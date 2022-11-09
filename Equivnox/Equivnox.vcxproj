@@ -91,13 +91,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\config\config.h" />
-    <ClInclude Include="src\math\matrix.h" />
+    <ClInclude Include="src\Basics\Shapes\line.h" />
+    <ClInclude Include="src\Config\config.h" />
+    <ClInclude Include="src\eqxpch.h" />
+    <ClInclude Include="src\Math\matrix.h" />
     <ClInclude Include="vendor\tgaimage.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Basics\Renderer\TGAUtility.h" />
+    <ClCompile Include="src\Basics\Shapes\line.cpp" />
+    <ClCompile Include="src\eqxpch.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\math\matrix.cpp" />
+    <ClCompile Include="src\Math\matrix.cpp" />
     <ClCompile Include="vendor\tgaimage.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

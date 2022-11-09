@@ -1,7 +1,7 @@
 #ifndef __IMAGE_H__
 #define __IMAGE_H__
 
-#include <fstream>
+#include "eqxpch.h"
 
 #pragma pack(push,1)
 struct TGA_Header {
@@ -78,7 +78,7 @@ public:
 	TGAImage(int w, int h, int bpp);
 	TGAImage(const TGAImage &img);
 	bool read_tga_file(const char *filename);
-	bool write_tga_file(const char *filename, bool rle=true);
+	bool write_tga_file(const char* filename, bool rle = true);
 	bool flip_horizontally();
 	bool flip_vertically();
 	bool scale(int w, int h);

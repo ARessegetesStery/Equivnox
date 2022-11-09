@@ -4,5 +4,8 @@
 
 namespace EQX
 {
-std::string outputDir = "Output/";
+	const double DOUBLE_PREC = 1e-5;
+	const double SLOPE_MAX = 1000;
+
+	using std::cout, std::endl;
 }

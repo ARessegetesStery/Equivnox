@@ -1,10 +1,12 @@
 #pragma once
 
+#include "eqxpch.h"
+
 namespace EQX {
 
 	class vec2
 	{
-	private:
+	public:
 		double x;
 		double y;
 	public:
@@ -13,10 +15,21 @@ namespace EQX {
 		vec2(const vec2&);
 		vec2(vec2&&) noexcept;
 
-		inline double getX() { return x; }
-		inline double getY() { return y; }
-			
-		inline void setX(double x) { this->x = x; }
-		inline void setY(double y) { this->y = y; }
+		vec2 operator- (const vec2& p);
+		vec2 operator+ (const vec2& p);
+		vec2 operator= (const vec2& p);
+	};
+
+	class vec3
+	{
+	public:
+		double x;
+		double y;
+		double z;
+
+		vec3();
+		vec3(double, double, double);
+		vec3(const vec3&);
+		vec3(vec3&&) noexcept;
 	};
 }
