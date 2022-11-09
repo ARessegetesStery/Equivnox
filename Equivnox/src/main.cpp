@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
 
 	TGAImage image(100, 100, TGAImage::RGB);
 
-	EQX::line l(EQX::vec2(0, 0), EQX::vec2(99, 99));
+	EQX::line l(EQX::vec2(10, 80), EQX::vec2(69, 80));
 	//std::cout << l.start.x << l.start.y << l.end.x << l.end.y << std::endl;
 
 	l.render(image, EQX::red);

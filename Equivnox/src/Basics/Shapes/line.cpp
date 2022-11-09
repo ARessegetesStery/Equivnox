@@ -53,14 +53,20 @@ namespace EQX
 		int ey = static_cast<int>(this->end.y);
 		// std::cout << sx << " " << sy << " " << ex << " " << ey << std::endl;
 
-		int xPace = (ex - sx) / (abs(sx - ex));
-		int yPace = (ey - sy) / (abs(sy - ey));
+		int xPace = 1;
+		int yPace = 1;
+		if (ey < sy)
+			yPace = -1;
 
 		std::cout << xPace << yPace << std::endl;
 
-		for (int x = sx; x != ex + 1; x += xPace)
+		double horzLen = k;
+		if (k < 1)
+			horzLen = 1 / k;
+
+		for (int x = sx; x != ex + xPace; x += xPace)
 		{
-			for (int y = sy; y != ey + 1; y += yPace)
+			for (int y = sy; y != ey + yPace; y += yPace)
 			{
 				vec2 center(x + xPace / 2.0, y + yPace / 2.0);
 				image.set(x, y, ampTGAColor(color, pixelAmp(*this, center)));
@@ -85,7 +91,7 @@ namespace EQX
 		{
 			vec2 start = l.start;
 			double d = abs(p.y - (l.start.y + l.k * (p.x - l.start.x)));
-			return d * std::min(1 / l.k, 1.0); // avoid calculating square root
+			return d * abs(l.k) / std::sqrt(l.k * l.k + 1); // avoid calculating square root
 		}
 	}
 
@@ -93,10 +99,10 @@ namespace EQX
 	double pixelAmp(line& l, vec2 p)
 	{
 		float distance = P2LDistance(l, p);
-		if (distance < 0.3)
+		if (distance < 1.0)
 			return 1.0;
-		else if (distance < 1.3)
-			return 1.3 - distance;
+		else if (distance < 1.5)
+			return (1.5 - distance) * 2;
 		else
 			return 0.0;
 	}
