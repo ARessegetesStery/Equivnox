@@ -1,0 +1,11 @@
+# Directories
+.vs/
+bin/
+bin-int/
+Debug/
+
+# Files
+*.user
+
+# Output Files
+*.tga
