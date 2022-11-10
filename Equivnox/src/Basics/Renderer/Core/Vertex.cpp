@@ -1,0 +1,17 @@
+#pragma once
+
+#include "eqxpch.h"
+
+#include "Vertex.h"
+
+namespace EQX
+{
+	Vertex::Vertex(Vector4 pos, Vector3 normal, Vector2 uv)
+		: pos(pos), normal(normal), uv(uv) {  }
+
+	Vertex::Vertex(Vector3 pos, Vector3 normal, Vector2 uv)
+		: pos(Vector4(pos.x, pos.y, pos.z, 1.0)), normal(normal), uv(uv) {  }
+
+	Vertex::Vertex(Vector2 pos, Vector3 normal, Vector2 uv)
+		: pos(Vector4(pos.x, pos.y, 0.0, 1.0)), normal(normal), uv(uv) {  }
+}

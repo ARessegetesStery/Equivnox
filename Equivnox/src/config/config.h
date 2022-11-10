@@ -9,3 +9,4 @@ namespace EQX
 
 	using std::cout, std::endl;
 }
+using std::cout, std::endl;

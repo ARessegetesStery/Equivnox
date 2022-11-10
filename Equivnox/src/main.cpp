@@ -2,7 +2,7 @@
 
 #include "tgaimage.h"
 #include "Config/config.h"
-#include "Basics/Shapes/line.h"
+#include "Basics/Shapes/LineSeg.h"
 
 namespace EQX {
 	const TGAColor white = TGAColor(255, 255, 255, 255);
@@ -15,8 +15,8 @@ int main(int argc, char** argv) {
 
 	TGAImage image(100, 100, TGAImage::RGB);
 
-	EQX::line l(EQX::vec2(10, 20), EQX::vec2(10, 30));
-	EQX::line l2(EQX::vec2(10, 20), EQX::vec2(40, 30));
+	EQX::LineSeg l(EQX::Vector2(10, 20), EQX::Vector2(10, 30));
+	EQX::LineSeg l2(EQX::Vector2(10, 20), EQX::Vector2(40, 30));
 	std::cout << l2.k << std::endl;
 
 	l.render(image, EQX::red);

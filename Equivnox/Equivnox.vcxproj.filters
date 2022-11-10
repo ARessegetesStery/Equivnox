@@ -27,13 +27,20 @@
     <ClInclude Include="src\eqxpch.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\Math\matrix.h">
+    <ClInclude Include="src\Math\Vector2.h">
       <Filter>src\math</Filter>
     </ClInclude>
     <ClInclude Include="vendor\tgaimage.h">
       <Filter>vendor</Filter>
     </ClInclude>
-    <ClInclude Include="src\Basics\Shapes\line.h" />
+    <ClInclude Include="src\Basics\Shapes\LineSeg.h" />
+    <ClInclude Include="src\Basics\Renderer\Core\Vertex.h" />
+    <ClInclude Include="src\Math\Math.h" />
+    <ClInclude Include="src\Math\Vector3.h" />
+    <ClInclude Include="src\Math\Vector4.h" />
+    <ClInclude Include="src\Math\Matrix4x4.h" />
+    <ClInclude Include="src\Math\MathHeader.h" />
+    <ClInclude Include="src\Basics\Renderer\Core\Core.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\eqxpch.cpp">
@@ -42,13 +49,18 @@
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Math\matrix.cpp">
+    <ClCompile Include="src\Math\Vector2.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="vendor\tgaimage.cpp">
       <Filter>vendor</Filter>
     </ClCompile>
-    <ClCompile Include="src\Basics\Shapes\line.cpp" />
-    <ClCompile Include="src\Basics\Renderer\TGAUtility.cpp" />
+    <ClCompile Include="src\Basics\Shapes\LineSeg.cpp" />
+    <ClCompile Include="src\Basics\Renderer\Utility\TGAUtility.cpp" />
+    <ClCompile Include="src\Math\Vector3.cpp" />
+    <ClCompile Include="src\Math\Vector4.cpp" />
+    <ClCompile Include="src\Math\Matrix4x4.cpp" />
+    <ClCompile Include="src\Math\MathAlgorithm.cpp" />
+    <ClCompile Include="src\Basics\Renderer\Core\Vertex.cpp" />
   </ItemGroup>
 </Project>
