@@ -98,7 +98,7 @@
     <ClInclude Include="vendor\tgaimage.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Basics\Renderer\TGAUtility.h" />
+    <ClCompile Include="src\Basics\Renderer\TGAUtility.cpp" />
     <ClCompile Include="src\Basics\Shapes\line.cpp" />
     <ClCompile Include="src\eqxpch.cpp" />
     <ClCompile Include="src\main.cpp" />

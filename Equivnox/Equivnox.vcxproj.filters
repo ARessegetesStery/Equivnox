@@ -49,6 +49,6 @@
       <Filter>vendor</Filter>
     </ClCompile>
     <ClCompile Include="src\Basics\Shapes\line.cpp" />
-    <ClCompile Include="src\Basics\Renderer\TGAUtility.h" />
+    <ClCompile Include="src\Basics\Renderer\TGAUtility.cpp" />
   </ItemGroup>
 </Project>

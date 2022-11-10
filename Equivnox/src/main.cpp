@@ -15,20 +15,14 @@ int main(int argc, char** argv) {
 
 	TGAImage image(100, 100, TGAImage::RGB);
 
-	EQX::line l(EQX::vec2(10, 80), EQX::vec2(69, 80));
-	//std::cout << l.start.x << l.start.y << l.end.x << l.end.y << std::endl;
+	EQX::line l(EQX::vec2(10, 20), EQX::vec2(10, 30));
+	EQX::line l2(EQX::vec2(10, 20), EQX::vec2(40, 30));
+	std::cout << l2.k << std::endl;
 
 	l.render(image, EQX::red);
-	image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
+	l2.render(image, EQX::white);
+	image.flip_vertically(); // Ensure x horizontal, y vertical, origin lower-left corner
 	image.write_tga_file(path.c_str());
-
-	/*
-	TGAImage image(100, 100, TGAImage::RGB);
-	image.set(0, 99, EQX::red);
-	image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
-	image.write_tga_file(path.c_str());
-	return 0;
-	*/
 }
 
 

@@ -13,6 +13,7 @@ namespace EQX {
 		vec2 start;
 		vec2 end;
 		double k;
+		double kSign;
 
 	public: 
 		line();
