@@ -1,6 +1,6 @@
 #include "eqxpch.h"
 
-#include "tgaimage.h"
+#include "TGAUtility.h"
 
 namespace EQX {
 	/**
@@ -11,7 +11,7 @@ namespace EQX {
 	 * @param coeff The opacity of fore: 1 for completely opaque
 	 * @return 
 	 */
-	TGAColor blendTGAColor(TGAColor fore, TGAColor back, double coeff)
+	TGAColor blendTGAColor(TGAColor fore, TGAColor back, float coeff)
 	{
 		return TGAColor((int)(fore.r * coeff + back.r * (1 - coeff) * 0.5),
 			(int)(fore.g * coeff + back.g * (1 - coeff) * 0.5),

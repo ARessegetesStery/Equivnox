@@ -11,20 +11,24 @@ namespace EQX {
 	class Vector4
 	{
 	public:
-		double x;
-		double y;
-		double z;
-		double w;
+		float x;
+		float y;
+		float z;
+		float w;
 
 	public:
 		Vector4();
-		Vector4(double, double, double, double w = 1.0);
+		Vector4(float, float, float, float w = 1.0);
 		Vector4(const Vector4&);
 		Vector4(Vector4&&) noexcept;
 
 		Vector4 operator- (const Vector4& p);
 		Vector4 operator+ (const Vector4& p);
 		Vector4& operator= (const Vector4& p);
+
+		// index operator returns x if the index exceeds 3
+		float& operator[] (std::size_t n);
+		const float& operator[] (std::size_t n) const;
 
 		void normalize();
 

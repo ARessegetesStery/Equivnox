@@ -4,6 +4,12 @@
 
 namespace EQX
 {
+	/**
+	 * Quick algorithm of calculating inverse sqrt
+	 * 
+	 * @param x x
+	 * @return 1/sqrt(x)
+	 */
 	float InvSqrt(float x)
 	{
 		float xhalf = 0.5f * x;

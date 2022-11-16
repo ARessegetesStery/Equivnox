@@ -8,7 +8,7 @@ namespace EQX
 
 	Vector2::Vector2() : x(0), y(0) {  }
 
-	Vector2::Vector2(double x, double y) : x(x), y(y) {  }
+	Vector2::Vector2(float x, float y) : x(x), y(y) {  }
 
 	Vector2::Vector2(const Vector2& v) : x(v.x), y(v.y) {  }
 
@@ -31,5 +31,29 @@ namespace EQX
 		return *this;
 	}
 
-	
+	float& Vector2::operator[] (std::size_t n)
+	{
+		switch (n)
+		{
+		case 0:
+			return x;
+		case 1:
+			return y;
+		default:
+			return x;
+		}
+	}
+
+	const float& Vector2::operator[] (std::size_t n) const
+	{
+		switch (n)
+		{
+		case 0:
+			return x;
+		case 1:
+			return y;
+		default:
+			return x;
+		}
+	}
 }

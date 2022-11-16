@@ -1,7 +1,5 @@
 #pragma once
 
-#include "eqxpch.h"
-
 #include "Math/MathHeader.h"
 
 namespace EQX 
@@ -25,6 +23,7 @@ namespace EQX
 		Vector4 pos;
 		Vector3 normal;		// Default set to be UNIT_Z
 		Vector2 uv;
+		Vector3 color;		// Default set to be white; each comp 0~255
 
 	public:
 		Vertex(Vector4 pos = Vector4::ZERO, 

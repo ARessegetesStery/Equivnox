@@ -1,10 +1,8 @@
 #pragma once
 
-#include "eqxpch.h"
-
 #include "vendor/tgaimage.h"
 #include "Math/MathHeader.h"
-#include "Basics/Renderer/Core/Core.h"
+#include "Vertex.h"
 
 namespace EQX {
 
@@ -13,8 +11,8 @@ namespace EQX {
 	public: 
 		Vertex start;
 		Vertex end;
-		double k;
-		double kSign;
+		float k;
+		int kSign;
 
 	public: 
 		LineSeg();
@@ -23,8 +21,11 @@ namespace EQX {
 		void render(TGAImage&, TGAColor);
 	};
 
-	double P2LDistance(LineSeg& l, Vertex p);
+	float P2LDistance(LineSeg& l, Vertex p);
 
-	double pixelAmp(LineSeg&, Vertex);
+	float pixelAmp(LineSeg&, Vertex);
+
+	// For Line Rendering
+	const float SLOPE_MAX = 1000;
 
 }

@@ -1,11 +1,10 @@
 #include "eqxpch.h"
 
 #include "LineSeg.h"
-#include "Config/config.h"
 
 namespace EQX
 {
-	extern TGAColor blendTGAColor(TGAColor fore, TGAColor back, double foreAmp);
+	extern TGAColor blendTGAColor(TGAColor fore, TGAColor back, float foreAmp);
 
 	LineSeg::LineSeg() : start(Vector2(0,0)), end(Vector2(0,0)), k(0), kSign(1) {  }
 	
@@ -22,30 +21,14 @@ namespace EQX
 		{
 			this->end.pos = s.pos;
 			this->start.pos = e.pos;
-			/*
-			this->end.pos.x = s.pos.x;
-			this->end.pos.y = s.pos.y;
-			this->end.pos.z = s.pos.z;
-			this->start.pos.x = e.pos.x;
-			this->start.pos.y = e.pos.y;
-			this->start.pos.z = e.pos.z;
-			*/
 		}
 		else
 		{
 			this->end.pos = e.pos;
 			this->start.pos = s.pos;
-			/*
-			this->start.pos.x = s.pos.x;
-			this->start.pos.y = s.pos.y;
-			this->start.pos.z = e.pos.z;
-			this->end.pos.x = e.pos.x;
-			this->end.pos.y = e.pos.y;
-			this->end.pos.z = s.pos.z;
-			*/
 		}
-		if (abs(start.pos.x - end.pos.x) < DOUBLE_PREC)
-			k = SLOPE_MAX + 1;
+		if (abs(start.pos.x - end.pos.x) < FLOAT_PREC)
+			k = (SLOPE_MAX + 1) * (end.pos.x > start.pos.x ? 1 : -1);
 		else
 			k = (start.pos.y - end.pos.y) / (start.pos.x - end.pos.x);
 		kSign = k / abs(k);
@@ -58,6 +41,39 @@ namespace EQX
 		int ex = static_cast<int>(this->end.pos.x);
 		int ey = static_cast<int>(this->end.pos.y);
 
+		// no AA
+		/*
+		bool transpose = false;
+		if (abs(this->k) > 1)
+		{
+			std::swap(sx, sy);
+			std::swap(ex, ey);
+			if (sx > ex)
+			{
+				std::swap(sx, ex);
+				std::swap(sy, ey);
+			}
+			transpose = true;
+		}
+
+		for (int x = sx; x != ex + 1; x += 1)
+		{
+			if (transpose)
+			{
+				int y = std::roundf(1/k * (x - sx)) + sy;
+				cout << x << " " << y << endl;
+				image.set(y, x, color);
+			}
+			else
+			{
+				int y = std::roundf(k * (x - sx)) + sy;
+				image.set(x, y, color);
+			}
+		}
+
+		*/
+
+		// calculate AA
 		int xPace = 1;
 		int yPace = 1;
 		if (ey < sy)
@@ -68,7 +84,11 @@ namespace EQX
 			for (int x = sx; x != ex + xPace; x += xPace)
 				image.set(x, sy, blendTGAColor(color, image.get(x, sy), 1.0));
 		}
-
+		else if (abs(k) > SLOPE_MAX)
+		{
+			for (int y = sy; y != ey + yPace; y += yPace)
+				image.set(sx, y, blendTGAColor(color, image.get(sx, y), 1.0));
+		}
 		else
 		{
 			for (int x = sx; x != ex + xPace; x += xPace)
@@ -79,7 +99,7 @@ namespace EQX
 					// only traverse pixels that will possibly be rendered
 				{
 					Vector2 center(x + xPace / 2.0, y + yPace / 2.0);
-					double coeff = pixelAmp(*this, center);
+					float coeff = pixelAmp(*this, center);
 #ifdef EQX_DEBUG
 					if (coeff == 0)
 						cout << center.x << " " << center.y << " " 
@@ -99,7 +119,7 @@ namespace EQX
 	 * @param p
 	 * @return distance; SLOPE_MAX is slope is too high
 	 */
-	double P2LDistance(LineSeg& l, Vertex point)
+	float P2LDistance(LineSeg& l, Vertex point)
 	{
 		Vector2 p(point.pos.x, point.pos.y);
 		if (l.k > SLOPE_MAX)
@@ -107,19 +127,19 @@ namespace EQX
 		else
 		{
 			Vector2 start(l.start.pos.x, l.start.pos.y);
-			double d = abs((-p.y + start.y) * (l.kSign) + abs(l.k) * (p.x - start.x));
+			float d = abs((-p.y + start.y) * (l.kSign) + abs(l.k) * (p.x - start.x));
 			return d * InvSqrt(float(l.k * l.k + 1)); // avoid calculating square root
 		}
 	}
 
 
-	double pixelAmp(LineSeg& l, Vertex p)
+	float pixelAmp(LineSeg& l, Vertex p)
 	{
-		double distance = P2LDistance(l, p);
+		float distance = P2LDistance(l, p);
 		if (distance > 1.0)
 			return 0.0;
 		else
-			return exp(- 4 * pow(distance, 3));
+			return exp(- 3 * pow(distance, 3));
 	}
 
 }

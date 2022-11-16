@@ -91,12 +91,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\Basics\Renderer\Core\Core.h" />
+    <ClInclude Include="src\Renderer\Core\RenderConfig.h" />
+    <ClInclude Include="src\Renderer\Model\Mesh.h" />
+    <ClInclude Include="src\Renderer\Core\Core.h" />
+    <ClInclude Include="src\Renderer\Core\Renderer.h" />
+    <ClInclude Include="src\Renderer\Model\Model.h" />
+    <ClInclude Include="src\Renderer\Utility\TGAUtility.h" />
+    <ClInclude Include="src\Renderer\Utility\Utilities.h" />
     <ClInclude Include="src\Math\MathHeader.h" />
     <ClInclude Include="src\Math\Matrix4x4.h" />
-    <ClInclude Include="src\Basics\Renderer\Core\Vertex.h" />
-    <ClInclude Include="src\Basics\Shapes\LineSeg.h" />
-    <ClInclude Include="src\Config\config.h" />
+    <ClInclude Include="src\Renderer\Model\Vertex.h" />
+    <ClInclude Include="src\Renderer\Model\LineSeg.h" />
     <ClInclude Include="src\eqxpch.h" />
     <ClInclude Include="src\Math\Math.h" />
     <ClInclude Include="src\Math\Vector2.h" />
@@ -105,11 +110,13 @@
     <ClInclude Include="vendor\tgaimage.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Basics\Renderer\Core\Vertex.cpp" />
+    <ClCompile Include="src\Renderer\Model\Mesh.cpp" />
+    <ClCompile Include="src\Renderer\Core\Renderer.cpp" />
+    <ClCompile Include="src\Renderer\Model\Vertex.cpp" />
     <ClCompile Include="src\Math\MathAlgorithm.cpp" />
     <ClCompile Include="src\Math\Matrix4x4.cpp" />
-    <ClCompile Include="src\Basics\Renderer\Utility\TGAUtility.cpp" />
-    <ClCompile Include="src\Basics\Shapes\LineSeg.cpp" />
+    <ClCompile Include="src\Renderer\Utility\TGAUtility.cpp" />
+    <ClCompile Include="src\Renderer\Model\LineSeg.cpp" />
     <ClCompile Include="src\eqxpch.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Math\Vector2.cpp" />
