@@ -1,9 +1,6 @@
 #include "eqxpch.h"
 
-#include "Basics/Renderer/Core/Core.h"
-
-// #include "tgaimage.h"
-// #include "Basics/Shapes/LineSeg.h"
+#include "Renderer/Core/Core.h"
 
 namespace EQX {
 	const TGAColor white = TGAColor(255, 255, 255, 255);
@@ -12,26 +9,18 @@ namespace EQX {
 
 
 int main(int argc, char** argv) {
-	/*
-	std::string path = "output.tga";
+	// Instantiate an entity using reference
+	EQX::Renderer& coreRenderer = EQX::Renderer::Init();
 
-	TGAImage image(100, 100, TGAImage::RGB);
-
-	EQX::LineSeg l2(EQX::Vector2(10, 80), EQX::Vector2(20, 30));
-	EQX::LineSeg l(EQX::Vector2(10, 20), EQX::Vector2(10, 30));
-
-	l.render(image, EQX::red);
-	l2.render(image, EQX::white);
-	image.flip_vertically(); // Ensure x horizontal, y vertical, origin lower-left corner
-	image.write_tga_file(path.c_str());
-	*/
-
-	std::shared_ptr<EQX::Renderer> coreRenderer = EQX::Renderer::Init();
 	EQX::LineSeg l(EQX::Vector2(10, 80), EQX::Vector2(20, 30));
+	EQX::LineSeg l2(EQX::Vector2(10, 80), EQX::Vector2(40, 70));
+	EQX::LineSeg l3(EQX::Vector2(40, 60), EQX::Vector2(40, 170));
+	EQX::LineSeg l4(EQX::Vector2(40, 60), EQX::Vector2(140, 60));
 	EQX::Mesh m;
-	m.addLine(l);
-	coreRenderer->bindMesh(&m);
-	coreRenderer->render();
+	m.addLine({ l, l2, l3, l4 });
+	coreRenderer.bindMesh(&m);
+	coreRenderer.setAA(EQX::RenderAAConfig::ANTIALIAS_ON);
+	coreRenderer.render();
 }
 
 

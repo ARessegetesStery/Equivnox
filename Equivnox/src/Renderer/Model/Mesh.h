@@ -15,6 +15,8 @@ namespace EQX {
 		// void addFace(Vertex, Vertex, Vertex);
 		void addLine(Vertex, Vertex);
 		void addLine(LineSeg&);
+		void addLine(std::vector<LineSeg>&);
+		void addLine(const std::initializer_list<LineSeg>&);
 
 		Mesh() = default;
 		Mesh(const Mesh& m) = delete; // should not copy meshes

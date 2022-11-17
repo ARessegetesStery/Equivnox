@@ -26,9 +26,6 @@ namespace EQX {
 		static const Vector2 ZERO;
 	};
 
-	
-
-	
-
+	bool operator== (const Vector2&, const Vector2&);
 	
 }

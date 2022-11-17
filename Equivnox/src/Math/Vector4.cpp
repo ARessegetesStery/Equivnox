@@ -77,4 +77,11 @@ namespace EQX
 			return x;
 		}
 	}
+
+	bool operator== (const Vector4& v1, const Vector4& v2)
+	{
+		return (v1.x/v1.w == v2.x/v2.w) 
+			&& (v1.y/v1.w == v2.y/v2.w) 
+			&& (v1.z/v1.w == v2.z/v2.w);
+	}
 }

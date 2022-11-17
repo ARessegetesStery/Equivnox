@@ -17,9 +17,9 @@ namespace EQX {
 	public: 
 		LineSeg();
 		LineSeg(Vertex s, Vertex e);
-		
-		void render(TGAImage&, TGAColor);
 	};
+
+	using LineSegs = std::vector<LineSeg>;
 
 	float P2LDistance(LineSeg& l, Vertex p);
 

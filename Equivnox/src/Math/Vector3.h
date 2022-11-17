@@ -29,4 +29,7 @@ namespace EQX {
 		static const Vector3 UNIT_Y;
 		static const Vector3 UNIT_Z;
 	};
+
+	bool operator== (const Vector3&, const Vector3&);
+
 }

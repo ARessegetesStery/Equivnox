@@ -4,21 +4,21 @@
 
 namespace EQX
 {
-	std::shared_ptr<Renderer> Renderer::p_renderer = nullptr;
-
 	Renderer::Renderer()
 	{
 		this->curMesh = nullptr;
 		this->fill = RenderFill::WIREFRAME;
 		this->mode = RenderMode::FULL;
+		this->aaConfig = ANTIALIAS_OFF;
 		this->outputPath = "output.tga";
+		this->width = 400;
+		this->height = 400;
 	}
 
-	std::shared_ptr<Renderer> Renderer::Init()
+	Renderer& Renderer::Init()
 	{
-		if (Renderer::p_renderer == nullptr)
-			Renderer::p_renderer = std::shared_ptr<Renderer>(new Renderer);
-		return Renderer::p_renderer;
+		static Renderer _renderer;
+		return _renderer;
 	}
 
 	void Renderer::bindMesh(Mesh* m)
@@ -41,19 +41,55 @@ namespace EQX
 		this->mode = m;
 	}
 
+	void Renderer::setAA(RenderAAConfig a)
+	{
+		this->aaConfig = a;
+	}
+
+	void Renderer::setCanvas(unsigned int w, unsigned int h)
+	{
+		this->width = w;
+		this->height = h;
+	}
+
+	void Renderer::setCanvasHeight(unsigned int h)
+	{
+		this->height = h;
+	}
+
+	void Renderer::setCanvasWidth(unsigned int w)
+	{
+		this->width = w;
+	}
+
 	void Renderer::render()
 	{
-		TGAImage image(100, 100, TGAImage::RGB);
-		renderLineSmooth(image);
+		TGAImage image(this->width, this->height, TGAImage::RGB);
+		
+		// render lines
+		for (auto iter = curMesh->lineIndices.begin();
+			iter != curMesh->lineIndices.cend(); ++iter)
+		{
+			switch (this->aaConfig)
+			{
+			case ANTIALIAS_OFF:
+				renderLineRaw(image, LineSeg(curMesh->vertices[(*iter)[0]],
+					curMesh->vertices[(*iter)[1]]));
+				break;
+			case ANTIALIAS_ON:
+				renderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
+					curMesh->vertices[(*iter)[1]]));
+				break;
+			}
+		}
+
 		image.flip_vertically(); // Ensure x horizontal, y vertical, origin lower-left corner
 		image.write_tga_file(this->outputPath.c_str());
 	}
 
-	void Renderer::renderLineRaw(TGAImage& image)
+	void Renderer::renderLineRaw(TGAImage& image, LineSeg l)
 	{
 		const TGAColor white = TGAColor(255, 255, 255, 255);
-
-		LineSeg l(this->curMesh->vertices[0], this->curMesh->vertices[1]);
 
 		int sx = static_cast<int>(l.start.pos.x);
 		int sy = static_cast<int>(l.start.pos.y);
@@ -88,11 +124,9 @@ namespace EQX
 		}
 	}
 
-	void Renderer::renderLineSmooth(TGAImage& image)
+	void Renderer::renderLineSmooth(TGAImage& image, LineSeg l)
 	{
 		const TGAColor white = TGAColor(255, 255, 255, 255);
-
-		LineSeg l(this->curMesh->vertices[0], this->curMesh->vertices[1]);
 
 		int sx = static_cast<int>(l.start.pos.x);
 		int sy = static_cast<int>(l.start.pos.y);

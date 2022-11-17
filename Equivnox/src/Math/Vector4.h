@@ -35,4 +35,6 @@ namespace EQX {
 		static const Vector4 ZERO;
 	};
 
+	bool operator== (const Vector4&, const Vector4&);
+
 }

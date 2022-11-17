@@ -14,4 +14,11 @@ namespace EQX
 
 	Vertex::Vertex(Vector2 pos, Vector3 normal, Vector2 uv)
 		: pos(Vector4(pos.x, pos.y, 0.0, 1.0)), normal(normal), uv(uv) {  }
+
+	bool operator== (Vertex& v1, Vertex& v2)
+	{
+		return (v1.color == v2.color) && (v1.uv == v2.uv)
+			&& (v1.normal == v2.color) && (v1.pos == v2.pos);
+	}
+
 }

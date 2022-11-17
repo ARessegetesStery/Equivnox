@@ -13,7 +13,7 @@ namespace EQX
 	class Renderer
 	{
 	public:
-		static std::shared_ptr<Renderer> Init();
+		static Renderer& Init();
 
 		void bindMesh(Mesh*);
 		void unbindMesh();
@@ -22,22 +22,29 @@ namespace EQX
 
 		void setFill(RenderFill);
 		void setMode(RenderMode);
+		
+		void setAA(RenderAAConfig);
+
+		void setCanvas(unsigned int, unsigned int);
+		void setCanvasHeight(unsigned int);
+		void setCanvasWidth(unsigned int);
 
 	private:
 		Renderer();
 		Renderer(const Renderer& r) = delete;
 		Renderer& operator= (const Renderer& r) = delete;
 
-		static std::shared_ptr<Renderer> p_renderer;
-
 		Mesh* curMesh;
 
 		// TODO decode line arrays
-		void renderLineRaw(TGAImage&);
-		void renderLineSmooth(TGAImage&);
+		void renderLineRaw(TGAImage&, LineSeg);
+		void renderLineSmooth(TGAImage&, LineSeg);
 
 		RenderFill fill;
 		RenderMode mode;
+		RenderAAConfig aaConfig;
+
+		unsigned int width, height;
 
 		std::string outputPath;
 
