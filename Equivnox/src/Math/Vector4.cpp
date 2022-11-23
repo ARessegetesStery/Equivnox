@@ -111,4 +111,26 @@ namespace EQX
 			&& (v1.y/v1.w == v2.y/v2.w) 
 			&& (v1.z/v1.w == v2.z/v2.w);
 	}
+	
+	Vector4 operator+ (const Vector4& v1_4, const Vector3& v2_3)
+	{
+		return Vector4(v1_4.x + v2_3.x, v1_4.y + v2_3.y, v1_4.z + v2_3.z, v1_4.w);
+	}
+
+	Vector4 operator+ (const Vector3& v2_3, const Vector3& v1_4)
+	{
+		return (v1_4 + v2_3);
+	}
+
+	Vector4 operator*(const Vector4& v4, const float coeff)
+	{
+		return Vector4(v4.x * coeff, v4.y * coeff, v4.z * coeff, v4.w);
+	}
+
+	Vector4 operator*(const float coeff, const Vector4& v4)
+	{
+		return v4 * coeff;
+	}
+
+
 }

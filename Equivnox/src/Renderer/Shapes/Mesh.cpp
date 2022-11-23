@@ -145,8 +145,18 @@ namespace EQX {
 
 	void Mesh::scale(float s)
 	{
-		for (auto i : vertices)
-			i.pos *= s;
+		for (auto iter = vertices.begin(); iter != vertices.cend(); ++iter)
+		{
+			iter->pos = iter->pos * s;
+		}
+	}
+
+	void Mesh::shift(Vector3 delta)
+	{
+		for (auto iter = vertices.begin(); iter != vertices.cend(); ++iter)
+		{
+			iter->pos = iter->pos + delta;
+		}
 	}
 
 }

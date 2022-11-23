@@ -4,36 +4,20 @@
 
 namespace EQX {
 
-    namespace EQX_PARSING {
-
-        struct face
-        {
-            Vector3 f[4];
-            face(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
-            {
-                f[0] = a;
-                f[1] = b;
-                f[2] = c;
-                f[3] = d;
-            }
-            face()
-            {
-                Vector3 zero(0, 0, 0);
-                f[0] = Vector3(zero);
-                f[1] = Vector3(zero);
-                f[2] = Vector3(zero);
-                f[3] = Vector3(zero);
-            }
-        };
-
-    }
-
-
 // TODO test
-void Parser::parse()
+void ObjParser::parse()
 {
     std::ifstream infile;
     infile.open((filename + ".obj"), std::ios::in);
+
+    if (!infile.is_open())
+    {
+#ifdef EQX_DEBUG
+        cout << "Cannot open file \"" << filename << "\"" << endl;
+#endif
+        return;
+    }
+    
     char linebuf[1024];
     std::vector<Vector3> v;
     std::vector<Vector2> vt;
@@ -60,11 +44,8 @@ void Parser::parse()
             {
                 for (auto iter = fs.begin(); iter != fs.cend(); ++iter)
                 {
-                    p_mesh->addLine({ LineSeg(iter->f[0], iter->f[1]),
-                        LineSeg(iter->f[0], iter->f[2]),
-                        LineSeg(iter->f[2], iter->f[1]),
-                        LineSeg(iter->f[0], iter->f[3]),
-                        LineSeg(iter->f[2], iter->f[3]) });
+                    p_mesh->addFace({ {v[iter->f[0].x], v[iter->f[1].x], v[iter->f[2].x]},
+                        {v[iter->f[2].x], v[iter->f[0].x], v[iter->f[3].x]} });
                 }
                 fs.clear();
             }
@@ -101,7 +82,7 @@ void Parser::parse()
         {
             std::cout << linebuf << std::endl;
             EQX_PARSING::face F;
-            std::sscanf(linebuf, "f %f/%f/%f %f/%f/%f %f/%f/%f %f/%f/%f",
+            std::sscanf(linebuf, "f %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d",
                 &F.f[0].x, &F.f[0].y, &F.f[0].z,
                 &F.f[1].x, &F.f[1].y, &F.f[1].z,
                 &F.f[2].x, &F.f[2].y, &F.f[2].z,
@@ -111,14 +92,11 @@ void Parser::parse()
     }
     for (auto iter = fs.begin(); iter != fs.cend(); ++iter)
     {
-        p_mesh->addLine({ LineSeg(iter->f[0], iter->f[1]),
-            LineSeg(iter->f[0], iter->f[2]),
-            LineSeg(iter->f[2], iter->f[1]),
-            LineSeg(iter->f[0], iter->f[3]),
-            LineSeg(iter->f[2], iter->f[3]) });
+        cout << ":: " << iter->f[0].x << endl;
+        cout << v[iter->f[0].x].x << " " << v[iter->f[0].x].y << " " << v[iter->f[0].x].z << endl;
+        p_mesh->addFace({ {v[iter->f[0].x], v[iter->f[1].x], v[iter->f[2].x]},
+            {v[iter->f[2].x], v[iter->f[0].x], v[iter->f[3].x]} });
     }
-
-    
 
     infile.close();
 }

@@ -10,5 +10,9 @@ Debug/
 *.filters
 *.user
 
+# Models and Textures
+*.obj
+*.mtl
+
 # Output Files
 *.tga

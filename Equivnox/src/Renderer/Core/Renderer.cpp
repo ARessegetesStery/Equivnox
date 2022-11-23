@@ -133,7 +133,6 @@ namespace EQX
 			switch (this->renderAAConfig)
 			{
 			case RenderAAConfig::ANTIALIAS_OFF:
-				cout << curMesh->vertices[(*iter)[0]].pos.x << " " << curMesh->vertices[(*iter)[0]].pos.y << endl;
 				RenderFaceRaw(image, vertices);
 				break;
 			case RenderAAConfig::ANTIALIAS_ON:
@@ -220,11 +219,6 @@ namespace EQX
 				{
 					Vector2 center(x + xPace / 2.0f, y + yPace / 2.0f);
 					float coeff = PixelAmp(l, center);
-#ifdef EQX_DEBUG
-					if (coeff == 0)
-						cout << center.x << " " << center.y << " "
-						<< P2LDistance(l, center) << " " << coeff << endl;
-#endif
 					image.set(x, y, blendTGAColor(white, image.get(x, y), coeff));
 				}
 			}
@@ -233,7 +227,11 @@ namespace EQX
 
 	void Renderer::RenderFaceRaw(TGAImage& image, Face f)
 	{
-		cout << f.l.pos.x << f.l.pos.y << f.m.pos.x << f.m.pos.y << f.r.pos.x << f.r.pos.y;
+#ifdef EQX_DEBUG
+		cout << f.l.pos.x << " " << f.l.pos.y << "| "
+			<< f.m.pos.x << " " << f.m.pos.y << "| "
+			<< f.r.pos.x << " " << f.r.pos.y << endl;
+#endif
 		if (std::abs(f.kLM) > SLOPE_MAX)
 		{
 			int xpos, ypos;

@@ -25,6 +25,7 @@ namespace EQX {
 		void addLine(const std::initializer_list<LineSeg>&);
 
 		void scale(float s);
+		void shift(Vector3 delta);
 
 		Mesh() = default;
 		Mesh(const Mesh& m) = delete; // should not copy meshes

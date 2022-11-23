@@ -46,11 +46,11 @@ namespace EQX
 		Vector2 p(point.pos.x, point.pos.y);
 		if (p.x > l.end.pos.x && l.kSign * (p.y - l.end.pos.y) > 0)
 		{
-			return std::abs(p.x - l.end.pos.x) + std::abs(p.y - l.end.pos.y);
+			return 0.5 * (std::abs(p.x - l.end.pos.x) + std::abs(p.y - l.end.pos.y));
 		}
 		if (p.x < l.start.pos.x && l.kSign * (-p.y + l.start.pos.y) > 0)
 		{
-			return std::abs(p.x - l.start.pos.x) + std::abs(p.y - l.start.pos.y);
+			return 0.5 * (std::abs(p.x - l.start.pos.x) + std::abs(p.y - l.start.pos.y));
 		}
 		if (l.k > SLOPE_MAX)
 			return abs(p.x - l.start.pos.x);

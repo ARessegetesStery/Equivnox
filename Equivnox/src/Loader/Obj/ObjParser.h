@@ -2,15 +2,14 @@
 
 #include "eqxpch.h"
 
-#include "Renderer/Shapes/Shapes.h"
-#include "Math/MathHeader.h"
+#include "Loader/Parsing.h"
 
 namespace EQX {
 
-    class Parser
+    class ObjParser
     {
     public:
-        Parser(Mesh* m, std::string filename)
+        ObjParser(Mesh* m, std::string filename)
         {
             this->p_mesh = m;
             this->filename = filename;

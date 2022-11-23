@@ -2,6 +2,8 @@
 
 #include "eqxpch.h"
 
+#include "Vector3.h"
+
 namespace EQX {
 
 	/**
@@ -39,5 +41,11 @@ namespace EQX {
 	};
 
 	bool operator== (const Vector4&, const Vector4&);
+
+	Vector4 operator+ (const Vector4&, const Vector3&);
+	Vector4 operator+ (const Vector3&, const Vector4&);
+
+	Vector4 operator* (const Vector4&, const float);
+	Vector4 operator* (const float, const Vector4&);
 
 }
