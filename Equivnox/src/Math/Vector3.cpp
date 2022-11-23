@@ -35,6 +35,26 @@ namespace EQX
 		return *this;
 	}
 
+	Vector3 Vector3::operator-= (const Vector3& p)
+	{
+		*this = *this - p;
+		return *this;
+	}
+
+	Vector3 Vector3::operator+= (const Vector3& p)
+	{
+		*this = *this + p;
+		return *this;
+	}
+
+	Vector3 Vector3::operator*= (float s)
+	{
+		this->x *= s;
+		this->y *= s;
+		this->z *= s;
+		return *this;
+	}
+
 	float& Vector3::operator[] (std::size_t n)
 	{
 		switch (n)

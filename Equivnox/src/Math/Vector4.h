@@ -25,6 +25,9 @@ namespace EQX {
 		Vector4 operator- (const Vector4& p);
 		Vector4 operator+ (const Vector4& p);
 		Vector4& operator= (const Vector4& p);
+		Vector4 operator-= (const Vector4& p);
+		Vector4 operator+= (const Vector4& p);
+		Vector4 operator*= (float s);
 
 		// index operator returns x if the index exceeds 3
 		float& operator[] (std::size_t n);

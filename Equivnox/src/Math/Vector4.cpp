@@ -36,6 +36,33 @@ namespace EQX
 		return *this;
 	}
 
+	Vector4 Vector4::operator-= (const Vector4& p)
+	{
+		*this = *this - p;
+		return *this;
+	}
+
+	Vector4 Vector4::operator+= (const Vector4& p)
+	{
+		*this = *this + p;
+		return *this;
+	}
+
+	/**
+	 * Multiply the distance between the point and the origin
+	 * w is not multiplied here or nothing is changed
+	 * 	  
+	 * @param s scale of multiplication
+	 * @return 
+	 */
+	Vector4 Vector4::operator*= (float s)
+	{
+		this->x *= s;
+		this->y *= s;
+		this->z *= s;
+		return *this;
+	}
+
 	void Vector4::normalize()
 	{
 		x /= w;

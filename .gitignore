@@ -4,7 +4,10 @@ bin/
 bin-int/
 Debug/
 
-# Files
+# VS Files
+*.sln
+*.vcxproj
+*.filters
 *.user
 
 # Output Files

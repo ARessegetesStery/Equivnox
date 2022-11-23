@@ -33,5 +33,21 @@ namespace EQX
 	};
 
 	bool operator== (Vertex&, Vertex&);
+	bool operator== (Vertex&, const Vertex&);
 
+	/**
+	 * return true if l.x is smaller than or equal to r.x
+	 * 
+	 * @param l vertex supposedly with smaller x
+	 * @param r vertex supposedly with larger x
+	 */
+	bool LefterVertex(const Vertex& l, const Vertex& r);
+
+	/**
+	 * return true if l.y is smaller than or equal to u.y
+	 *
+	 * @param l vertex supposedly with smaller y
+	 * @param u vertex supposedly with larger y
+	 */
+	bool LowerVertex(const Vertex& l, const Vertex& u);
 }

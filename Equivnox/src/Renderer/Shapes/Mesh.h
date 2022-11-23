@@ -4,6 +4,8 @@
 
 #include "Renderer/Core/RenderConfig.h"
 #include "LineSeg.h"
+#include "Face.h"
+#include "Vertex.h"
 
 namespace EQX {
 
@@ -12,11 +14,17 @@ namespace EQX {
 	public:
 		friend class Renderer;
 
-		// void addFace(Vertex, Vertex, Vertex);
+		void addFace(Vertex, Vertex, Vertex);
+		void addFace(Face&);
+		void addFace(std::vector<Face>&);
+		void addFace(const std::initializer_list<Face>&);
+
 		void addLine(Vertex, Vertex);
 		void addLine(LineSeg&);
 		void addLine(std::vector<LineSeg>&);
 		void addLine(const std::initializer_list<LineSeg>&);
+
+		void scale(float s);
 
 		Mesh() = default;
 		Mesh(const Mesh& m) = delete; // should not copy meshes

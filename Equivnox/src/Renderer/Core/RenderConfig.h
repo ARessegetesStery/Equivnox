@@ -4,28 +4,28 @@
 
 namespace EQX {
 
-	enum RenderFill
+	enum class RenderFill
 	{
 		WIREFRAME, FILL
 	};
 
-	enum RenderMode
+	enum class RenderMode
 	{
 		FULL, ZBUFFER_ONLY
 	};
 
-	enum RenderAAConfig
+	enum class RenderAAConfig
 	{
 		ANTIALIAS_ON, ANTIALIAS_OFF
 	};
 
-	enum RenderColorConfig
+	enum class RenderColorConfig
 	{
 		UNIFORM, VERTEX, TEXTURE
 	};
 
 #ifdef EQX_DEBUG
-	const TGAColor TGAWhite = TGAColor(0, 0, 0, 255);
+	const TGAColor TGAWhite = TGAColor(255, 255, 255, 255);
 	const TGAColor TGANone = TGAColor(0, 0, 0, 255);
 #endif
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "vendor/tgaimage.h"
 #include "Math/MathHeader.h"
 #include "Vertex.h"
 
@@ -23,7 +22,9 @@ namespace EQX {
 
 	float P2LDistance(LineSeg& l, Vertex p);
 
-	float pixelAmp(LineSeg&, Vertex);
+	float PixelAmp(LineSeg&, Vertex);
+
+	float GetSlope(Vertex& v1, Vertex& v2);
 
 	// For Line Rendering
 	const float SLOPE_MAX = 1000;
