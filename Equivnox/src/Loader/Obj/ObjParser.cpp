@@ -5,7 +5,7 @@
 namespace EQX {
 
 // TODO test
-void ObjParser::parse()
+void ObjParser::Parse()
 {
     std::ifstream infile;
     infile.open((filename + ".obj"), std::ios::in);
@@ -44,7 +44,7 @@ void ObjParser::parse()
             {
                 for (auto iter = fs.begin(); iter != fs.cend(); ++iter)
                 {
-                    p_mesh->addFace({ {v[iter->f[0].x], v[iter->f[1].x], v[iter->f[2].x]},
+                    p_mesh->AddFace({ {v[iter->f[0].x], v[iter->f[1].x], v[iter->f[2].x]},
                         {v[iter->f[2].x], v[iter->f[0].x], v[iter->f[3].x]} });
                 }
                 fs.clear();
@@ -93,8 +93,8 @@ void ObjParser::parse()
     for (auto iter = fs.begin(); iter != fs.cend(); ++iter)
     {
         cout << ":: " << iter->f[0].x << endl;
-        cout << v[iter->f[0].x].x << " " << v[iter->f[0].x].y << " " << v[iter->f[0].x].z << endl;
-        p_mesh->addFace({ {v[iter->f[0].x], v[iter->f[1].x], v[iter->f[2].x]},
+        cout << v[iter->f[0].x].x << " " << v[iter->f[0].x].y << " " << v[iter->f[0].x].z << endl;\
+        p_mesh->AddFace({ {v[iter->f[0].x], v[iter->f[1].x], v[iter->f[2].x]},
             {v[iter->f[2].x], v[iter->f[0].x], v[iter->f[3].x]} });
     }
 

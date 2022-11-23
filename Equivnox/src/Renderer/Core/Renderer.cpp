@@ -13,6 +13,7 @@ namespace EQX
 		this->outputPath = "output.tga";
 		this->width = 400;
 		this->height = 400;
+		this->MSAAMult = 2;
 	}
 
 	Renderer& Renderer::Init()
@@ -44,6 +45,16 @@ namespace EQX
 	void Renderer::SetAA(RenderAAConfig a)
 	{
 		this->renderAAConfig = a;
+	}
+
+	void Renderer::SetMSAAMult(unsigned int scale)
+	{
+		if (scale == 0 || scale == 1)
+			MSAAMult = 2;
+		else if (scale > 6)
+			MSAAMult = 6;
+		else
+			MSAAMult = scale;
 	}
 
 	void Renderer::SetCanvas(unsigned int w, unsigned int h)
@@ -93,7 +104,7 @@ namespace EQX
 				RenderLineRaw(image, LineSeg(curMesh->vertices[(*iter)[0]],
 					curMesh->vertices[(*iter)[1]]));
 				break;
-			case RenderAAConfig::ANTIALIAS_ON:
+			case RenderAAConfig::MSAA:
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
 					curMesh->vertices[(*iter)[1]]));
 				break;
@@ -112,13 +123,13 @@ namespace EQX
 				RenderLineRaw(image, LineSeg(curMesh->vertices[(*iter)[2]],
 					curMesh->vertices[(*iter)[1]]));
 				break;
-			case RenderAAConfig::ANTIALIAS_ON:
+			case RenderAAConfig::MSAA: case RenderAAConfig::FXAA:
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
 					curMesh->vertices[(*iter)[1]]));
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
 					curMesh->vertices[(*iter)[2]]));
-				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[2]],
-					curMesh->vertices[(*iter)[1]]));
+				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[1]],
+					curMesh->vertices[(*iter)[2]]));
 				break;
 			}
 		}
@@ -129,13 +140,14 @@ namespace EQX
 		for (auto iter = curMesh->faceIndices.begin();
 			iter != curMesh->faceIndices.cend(); ++iter)
 		{
-			std::array<Vertex, 3> vertices{ curMesh->vertices[(*iter)[0]], curMesh->vertices[(*iter)[1]] , curMesh->vertices[(*iter)[2]] };
+			std::array<Vertex, 3> vertices{ curMesh->vertices[(*iter)[0]], 
+				curMesh->vertices[(*iter)[1]] , curMesh->vertices[(*iter)[2]] };
 			switch (this->renderAAConfig)
 			{
 			case RenderAAConfig::ANTIALIAS_OFF:
 				RenderFaceRaw(image, vertices);
 				break;
-			case RenderAAConfig::ANTIALIAS_ON:
+			case RenderAAConfig::MSAA:
 				RenderFaceRaw(image, vertices);
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
 					curMesh->vertices[(*iter)[1]]));
@@ -219,6 +231,7 @@ namespace EQX
 				{
 					Vector2 center(x + xPace / 2.0f, y + yPace / 2.0f);
 					float coeff = PixelAmp(l, center);
+					// cout << center.x << " " << center.y << " " << P2LDistance(l, center) << endl;
 					image.set(x, y, blendTGAColor(white, image.get(x, y), coeff));
 				}
 			}

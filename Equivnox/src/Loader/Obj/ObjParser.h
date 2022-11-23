@@ -14,7 +14,7 @@ namespace EQX {
             this->p_mesh = m;
             this->filename = filename;
         }
-        void parse();
+        void Parse();
 
     private:
         Mesh* p_mesh;

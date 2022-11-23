@@ -68,7 +68,7 @@ namespace EQX
 		if (distance > 1.0)
 			return 0.0;
 		else
-			return exp(- 3 * pow(distance, 3));
+			return exp(- 2 * pow(distance, 3));
 	}
 
 	float GetSlope(Vertex& start, Vertex& end)

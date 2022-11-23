@@ -4,8 +4,11 @@
 
 namespace EQX {
 
-	void Mesh::addFace(Vertex a, Vertex b, Vertex c)
+	void Mesh::AddFace(Vertex a, Vertex b, Vertex c)
 	{
+		floorVertexPos(a);
+		floorVertexPos(b);
+		floorVertexPos(c);
 		bool ARep = false, BRep = false, CRep = false;
 		unsigned int AIndex = 0, BIndex = 0, CIndex = 0;
 		unsigned int CurIndex = this->vertices.size();
@@ -59,27 +62,29 @@ namespace EQX {
 		this->faceIndices.push_back(indices);
 	}
 
-	void Mesh::addFace(Face& f)
+	void Mesh::AddFace(Face& f)
 	{
-		Mesh::addFace(f.l, f.m, f.r);
+		Mesh::AddFace(f.l, f.m, f.r);
 	}
 
-	void Mesh::addFace(std::vector<Face>& ls)
+	void Mesh::AddFace(std::vector<Face>& ls)
 	{
 		for (auto iter = ls.begin(); iter != ls.cend(); ++iter)
-			Mesh::addFace(*iter);
+			Mesh::AddFace(*iter);
 	}
 
-	void Mesh::addFace(const std::initializer_list<Face>& ls)
+	void Mesh::AddFace(const std::initializer_list<Face>& ls)
 	{
 		for (auto iter : ls)
-			Mesh::addFace(iter);
+			Mesh::AddFace(iter);
 	}
 
-	void Mesh::addLine(Vertex a, Vertex b)
+	void Mesh::AddLine(Vertex a, Vertex b)
 	{
 		bool ARep = false;
 		bool BRep = false;
+		floorVertexPos(a);
+		floorVertexPos(b);
 		unsigned int AIndex;
 		unsigned int BIndex;
 		unsigned int CurIndex = this->vertices.size();
@@ -126,24 +131,24 @@ namespace EQX {
 		this->lineIndices.push_back(indices);
 	}
 
-	void Mesh::addLine(LineSeg& l)
+	void Mesh::AddLine(LineSeg& l)
 	{
-		Mesh::addLine(l.start, l.end);
+		Mesh::AddLine(l.start, l.end);
 	}
 
-	void Mesh::addLine(std::vector<LineSeg>& ls)
+	void Mesh::AddLine(std::vector<LineSeg>& ls)
 	{
 		for (auto iter = ls.begin(); iter != ls.cend(); ++iter)
-			Mesh::addLine(*iter);
+			Mesh::AddLine(*iter);
 	}
 
-	void Mesh::addLine(const std::initializer_list<LineSeg>& ls)
+	void Mesh::AddLine(const std::initializer_list<LineSeg>& ls)
 	{
 		for (auto iter : ls)
-			Mesh::addLine(iter);
+			Mesh::AddLine(iter);
 	}
 
-	void Mesh::scale(float s)
+	void Mesh::Scale(float s)
 	{
 		for (auto iter = vertices.begin(); iter != vertices.cend(); ++iter)
 		{
@@ -151,12 +156,24 @@ namespace EQX {
 		}
 	}
 
-	void Mesh::shift(Vector3 delta)
+	void Mesh::Shift(Vector3 delta)
 	{
 		for (auto iter = vertices.begin(); iter != vertices.cend(); ++iter)
 		{
 			iter->pos = iter->pos + delta;
 		}
+	}
+
+	/**
+	 * Floor each index in v so that the renderLineSmooth could function normally
+	 * 
+	 * @param v the vertex; Note it will be modified
+	 */
+	void floorVertexPos(Vertex& v)
+	{
+		v.pos.x = floor(v.pos.x);
+		v.pos.y = floor(v.pos.y);
+		v.pos.z = floor(v.pos.z);
 	}
 
 }

@@ -16,7 +16,7 @@ namespace EQX {
 
 	enum class RenderAAConfig
 	{
-		ANTIALIAS_ON, ANTIALIAS_OFF
+		ANTIALIAS_OFF, MSAA, FXAA
 	};
 
 	enum class RenderColorConfig

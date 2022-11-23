@@ -23,19 +23,20 @@ int main(int argc, char** argv) {
 	EQX::Mesh m;
 
 	EQX::ObjParser objParser(&m, "Cube");
-	objParser.parse();
-	m.scale(0.5f);
+	m.Scale(0.1f);
+	objParser.Parse();
 
-	EQX::Vertex v1(EQX::Vector2(110, 80)), v2(EQX::Vector2(105, 290)), v3(EQX::Vector2(240, 140));
+	EQX::Vertex v1(EQX::Vector2(23, 136)), v2(EQX::Vector2(253, 306)), v3(EQX::Vector2(35, 122));
 
 	std::array<EQX::Vertex, 3> vertices{ EQX::Vector2(10, 80), EQX::Vector2(40, 90), EQX::Vector2(40, 140) };
 	EQX::Face f(v1, v2, v3);
-	m.shift(EQX::Vector3(0, 120, 0));
-	// m.addLine(v1, v3);
-	// m.addFace(f);
+	m.Shift(EQX::Vector3(0, 120, 0));
+	// m.AddLine(v1, v3);
+	// m.AddFace(f);
+
 	coreRenderer.BindMesh(&m);
 	coreRenderer.SetFill(EQX::RenderFill::WIREFRAME);
-	coreRenderer.SetAA(EQX::RenderAAConfig::ANTIALIAS_OFF);
+	coreRenderer.SetAA(EQX::RenderAAConfig::MSAA);
 	coreRenderer.Render();
 
 	/*

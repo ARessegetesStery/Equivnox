@@ -26,6 +26,8 @@ namespace EQX
 		void SetFill(RenderFill);
 		void SetMode(RenderMode);
 		void SetAA(RenderAAConfig);
+
+		void SetMSAAMult(unsigned int);
 			 
 		void SetCanvas(unsigned int, unsigned int);
 		void SetCanvasHeight(unsigned int);
@@ -51,6 +53,8 @@ namespace EQX
 		RenderAAConfig renderAAConfig;
 
 		unsigned int width, height;
+
+		unsigned int MSAAMult;   // the rate of sampling in MSAA, 2^x
 
 		std::string outputPath;
 

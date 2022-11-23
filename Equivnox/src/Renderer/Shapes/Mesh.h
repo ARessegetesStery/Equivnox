@@ -14,27 +14,29 @@ namespace EQX {
 	public:
 		friend class Renderer;
 
-		void addFace(Vertex, Vertex, Vertex);
-		void addFace(Face&);
-		void addFace(std::vector<Face>&);
-		void addFace(const std::initializer_list<Face>&);
+		void AddFace(Vertex, Vertex, Vertex);
+		void AddFace(Face&);
+		void AddFace(std::vector<Face>&);
+		void AddFace(const std::initializer_list<Face>&);
 
-		void addLine(Vertex, Vertex);
-		void addLine(LineSeg&);
-		void addLine(std::vector<LineSeg>&);
-		void addLine(const std::initializer_list<LineSeg>&);
+		void AddLine(Vertex, Vertex);
+		void AddLine(LineSeg&);
+		void AddLine(std::vector<LineSeg>&);
+		void AddLine(const std::initializer_list<LineSeg>&);
 
-		void scale(float s);
-		void shift(Vector3 delta);
+		void Scale(float s);
+		void Shift(Vector3 delta);
 
 		Mesh() = default;
 		Mesh(const Mesh& m) = delete; // should not copy meshes
 
-	private:
+	public:
 		std::vector<Vertex> vertices;
 		std::vector<std::array<unsigned int, 3>> faceIndices;
 		std::vector<std::array<unsigned int, 2>> lineIndices;
 
 	};
+
+	void floorVertexPos(Vertex& v);
 }
 
