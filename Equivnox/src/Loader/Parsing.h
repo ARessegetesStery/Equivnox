@@ -3,8 +3,6 @@
 #include "eqxpch.h"
 
 #include "Renderer/Shapes/Shapes.h"
-#include "Math/MathHeader.h"
-#include "Math/MathHeader.h"
 
 namespace EQX {
 

@@ -4,7 +4,6 @@
 
 #include "LineSeg.h"
 #include "Vertex.h"
-#include "vendor/tgaimage.h"
 
 namespace EQX {
 
@@ -21,8 +20,6 @@ namespace EQX {
 		Face(LineSeg&, LineSeg&, LineSeg&);		// make sure the line segments connects each other
 		Face(const Face&);
 		Face(Face&&) = default;
-
-		void Render(TGAImage&);
 	};
 
 }

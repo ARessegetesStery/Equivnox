@@ -75,8 +75,8 @@ namespace EQX
 
 	void Renderer::Render()
 	{
-		TGAImage image(this->width, this->height, TGAImage::RGB);
-		
+		Image image(this->width, this->height, ImageType::TGA);
+
 		switch (renderFill)
 		{
 		case RenderFill::WIREFRAME:
@@ -89,11 +89,13 @@ namespace EQX
 			break;
 		}
 
-		image.flip_vertically(); // Ensure x horizontal, y vertical, origin lower-left corner
-		image.write_tga_file(this->outputPath.c_str());
+		image.write();
+
+		// image.flip_vertically(); // Ensure x horizontal, y vertical, origin lower-left corner
+		// image.write_tga_file(this->outputPath.c_str());
 	}
 
-	void Renderer::RenderLines(TGAImage& image)
+	void Renderer::RenderLines(Image& image)
 	{
 		for (auto iter = curMesh->lineIndices.begin();
 			iter != curMesh->lineIndices.cend(); ++iter)
@@ -135,7 +137,7 @@ namespace EQX
 		}
 	}
 
-	void Renderer::RenderFaces(TGAImage& image)
+	void Renderer::RenderFaces(Image& image)
 	{
 		for (auto iter = curMesh->faceIndices.begin();
 			iter != curMesh->faceIndices.cend(); ++iter)
@@ -160,10 +162,8 @@ namespace EQX
 		}
 	}
 
-	void Renderer::RenderLineRaw(TGAImage& image, LineSeg l)
+	void Renderer::RenderLineRaw(Image& image, LineSeg l)
 	{
-		const TGAColor white = TGAColor(255, 255, 255, 255);
-
 		int sx = static_cast<int>(l.start.pos.x);
 		int sy = static_cast<int>(l.start.pos.y);
 		int ex = static_cast<int>(l.end.pos.x);
@@ -187,19 +187,18 @@ namespace EQX
 			if (transpose)
 			{
 				int y = std::roundf(1 / l.k * (x - sx)) + sy;
-				image.set(y, x, white);
+				image.set(y, x, Color::White);
 			}
 			else
 			{
 				int y = std::roundf(l.k * (x - sx)) + sy;
-				image.set(x, y, white);
+				image.set(x, y, Color::White);
 			}
 		}
 	}
-
-	void Renderer::RenderLineSmooth(TGAImage& image, LineSeg l)
+	 
+	void Renderer::RenderLineSmooth(Image& image, LineSeg l)
 	{
-		const TGAColor white = TGAColor(255, 255, 255, 255);
 		int sx = static_cast<int>(l.start.pos.x);
 		int sy = static_cast<int>(l.start.pos.y);
 		int ex = static_cast<int>(l.end.pos.x);
@@ -213,12 +212,12 @@ namespace EQX
 		if (sy == ey)
 		{
 			for (int x = sx; x != ex + xPace; x += xPace)
-				image.set(x, sy, blendTGAColor(white, image.get(x, sy), 1.0));
+				image.set(x, sy, blendColor(Color::White, image.get(x, sy), 1.0));
 		}
 		else if (abs(l.k) > SLOPE_MAX)
 		{
 			for (int y = sy; y != ey + yPace; y += yPace)
-				image.set(sx, y, blendTGAColor(white, image.get(sx, y), 1.0));
+				image.set(sx, y, blendColor(Color::White, image.get(sx, y), 1.0));
 		}
 		else
 		{
@@ -230,16 +229,18 @@ namespace EQX
 					// only traverse pixels that will possibly be rendered
 				{
 					Vector2 center(x + xPace / 2.0f, y + yPace / 2.0f);
+					// cout << center.x << " " << center.y << " " << (int)(image.get(196, 256).r) << endl;
 					float coeff = PixelAmp(l, center);
 					// cout << center.x << " " << center.y << " " << P2LDistance(l, center) << endl;
-					image.set(x, y, blendTGAColor(white, image.get(x, y), coeff));
+					image.set(x, y, blendColor(Color::White, image.get(x, y), coeff));
 				}
 			}
 		}
 	}
 
-	void Renderer::RenderFaceRaw(TGAImage& image, Face f)
+	void Renderer::RenderFaceRaw(Image& image, Face f)
 	{
+		// TODO (GPU) Change into edge function (cross product)
 #ifdef EQX_DEBUG
 		cout << f.l.pos.x << " " << f.l.pos.y << "| "
 			<< f.m.pos.x << " " << f.m.pos.y << "| "
@@ -253,7 +254,7 @@ namespace EQX
 				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLR;
 					ypos <= f.m.pos.y + (xpos - f.l.pos.x) * f.kMR; ++ypos)
 				{
-					image.set(xpos, ypos, TGAWhite);
+					image.set(xpos, ypos, Color::White);
 				}
 			}
 		}
@@ -265,7 +266,7 @@ namespace EQX
 				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLR;
 					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLM; ++ypos)
 				{
-					image.set(xpos, ypos, TGAWhite);
+					image.set(xpos, ypos, Color::White);
 				}
 			}
 			for (xpos = f.m.pos.x; xpos <= f.r.pos.x; ++xpos)
@@ -273,7 +274,7 @@ namespace EQX
 				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLR;
 					ypos <= f.m.pos.y + (xpos - f.m.pos.x) * f.kMR; ++ypos)
 				{
-					image.set(xpos, ypos, TGAWhite);
+					image.set(xpos, ypos, Color::White);
 				}
 			}
 		}
@@ -285,7 +286,7 @@ namespace EQX
 				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLM;
 					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLR; ++ypos)
 				{
-					image.set(xpos, ypos, TGAWhite);
+					image.set(xpos, ypos, Color::White);
 				}
 			}
 			for (xpos = f.m.pos.x; xpos <= f.r.pos.x; ++xpos)
@@ -293,7 +294,7 @@ namespace EQX
 				for (ypos = f.m.pos.y + (xpos - f.m.pos.x) * f.kMR;
 					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLR; ++ypos)
 				{
-					image.set(xpos, ypos, TGAWhite);
+					image.set(xpos, ypos, Color::White);
 				}
 			}
 		}

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Math/MathHeader.h"
-
 namespace EQX 
 {
 	/**    

@@ -14,6 +14,8 @@
 #include <vector>
 #include <iterator>
 
+#include "Math/MathHeader.h"
+
 /**
  * Convention:
  * * Float instead of Double is used.

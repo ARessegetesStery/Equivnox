@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/Utility/Utilities.h"
+#include "Renderer/ExternalTools/ExternalTools.h"
 
 namespace EQX {
 
@@ -16,7 +16,10 @@ namespace EQX {
 
 	enum class RenderAAConfig
 	{
-		ANTIALIAS_OFF, MSAA, FXAA
+		ANTIALIAS_OFF, 
+		SMOOTH,			// renedr raw shape + boundary lines
+		MSAA, 
+		FXAA
 	};
 
 	enum class RenderColorConfig

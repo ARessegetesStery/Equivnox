@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Math/MathHeader.h"
 #include "Vertex.h"
 
 namespace EQX {

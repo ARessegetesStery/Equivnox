@@ -2,9 +2,10 @@
 
 #include "eqxpch.h"
 
+#include "Renderer/ExternalTools/ExternalTools.h"
+// #include "Renderer/ExternalTools/vendor/TGA/tgaimage.h"
 #include "RenderConfig.h"
 #include "Renderer/Shapes/Shapes.h"
-#include "Renderer/Utility/Utilities.h"
 
 // TODO optimize: whether construct line/shape entities
 
@@ -40,13 +41,13 @@ namespace EQX
 
 		Mesh* curMesh;
 
-		void RenderLines(TGAImage&);
-		void RenderFaces(TGAImage&);
+		void RenderLines(Image&);
+		void RenderFaces(Image&);
 
-		void RenderLineRaw(TGAImage&, LineSeg);
-		void RenderLineSmooth(TGAImage&, LineSeg);
+		void RenderLineRaw(Image&, LineSeg);
+		void RenderLineSmooth(Image&, LineSeg);
 
-		void RenderFaceRaw(TGAImage&, Face);
+		void RenderFaceRaw(Image&, Face);
 
 		RenderFill renderFill;
 		RenderMode renderMode;
