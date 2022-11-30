@@ -8,7 +8,8 @@ namespace EQX {
 
 	enum class ImageType
 	{
-		TGA
+		TGA,	// Relies on tgaimage.h
+		PNG		// Relies on stb libraries
 	};
 
 	class Color

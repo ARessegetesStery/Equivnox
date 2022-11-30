@@ -2,6 +2,12 @@
 
 #include "Image.h"
 
+// include it here as stb is header-only
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "vendor/stb/stb_image.h"
+#include "vendor/stb/stb_image_write.h"
+
 namespace EQX {
 
 	Color Color::White = Color(255, 255, 255, 255);
@@ -56,16 +62,17 @@ namespace EQX {
 			delete[] canvas;
 	}
 
+	// INSP change "h * this->width + w" to "h * w + w" for interesting results
 	void Image::set(unsigned int w, unsigned int h, Color c)
 	{
 		if (!(!canvas || w >= width || h >= height))
 			this->canvas[(size_t)(h * this->width + w)] = c;
 	}
 
-	Color Image::get(unsigned int h, unsigned int w) const
+	Color Image::get(unsigned int w, unsigned int h) const
 	{
 		if (!(!canvas || w >= width || h >= height))
-			return this->canvas[h * this->width + w];
+			return this->canvas[(size_t)(h * this->width + w)];
 	}
 
 	void Image::clear()
@@ -76,7 +83,6 @@ namespace EQX {
 
 	void Image::write()
 	{
-		cout << (int)(canvas[256 * width + 196].r) << endl;
 		if (this->type == ImageType::TGA)
 		{
 			TGAImage image(this->width, this->height, TGAImage::RGBA);
@@ -92,11 +98,20 @@ namespace EQX {
 			image.flip_vertically(); // Ensure x horizontal, y vertical, origin lower-left corner
 			image.write_tga_file((this->filename + ".tga").c_str());
 		}
+		if (this->type == ImageType::PNG)
+		{
+			stbi_flip_vertically_on_write(true);
+			
+			int info;
+			info = stbi_write_png((this->filename + ".png").c_str(), this->width, this->height, 4, this->canvas, 0);
+			if (!info)
+				cout << "Writing to " << this->filename << ".png failed." << endl;
+		}
 	}
 
 
 	/**
-	 * Mix TGAColors
+	 * Mix Colors
 	 *
 	 * @param fore Newly added color
 	 * @param back Originally existing color

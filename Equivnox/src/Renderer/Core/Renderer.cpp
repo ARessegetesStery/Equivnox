@@ -10,6 +10,7 @@ namespace EQX
 		this->renderFill = RenderFill::WIREFRAME;
 		this->renderMode = RenderMode::FULL;
 		this->renderAAConfig = RenderAAConfig::ANTIALIAS_OFF;
+		this->imageType = ImageType::TGA;
 		this->outputPath = "output.tga";
 		this->width = 400;
 		this->height = 400;
@@ -47,6 +48,11 @@ namespace EQX
 		this->renderAAConfig = a;
 	}
 
+	void Renderer::SetOutputType(ImageType t)
+	{
+		this->imageType = t;
+	}
+
 	void Renderer::SetMSAAMult(unsigned int scale)
 	{
 		if (scale == 0 || scale == 1)
@@ -75,7 +81,7 @@ namespace EQX
 
 	void Renderer::Render()
 	{
-		Image image(this->width, this->height, ImageType::TGA);
+		Image image(this->width, this->height, this->imageType);
 
 		switch (renderFill)
 		{
@@ -106,7 +112,7 @@ namespace EQX
 				RenderLineRaw(image, LineSeg(curMesh->vertices[(*iter)[0]],
 					curMesh->vertices[(*iter)[1]]));
 				break;
-			case RenderAAConfig::MSAA:
+			case RenderAAConfig::MSAA: case RenderAAConfig::SMOOTH:
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
 					curMesh->vertices[(*iter)[1]]));
 				break;
@@ -229,6 +235,7 @@ namespace EQX
 					// only traverse pixels that will possibly be rendered
 				{
 					Vector2 center(x + xPace / 2.0f, y + yPace / 2.0f);
+					// Vector2 center(x, y);
 					// cout << center.x << " " << center.y << " " << (int)(image.get(196, 256).r) << endl;
 					float coeff = PixelAmp(l, center);
 					// cout << center.x << " " << center.y << " " << P2LDistance(l, center) << endl;

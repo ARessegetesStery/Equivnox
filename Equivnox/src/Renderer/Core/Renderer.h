@@ -27,6 +27,7 @@ namespace EQX
 		void SetFill(RenderFill);
 		void SetMode(RenderMode);
 		void SetAA(RenderAAConfig);
+		void SetOutputType(ImageType);
 
 		void SetMSAAMult(unsigned int);
 			 
@@ -52,6 +53,8 @@ namespace EQX
 		RenderFill renderFill;
 		RenderMode renderMode;
 		RenderAAConfig renderAAConfig;
+
+		ImageType imageType;
 
 		unsigned int width, height;
 
