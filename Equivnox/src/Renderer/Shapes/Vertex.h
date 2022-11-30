@@ -4,6 +4,7 @@ namespace EQX
 {
 	/**    
 	 * Axes, conforming to right-hand system
+	 * 
 	 *     ^ 
 	 *     | y
 	 *     |
@@ -12,6 +13,7 @@ namespace EQX
 	 * ----¡¤-----------> x
 	 *    /|
 	 * z / |
+	 * 
 	 */
 
 
@@ -48,4 +50,6 @@ namespace EQX
 	 * @param u vertex supposedly with larger y
 	 */
 	bool LowerVertex(const Vertex& l, const Vertex& u);
+
+	Vertex TransformVertexPos(const Mat4& projection, const Vertex& v);
 }

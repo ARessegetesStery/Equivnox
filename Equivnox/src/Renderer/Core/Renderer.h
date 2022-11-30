@@ -3,9 +3,9 @@
 #include "eqxpch.h"
 
 #include "Renderer/ExternalTools/ExternalTools.h"
-// #include "Renderer/ExternalTools/vendor/TGA/tgaimage.h"
-#include "RenderConfig.h"
 #include "Renderer/Shapes/Shapes.h"
+#include "RenderConfig.h"
+#include "Camera.h"
 
 // TODO optimize: whether construct line/shape entities
 
@@ -35,6 +35,8 @@ namespace EQX
 		void SetCanvasHeight(unsigned int);
 		void SetCanvasWidth(unsigned int);
 
+		Camera camera;
+
 	private:
 		Renderer();
 		Renderer(const Renderer& r) = delete;
@@ -42,11 +44,12 @@ namespace EQX
 
 		Mesh* curMesh;
 
+
 		void RenderLines(Image&);
 		void RenderFaces(Image&);
 
 		void RenderLineRaw(Image&, LineSeg);
-		void RenderLineSmooth(Image&, LineSeg);
+		void RenderLineSmooth(Image&, LineSeg, const Mat4&);
 
 		void RenderFaceRaw(Image&, Face);
 

@@ -26,8 +26,12 @@ namespace EQX {
 		float& operator[] (std::size_t n);
 		const float& operator[] (std::size_t n) const;
 
+		Vector2 Neg() const;
+
 		static const Vector2 ZERO;
 	};
+
+	float Dot(const Vector2&, const Vector2&);
 
 	bool operator== (const Vector2&, const Vector2&);
 	

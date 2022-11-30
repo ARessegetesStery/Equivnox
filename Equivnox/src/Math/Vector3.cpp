@@ -27,6 +27,11 @@ namespace EQX
 		return Vector3(this->x + p.x, this->y + p.y, this->z + p.z);
 	}
 
+	Vector3 Vector3::operator* (const float coeff)
+	{
+		return Vector3(x * coeff, y * coeff, z * coeff);
+	}
+
 	Vector3& Vector3::operator= (const Vector3& p)
 	{
 		this->x = p.x;
@@ -88,6 +93,34 @@ namespace EQX
 	bool operator== (const Vector3& v1, const Vector3& v2)
 	{
 		return (v1.x == v2.x) && (v1.y == v2.y) && (v1.z == v2.z);
+	}
+
+	Vector3 Vector3::Neg() const
+	{
+		return Vector3(-x, -y, -z);
+	}
+
+	Vector3 Vector3::Normalize() const
+	{
+		float norm = this->Norm();
+		return Vector3(x / norm, y / norm, z / norm);
+	}
+
+	float Vector3::Norm() const
+	{
+		return sqrt(x * x + y * y + z * z);
+	}
+
+	float Dot(const Vector3& v1, const Vector3& v2)
+	{
+		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+	}
+
+	Vector3 Cross(const Vector3& v1, const Vector3& v2)
+	{
+		return Vector3(v1.y * v2.z - v1.z * v2.y, 
+			v1.z * v2.x - v1.x * v2.z, 
+			v1.x * v2.y - v1.y * v2.x);
 	}
 
 }

@@ -37,4 +37,11 @@ namespace EQX
 		return l.pos.y < u.pos.y;
 	}
 
+	Vertex TransformVertexPos(const Mat4& projection, const Vertex& v)
+	{
+		Vertex ans = v;
+		ans.pos = projection * v.pos;
+		return ans;
+	}
+
 }

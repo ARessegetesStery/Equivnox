@@ -65,10 +65,10 @@ namespace EQX
 	float PixelAmp(LineSeg& l, Vertex p)
 	{
 		float distance = P2LDistance(l, p);
-		if (distance > 1.0)
+		if (distance > 1.3)
 			return 0.0;
 		else
-			return exp(- 2 * pow(distance, 3));
+			return exp(3 * -pow(distance, 3));
 	}
 
 	float GetSlope(Vertex& start, Vertex& end)

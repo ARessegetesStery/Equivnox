@@ -103,6 +103,8 @@ namespace EQX
 
 	void Renderer::RenderLines(Image& image)
 	{
+		Mat4 Projection = makeScreenSpace(this->width, this->height) *
+			makePersp(camera.width, camera.height) * makeView(camera.pos, camera.lookAt, camera.upDir);
 		for (auto iter = curMesh->lineIndices.begin();
 			iter != curMesh->lineIndices.cend(); ++iter)
 		{
@@ -114,7 +116,7 @@ namespace EQX
 				break;
 			case RenderAAConfig::MSAA: case RenderAAConfig::SMOOTH:
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[1]]));
+					curMesh->vertices[(*iter)[1]]), Projection);
 				break;
 			}
 		}
@@ -133,11 +135,11 @@ namespace EQX
 				break;
 			case RenderAAConfig::MSAA: case RenderAAConfig::FXAA:
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[1]]));
+					curMesh->vertices[(*iter)[1]]), Projection);
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[2]]));
+					curMesh->vertices[(*iter)[2]]), Projection);
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[1]],
-					curMesh->vertices[(*iter)[2]]));
+					curMesh->vertices[(*iter)[2]]), Projection);
 				break;
 			}
 		}
@@ -145,6 +147,8 @@ namespace EQX
 
 	void Renderer::RenderFaces(Image& image)
 	{
+		Mat4 Projection = makeScreenSpace(this->width, this->height) *
+			makePersp(camera.width, camera.height) * makeView(camera.pos, camera.lookAt, camera.upDir);
 		for (auto iter = curMesh->faceIndices.begin();
 			iter != curMesh->faceIndices.cend(); ++iter)
 		{
@@ -158,11 +162,11 @@ namespace EQX
 			case RenderAAConfig::MSAA:
 				RenderFaceRaw(image, vertices);
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[1]]));
+					curMesh->vertices[(*iter)[1]]), Projection);
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[2]]));
+					curMesh->vertices[(*iter)[2]]), Projection);
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[2]],
-					curMesh->vertices[(*iter)[1]]));
+					curMesh->vertices[(*iter)[1]]), Projection);
 				break;
 			}
 		}
@@ -203,8 +207,13 @@ namespace EQX
 		}
 	}
 	 
-	void Renderer::RenderLineSmooth(Image& image, LineSeg l)
+	void Renderer::RenderLineSmooth(Image& image, LineSeg l, const Mat4& Projection)
 	{
+		// TODO Test
+		// l.start = TransformVertexPos(Projection, l.start);
+		// l.end = TransformVertexPos(Projection, l.end);
+		floorVertexPos(l.start);
+		floorVertexPos(l.end);
 		int sx = static_cast<int>(l.start.pos.x);
 		int sy = static_cast<int>(l.start.pos.y);
 		int ex = static_cast<int>(l.end.pos.x);
@@ -218,7 +227,9 @@ namespace EQX
 		if (sy == ey)
 		{
 			for (int x = sx; x != ex + xPace; x += xPace)
+			{
 				image.set(x, sy, blendColor(Color::White, image.get(x, sy), 1.0));
+			}
 		}
 		else if (abs(l.k) > SLOPE_MAX)
 		{
@@ -236,7 +247,7 @@ namespace EQX
 				{
 					Vector2 center(x + xPace / 2.0f, y + yPace / 2.0f);
 					// Vector2 center(x, y);
-					// cout << center.x << " " << center.y << " " << (int)(image.get(196, 256).r) << endl;
+					cout << center.x << " " << center.y << " " << (int)(image.get(196, 256).r) << endl;
 					float coeff = PixelAmp(l, center);
 					// cout << center.x << " " << center.y << " " << P2LDistance(l, center) << endl;
 					image.set(x, y, blendColor(Color::White, image.get(x, y), coeff));

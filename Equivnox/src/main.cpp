@@ -39,10 +39,16 @@ int main(int argc, char** argv) {
 	coreRenderer.SetFill(EQX::RenderFill::WIREFRAME);
 	coreRenderer.SetAA(EQX::RenderAAConfig::MSAA);
 	coreRenderer.SetOutputType(EQX::ImageType::TGA);
+
+	coreRenderer.camera.pos = EQX::Vector3(0, 0, 3);
+	coreRenderer.camera.lookAt = EQX::Vec3(0, 0, -1);
+	coreRenderer.camera.fromFoV(45, 1.0);
+	coreRenderer.camera.upDir = EQX::Vec3(0, 1, 0);
+
 	coreRenderer.Render();
 
 	/*
-	EQX::Vertex v1(EQX::Vector2(10, 80)), v2(EQX::Vector2(40, 90)), v3(EQX::Vector2(40, 140));
+	EQX::Vertex v1(EQ       X::Vector2(10, 80)), v2(EQX::Vector2(40, 90)), v3(EQX::Vector2(40, 140));
 	EQX::Face f(v1, v2, v3);
 	TGAImage image(400, 400, TGAImage::RGB);
 	cout << f.kLM << " " << f.kLR << " " << f.kMR << endl;
