@@ -73,6 +73,7 @@ namespace EQX {
 	{
 		if (!(!canvas || w >= width || h >= height))
 			return this->canvas[(size_t)(h * this->width + w)];
+		return Color::Black;
 	}
 
 	void Image::clear()

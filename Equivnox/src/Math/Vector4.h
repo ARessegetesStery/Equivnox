@@ -21,6 +21,7 @@ namespace EQX {
 	public:
 		Vector4();
 		Vector4(float, float, float, float w = 1.0);
+		Vector4(const Vector3&);
 		Vector4(const Vector4&);
 		Vector4(Vector4&&) noexcept;
 
@@ -31,19 +32,22 @@ namespace EQX {
 		Vector4 operator+= (const Vector4& p);
 		Vector4 operator*= (float s);
 
+		Vector3 ToVec3() const;
+
 		// index operator returns x if the index exceeds 3
 		float& operator[] (std::size_t n);
 		const float& operator[] (std::size_t n) const;
 
-		void normalize();
+		void Normalize();
+		Vector4 Neg() const;
 
 		static const Vector4 ZERO;
 	};
 
-	bool operator== (const Vector4&, const Vector4&);
+	float Dot(const Vector4&, const Vector4&);
+	Vector4 Cross(const Vector4&, const Vector4&);
 
-	Vector4 operator+ (const Vector4&, const Vector3&);
-	Vector4 operator+ (const Vector3&, const Vector4&);
+	bool operator== (const Vector4&, const Vector4&);
 
 	Vector4 operator* (const Vector4&, const float);
 	Vector4 operator* (const float, const Vector4&);

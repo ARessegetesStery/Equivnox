@@ -6,9 +6,6 @@ namespace EQX {
 
 	void Mesh::AddFace(Vertex a, Vertex b, Vertex c)
 	{
-		floorVertexPos(a);
-		floorVertexPos(b);
-		floorVertexPos(c);
 		bool ARep = false, BRep = false, CRep = false;
 		unsigned int AIndex = 0, BIndex = 0, CIndex = 0;
 		unsigned int CurIndex = this->vertices.size();
@@ -83,8 +80,6 @@ namespace EQX {
 	{
 		bool ARep = false;
 		bool BRep = false;
-		floorVertexPos(a);
-		floorVertexPos(b);
 		unsigned int AIndex;
 		unsigned int BIndex;
 		unsigned int CurIndex = this->vertices.size();
@@ -169,11 +164,6 @@ namespace EQX {
 	 * 
 	 * @param v the vertex; Note it will be modified
 	 */
-	void floorVertexPos(Vertex& v)
-	{
-		v.pos.x = floor(v.pos.x);
-		v.pos.y = floor(v.pos.y);
-		v.pos.z = floor(v.pos.z);
-	}
+	
 
 }

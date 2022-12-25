@@ -46,11 +46,11 @@ namespace EQX
 		Vector2 p(point.pos.x, point.pos.y);
 		if (p.x > l.end.pos.x && l.kSign * (p.y - l.end.pos.y) > 0)
 		{
-			return 0.5 * (std::abs(p.x - l.end.pos.x) + std::abs(p.y - l.end.pos.y));
+			return 0.75 * (std::abs(p.x - l.end.pos.x) + std::abs(p.y - l.end.pos.y));
 		}
 		if (p.x < l.start.pos.x && l.kSign * (-p.y + l.start.pos.y) > 0)
 		{
-			return 0.5 * (std::abs(p.x - l.start.pos.x) + std::abs(p.y - l.start.pos.y));
+			return 0.75 * (std::abs(p.x - l.start.pos.x) + std::abs(p.y - l.start.pos.y));
 		}
 		if (l.k > SLOPE_MAX)
 			return abs(p.x - l.start.pos.x);
@@ -65,10 +65,10 @@ namespace EQX
 	float PixelAmp(LineSeg& l, Vertex p)
 	{
 		float distance = P2LDistance(l, p);
-		if (distance > 1.0)
+		if (distance > 1.3)
 			return 0.0;
 		else
-			return exp(- 2 * pow(distance, 3));
+			return exp(3 * -pow(distance, 3));
 	}
 
 	float GetSlope(Vertex& start, Vertex& end)

@@ -11,6 +11,9 @@ namespace EQX
 	Vector4::Vector4(float x, float y, float z, float w) 
 		: x(x), y(y), z(z), w(w) {  }
 
+	Vector4::Vector4(const Vector3& v3)
+		: x(v3.x), y(v3.y), z(v3.z), w(1) {  }
+
 	Vector4::Vector4(const Vector4& v)
 		: x(v.x), y(v.y), z(v.z), w(v.w) {	}
 
@@ -63,12 +66,22 @@ namespace EQX
 		return *this;
 	}
 
-	void Vector4::normalize()
+	Vector3 Vector4::ToVec3() const
+	{
+		return Vector3(x / w, y / w, z / w);
+	}
+
+	void Vector4::Normalize()
 	{
 		x /= w;
 		y /= w;
 		z /= w; 
 		w = 1;
+	}
+
+	Vector4 Vector4::Neg() const
+	{
+		return Vector4(-x, -y, -z, w);
 	}
 
 	float& Vector4::operator[] (std::size_t n)
@@ -111,16 +124,6 @@ namespace EQX
 			&& (v1.y/v1.w == v2.y/v2.w) 
 			&& (v1.z/v1.w == v2.z/v2.w);
 	}
-	
-	Vector4 operator+ (const Vector4& v1_4, const Vector3& v2_3)
-	{
-		return Vector4(v1_4.x + v2_3.x, v1_4.y + v2_3.y, v1_4.z + v2_3.z, v1_4.w);
-	}
-
-	Vector4 operator+ (const Vector3& v2_3, const Vector3& v1_4)
-	{
-		return (v1_4 + v2_3);
-	}
 
 	Vector4 operator*(const Vector4& v4, const float coeff)
 	{
@@ -132,5 +135,17 @@ namespace EQX
 		return v4 * coeff;
 	}
 
+	float Dot(const Vector4& v1, const Vector4& v2)
+	{
+		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w;
+	}
+
+	Vector4 Cross(const Vector4& v1, const Vector4& v2)
+	{
+		Vector3 t3(v1.x, v1.y, v1.z);
+		Vector3 v3(v2.x, v2.y, v2.z);
+		Vector3 ans3 = Cross(t3, v3);
+		return Vector4(ans3);
+	}
 
 }

@@ -18,6 +18,7 @@ namespace EQX {
 
 		Vector3 operator- (const Vector3& p);
 		Vector3 operator+ (const Vector3& p);
+		Vector3 operator* (const float coeff);
 		Vector3& operator= (const Vector3& p);
 		Vector3 operator-= (const Vector3& p);
 		Vector3 operator+= (const Vector3& p);
@@ -27,11 +28,19 @@ namespace EQX {
 		float& operator[] (std::size_t n);
 		const float& operator[] (std::size_t n) const;
 
+		Vector3 Neg() const;
+		Vector3 Normalize() const;
+
+		float Norm() const;
+
 		static const Vector3 ZERO;
 		static const Vector3 UNIT_X;
 		static const Vector3 UNIT_Y;
 		static const Vector3 UNIT_Z;
 	};
+
+	float Dot(const Vector3&, const Vector3&);
+	Vector3 Cross(const Vector3&, const Vector3&);
 
 	bool operator== (const Vector3&, const Vector3&);
 

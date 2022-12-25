@@ -17,7 +17,7 @@ namespace EQX {
 	enum class RenderAAConfig
 	{
 		ANTIALIAS_OFF, 
-		SMOOTH,			// renedr raw shape + boundary lines
+		SMOOTH,			// render raw shape + boundary lines
 		MSAA, 
 		FXAA
 	};

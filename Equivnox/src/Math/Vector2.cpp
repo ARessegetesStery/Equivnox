@@ -76,9 +76,19 @@ namespace EQX
 		}
 	}
 
+	Vector2 Vector2::Neg() const
+	{
+		return Vector2(-x, -y);
+	}
+
 	bool operator== (const Vector2& v1, const Vector2& v2)
 	{
 		return (v1.x == v2.x) && (v1.y == v2.y);
+	}
+
+	float Dot(const Vector2& v1, const Vector2& v2)
+	{
+		return v1.x * v2.x + v1.y * v2.y;
 	}
 
 }

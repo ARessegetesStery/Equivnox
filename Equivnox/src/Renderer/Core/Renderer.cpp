@@ -7,6 +7,7 @@ namespace EQX
 	Renderer::Renderer()
 	{
 		this->curMesh = nullptr;
+		this->cameraEnabled = true;
 		this->renderFill = RenderFill::WIREFRAME;
 		this->renderMode = RenderMode::FULL;
 		this->renderAAConfig = RenderAAConfig::ANTIALIAS_OFF;
@@ -103,6 +104,10 @@ namespace EQX
 
 	void Renderer::RenderLines(Image& image)
 	{
+		// TODO fix
+		Mat4 Projection = makeScreenSpace(this->width, this->height) *
+			makePersp(camera.width, camera.height) * makeView(camera.pos, camera.lookAt, camera.upDir);
+		// Mat4 Projection = Mat4::IDENTITY;
 		for (auto iter = curMesh->lineIndices.begin();
 			iter != curMesh->lineIndices.cend(); ++iter)
 		{
@@ -110,11 +115,11 @@ namespace EQX
 			{
 			case RenderAAConfig::ANTIALIAS_OFF:
 				RenderLineRaw(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[1]]));
+					curMesh->vertices[(*iter)[1]]), Projection);
 				break;
 			case RenderAAConfig::MSAA: case RenderAAConfig::SMOOTH:
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[1]]));
+					curMesh->vertices[(*iter)[1]]), Projection);
 				break;
 			}
 		}
@@ -125,19 +130,19 @@ namespace EQX
 			{
 			case RenderAAConfig::ANTIALIAS_OFF:
 				RenderLineRaw(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[1]]));
+					curMesh->vertices[(*iter)[1]]), Projection);
 				RenderLineRaw(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[2]]));
+					curMesh->vertices[(*iter)[2]]), Projection);
 				RenderLineRaw(image, LineSeg(curMesh->vertices[(*iter)[2]],
-					curMesh->vertices[(*iter)[1]]));
+					curMesh->vertices[(*iter)[1]]), Projection);
 				break;
 			case RenderAAConfig::MSAA: case RenderAAConfig::FXAA:
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[1]]));
+					curMesh->vertices[(*iter)[1]]), Projection);
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[2]]));
+					curMesh->vertices[(*iter)[2]]), Projection);
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[1]],
-					curMesh->vertices[(*iter)[2]]));
+					curMesh->vertices[(*iter)[2]]), Projection);
 				break;
 			}
 		}
@@ -145,6 +150,8 @@ namespace EQX
 
 	void Renderer::RenderFaces(Image& image)
 	{
+		Mat4 Projection = makeScreenSpace(this->width, this->height) *
+			makePersp(camera.width, camera.height) * makeView(camera.pos, camera.lookAt, camera.upDir);
 		for (auto iter = curMesh->faceIndices.begin();
 			iter != curMesh->faceIndices.cend(); ++iter)
 		{
@@ -158,25 +165,34 @@ namespace EQX
 			case RenderAAConfig::MSAA:
 				RenderFaceRaw(image, vertices);
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[1]]));
+					curMesh->vertices[(*iter)[1]]), Projection);
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[2]]));
+					curMesh->vertices[(*iter)[2]]), Projection);
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[2]],
-					curMesh->vertices[(*iter)[1]]));
+					curMesh->vertices[(*iter)[1]]), Projection);
 				break;
 			}
 		}
 	}
 
-	void Renderer::RenderLineRaw(Image& image, LineSeg l)
+	void Renderer::RenderLineRaw(Image& image, LineSeg l, const Mat4& Projection)
 	{
-		int sx = static_cast<int>(l.start.pos.x);
-		int sy = static_cast<int>(l.start.pos.y);
-		int ex = static_cast<int>(l.end.pos.x);
-		int ey = static_cast<int>(l.end.pos.y);
+		if (this->cameraEnabled)
+		{
+			l.start = TransformVertexPos(Projection, l.start);
+			l.end = TransformVertexPos(Projection, l.end);
+		}
+		LineSeg perspL(l.start, l.end);
+		floorVertexPos(perspL.start);
+		floorVertexPos(perspL.end);
+
+		int sx = static_cast<int>(perspL.start.pos.x);
+		int sy = static_cast<int>(perspL.start.pos.y);
+		int ex = static_cast<int>(perspL.end.pos.x);
+		int ey = static_cast<int>(perspL.end.pos.y);
 
 		bool transpose = false;
-		if (abs(l.k) > 1)
+		if (abs(perspL.k) > 1)
 		{
 			std::swap(sx, sy);
 			std::swap(ex, ey);
@@ -192,23 +208,34 @@ namespace EQX
 		{
 			if (transpose)
 			{
-				int y = std::roundf(1 / l.k * (x - sx)) + sy;
+				int y = std::roundf(1 / perspL.k * (x - sx)) + sy;
 				image.set(y, x, Color::White);
 			}
 			else
 			{
-				int y = std::roundf(l.k * (x - sx)) + sy;
+				int y = std::roundf(perspL.k * (x - sx)) + sy;
 				image.set(x, y, Color::White);
 			}
 		}
 	}
 	 
-	void Renderer::RenderLineSmooth(Image& image, LineSeg l)
+	void Renderer::RenderLineSmooth(Image& image, LineSeg l, const Mat4& Projection)
 	{
-		int sx = static_cast<int>(l.start.pos.x);
-		int sy = static_cast<int>(l.start.pos.y);
-		int ex = static_cast<int>(l.end.pos.x);
-		int ey = static_cast<int>(l.end.pos.y);
+		// cout << "-----------" << endl;
+		// cout << l.start.pos.x << " " << l.start.pos.y << " " << l.end.pos.x << " " << l.end.pos.y << endl;
+		if (this->cameraEnabled)
+		{
+			l.start = TransformVertexPos(Projection, l.start);
+			l.end = TransformVertexPos(Projection, l.end);
+		}
+		LineSeg perspL(l.start, l.end);
+
+		floorVertexPos(perspL.start);
+		floorVertexPos(perspL.end);
+		int sx = static_cast<int>(perspL.start.pos.x);
+		int sy = static_cast<int>(perspL.start.pos.y);
+		int ex = static_cast<int>(perspL.end.pos.x);
+		int ey = static_cast<int>(perspL.end.pos.y);
 
 		int xPace = 1;
 		int yPace = 1;
@@ -218,9 +245,11 @@ namespace EQX
 		if (sy == ey)
 		{
 			for (int x = sx; x != ex + xPace; x += xPace)
+			{
 				image.set(x, sy, blendColor(Color::White, image.get(x, sy), 1.0));
+			}
 		}
-		else if (abs(l.k) > SLOPE_MAX)
+		else if (abs(perspL.k) > SLOPE_MAX)
 		{
 			for (int y = sy; y != ey + yPace; y += yPace)
 				image.set(sx, y, blendColor(Color::White, image.get(sx, y), 1.0));
@@ -229,15 +258,14 @@ namespace EQX
 		{
 			for (int x = sx; x != ex + xPace; x += xPace)
 			{
-				for (int y = (int)(sy + l.k * (x - sx)) - yPace;
-					y != (int)(sy + l.k * (x - sx + 1) + yPace);
+				for (int y = (int)(sy + perspL.k * (x - sx)) - yPace;
+					y != (int)(sy + perspL.k * (x - sx + 1) + yPace);
 					y += yPace)
 					// only traverse pixels that will possibly be rendered
 				{
 					Vector2 center(x + xPace / 2.0f, y + yPace / 2.0f);
-					// Vector2 center(x, y);
 					// cout << center.x << " " << center.y << " " << (int)(image.get(196, 256).r) << endl;
-					float coeff = PixelAmp(l, center);
+					float coeff = PixelAmp(perspL, center);
 					// cout << center.x << " " << center.y << " " << P2LDistance(l, center) << endl;
 					image.set(x, y, blendColor(Color::White, image.get(x, y), coeff));
 				}
