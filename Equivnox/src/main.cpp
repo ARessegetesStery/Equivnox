@@ -24,15 +24,15 @@ int main(int argc, char** argv) {
 	EQX::Mesh m;
 
 	EQX::ObjParser objParser(&m, "Cube");
-	m.Scale(0.1f);
 	objParser.Parse();
+	m.Scale(0.4f);
 
-	EQX::Vertex v1(EQX::Vector2(40, 100)), v2(EQX::Vector2(253, 306)), v3(EQX::Vector2(80, 300));
+	EQX::Vertex v1(EQX::Vector2(40, 100)), v2(EQX::Vector2(253, 306)), v3(EQX::Vector2(45, 300));
 
 	std::array<EQX::Vertex, 3> vertices{ EQX::Vector2(10, 80), EQX::Vector2(40, 90), EQX::Vector2(40, 140) };
 	EQX::Face f(v1, v2, v3);
-	m.Shift(EQX::Vector3(0, 120, 0));
-	m.AddLine(v1, v3);
+	// m.Shift(EQX::Vector3(0, 120, 0));
+	// m.AddLine(v1, v3);
 	//m.AddFace(f);
 
 	coreRenderer.BindMesh(&m);
@@ -40,22 +40,14 @@ int main(int argc, char** argv) {
 	coreRenderer.SetAA(EQX::RenderAAConfig::MSAA);
 	coreRenderer.SetOutputType(EQX::ImageType::TGA);
 
-	coreRenderer.camera.pos = EQX::Vector3(0, 0, 3);
+	coreRenderer.camera.pos = EQX::Vector3(0, 0, 2);
 	coreRenderer.camera.lookAt = EQX::Vec3(0, 0, -1);
 	coreRenderer.camera.fromFoV(45, 1.0);
+	cout << coreRenderer.camera.width << " " << coreRenderer.camera.height << endl;
 	coreRenderer.camera.upDir = EQX::Vec3(0, 1, 0);
 
 	coreRenderer.Render();
 
-	/*
-	EQX::Vertex v1(EQ       X::Vector2(10, 80)), v2(EQX::Vector2(40, 90)), v3(EQX::Vector2(40, 140));
-	EQX::Face f(v1, v2, v3);
-	TGAImage image(400, 400, TGAImage::RGB);
-	cout << f.kLM << " " << f.kLR << " " << f.kMR << endl;
-	f.Render(image);
-	image.flip_vertically(); // Ensure x horizontal, y vertical, origin lower-left corner
-	image.write_tga_file("output.tga");
-	*/
 }
 
 

@@ -4,6 +4,13 @@
 
 namespace EQX {
 
+	const Matrix4x4 Matrix4x4::IDENTITY = Matrix4x4(
+		Vector4(1, 0, 0, 0),
+		Vector4(0, 1, 0, 0),
+		Vector4(0, 0, 1, 0),
+		Vector4(0, 0, 0, 1)
+	);
+
 	Matrix4x4::Matrix4x4()
 	{
 		for (int i = 0; i < 4; ++i)
@@ -164,23 +171,29 @@ namespace EQX {
 	Matrix4x4 makeOrtho(float NearWidth, float NearHeight,
 		float NearClip, float FarClip)
 	{
-		return Matrix4x4(Vector4(2.0 / NearWidth, 0, 0, 0), Vector4(0, 2.0 / NearHeight, 0, 0),
-			Vector4(0, 0, 2 / FarClip - NearClip, 0), Vector4(0, 0, -(FarClip - NearClip) / 2, 1));
+		return Matrix4x4(Vector4(2.0 / NearWidth, 0, 0, 0), 
+			Vector4(0, 2.0 / NearHeight, 0, 0),
+			Vector4(0, 0, 2 / FarClip - NearClip, 0), 
+			Vector4(0, 0, -(FarClip + NearClip) / 2, 1));
 	}
 
 	Matrix4x4 makePersp(float NearWidth, float NearHeight,
 		float NearClip, float FarClip)
 	{
 		Matrix4x4 Ortho = makeOrtho(NearWidth, NearHeight, NearClip, FarClip);
-		Matrix4x4 Persp = Matrix4x4(Vector4(NearClip, 0, 0, 0), Vector4(0, NearClip, 0, 0),
-			Vector4(0, 0, NearClip + FarClip, 1), Vector4(0, 0, -NearClip * FarClip, 0));
+		Matrix4x4 Persp = Matrix4x4(Vector4(NearClip, 0, 0, 0), 
+			Vector4(0, NearClip, 0, 0),
+			Vector4(0, 0, NearClip + FarClip, 1), 
+			Vector4(0, 0, -NearClip * FarClip, 0));
 		return Ortho * Persp;
 	}
 
 	Matrix4x4 makeScreenSpace(float Width, float Height)
 	{
-		return Matrix4x4(Vector4(Width / 2.0f, 0, 0, 0), Vector4(0, Height / 2.0f, 0, 0), 
-			Vector4(0, 0, 1, 0), Vector4(0, 0, 0, 1));
+		return Matrix4x4(Vector4(Width / 2.0f, 0, 0, 0), 
+			Vector4(0, Height / 2.0f, 0, 0), 
+			Vector4(0, 0, 1, 0), 
+			Vector4(Width / 2.0f, Height / 2.0f, 0, 1));
 	}
 
 }

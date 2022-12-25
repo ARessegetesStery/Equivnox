@@ -8,7 +8,7 @@
 
 namespace EQX {
 
-	const int EQXPI = 3.1415892653589793;
+	const float EQXPI = 3.1415892653589793;
 
 	using Vec2 = Vector2;
 	using Vec3 = Vector3;

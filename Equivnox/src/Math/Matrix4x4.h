@@ -35,6 +35,8 @@ namespace EQX {
 		Matrix4x4 operator* (const Matrix4x4&);
 		// TODO Matrix Operations
 		// TODO MVP Matrices
+
+		static const Matrix4x4 IDENTITY;
 	};
 
 	/**

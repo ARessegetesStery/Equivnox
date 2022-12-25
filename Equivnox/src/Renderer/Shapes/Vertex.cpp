@@ -41,6 +41,7 @@ namespace EQX
 	{
 		Vertex ans = v;
 		ans.pos = projection * v.pos;
+		ans.pos.Normalize();
 		return ans;
 	}
 

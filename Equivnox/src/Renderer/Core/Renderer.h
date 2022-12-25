@@ -35,6 +35,9 @@ namespace EQX
 		void SetCanvasHeight(unsigned int);
 		void SetCanvasWidth(unsigned int);
 
+		inline void DisableCamera() { this->cameraEnabled = false; }		// Accept pixel info and render as it is
+		inline void EnableCamera() { this->cameraEnabled = true; }		// Enable rendering with perspective
+
 		Camera camera;
 
 	private:
@@ -48,11 +51,12 @@ namespace EQX
 		void RenderLines(Image&);
 		void RenderFaces(Image&);
 
-		void RenderLineRaw(Image&, LineSeg);
+		void RenderLineRaw(Image&, LineSeg, const Mat4&);
 		void RenderLineSmooth(Image&, LineSeg, const Mat4&);
 
 		void RenderFaceRaw(Image&, Face);
 
+		bool cameraEnabled;
 		RenderFill renderFill;
 		RenderMode renderMode;
 		RenderAAConfig renderAAConfig;
