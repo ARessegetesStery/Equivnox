@@ -182,9 +182,9 @@ namespace EQX
 			l.start = TransformVertexPos(Projection, l.start);
 			l.end = TransformVertexPos(Projection, l.end);
 		}
+		floorVertexPos(l.start);
+		floorVertexPos(l.end);
 		LineSeg perspL(l.start, l.end);
-		floorVertexPos(perspL.start);
-		floorVertexPos(perspL.end);
 
 		int sx = static_cast<int>(perspL.start.pos.x);
 		int sy = static_cast<int>(perspL.start.pos.y);
@@ -222,20 +222,21 @@ namespace EQX
 	void Renderer::RenderLineSmooth(Image& image, LineSeg l, const Mat4& Projection)
 	{
 		// cout << "-----------" << endl;
-		// cout << l.start.pos.x << " " << l.start.pos.y << " " << l.end.pos.x << " " << l.end.pos.y << endl;
 		if (this->cameraEnabled)
 		{
 			l.start = TransformVertexPos(Projection, l.start);
 			l.end = TransformVertexPos(Projection, l.end);
 		}
+		floorVertexPos(l.start);
+		floorVertexPos(l.end);
 		LineSeg perspL(l.start, l.end);
 
-		floorVertexPos(perspL.start);
-		floorVertexPos(perspL.end);
+		// cout << perspL.start.pos.x << " " << perspL.start.pos.y << " " << perspL.end.pos.x << " " << perspL.end.pos.y << endl;
 		int sx = static_cast<int>(perspL.start.pos.x);
 		int sy = static_cast<int>(perspL.start.pos.y);
 		int ex = static_cast<int>(perspL.end.pos.x);
 		int ey = static_cast<int>(perspL.end.pos.y);
+		cout << sx << " " << sy << " " << ex << " " << ey << endl;
 
 		int xPace = 1;
 		int yPace = 1;
@@ -252,19 +253,22 @@ namespace EQX
 		else if (abs(perspL.k) > SLOPE_MAX)
 		{
 			for (int y = sy; y != ey + yPace; y += yPace)
+			{
+				
 				image.set(sx, y, blendColor(Color::White, image.get(sx, y), 1.0));
+			}
 		}
 		else
 		{
-			for (int x = sx; x != ex + xPace; x += xPace)
+			
+			for (int x = sx; x != ex; x += xPace)
 			{
-				for (int y = (int)(sy + perspL.k * (x - sx)) - yPace;
-					y != (int)(sy + perspL.k * (x - sx + 1) + yPace);
+				for (int y = (int)(sy + perspL.k * (x - sx - 1)) - 2 * yPace;
+					y != (int)(sy + perspL.k * (x - sx + 2) + 2 * yPace);
 					y += yPace)
 					// only traverse pixels that will possibly be rendered
 				{
 					Vector2 center(x + xPace / 2.0f, y + yPace / 2.0f);
-					// cout << center.x << " " << center.y << " " << (int)(image.get(196, 256).r) << endl;
 					float coeff = PixelAmp(perspL, center);
 					// cout << center.x << " " << center.y << " " << P2LDistance(l, center) << endl;
 					image.set(x, y, blendColor(Color::White, image.get(x, y), coeff));

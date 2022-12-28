@@ -19,7 +19,20 @@ namespace EQX
 	 */
 	LineSeg::LineSeg(Vertex s, Vertex e) 
 	{
-		if (e.pos.x < s.pos.x)
+		if (s.pos.x == e.pos.x)
+		{
+			if (e.pos.y < s.pos.y)
+			{
+				this->end.pos = s.pos;
+				this->start.pos = e.pos;
+			}
+			else
+			{
+				this->end.pos = e.pos;
+				this->start.pos = s.pos;
+			}
+		}
+		else if (e.pos.x < s.pos.x)
 		{
 			this->end.pos = s.pos;
 			this->start.pos = e.pos;
@@ -39,19 +52,25 @@ namespace EQX
 	 * 
 	 * @param l
 	 * @param p
-	 * @return distance; SLOPE_MAX is slope is too high
+	 * @return distance; SLOPE_MAX when slope is too high
 	 */
 	float P2LDistance(LineSeg& l, Vertex point)
 	{
 		Vector2 p(point.pos.x, point.pos.y);
 		if (p.x > l.end.pos.x && l.kSign * (p.y - l.end.pos.y) > 0)
 		{
-			return 0.75 * (std::abs(p.x - l.end.pos.x) + std::abs(p.y - l.end.pos.y));
+			return 2;
+			// return (std::abs(p.x - l.end.pos.x) + std::abs(p.y - l.end.pos.y));
 		}
 		if (p.x < l.start.pos.x && l.kSign * (-p.y + l.start.pos.y) > 0)
 		{
-			return 0.75 * (std::abs(p.x - l.start.pos.x) + std::abs(p.y - l.start.pos.y));
+			return 2;
+			// return (std::abs(p.x - l.start.pos.x) + std::abs(p.y - l.start.pos.y));
 		}
+		else if (l.kSign * (p.y - l.end.pos.y) > 0)
+			return (std::abs(p.x - l.end.pos.x) + std::abs(p.y - l.end.pos.y));
+		else if (l.kSign * (-p.y + l.start.pos.y) > 0)
+			return (std::abs(p.x - l.start.pos.x) + std::abs(p.y - l.start.pos.y));
 		if (l.k > SLOPE_MAX)
 			return abs(p.x - l.start.pos.x);
 		else
@@ -75,7 +94,7 @@ namespace EQX
 	{
 		float k;
 		if (abs(start.pos.x - end.pos.x) < FLOAT_PREC)
-			k = (SLOPE_MAX + 1) * (end.pos.x > start.pos.x ? 1 : -1);
+			k = (SLOPE_MAX + 1) * (end.pos.x >= start.pos.x ? 1 : -1);
 		else
 			k = (start.pos.y - end.pos.y) / (start.pos.x - end.pos.x);
 		return k;
