@@ -6,6 +6,8 @@
 
 namespace EQX {
 
-	void floorVertexPos(Vertex& v);
+	void floorVertexXYPos(Vertex& v);
+
+	Vertex TransformVertexPos(const Mat4& projection, const Vertex& v);
 
 }

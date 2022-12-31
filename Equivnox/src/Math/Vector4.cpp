@@ -20,15 +20,21 @@ namespace EQX
 	Vector4::Vector4(Vector4&& v) noexcept
 		: x(v.x), y(v.y), z(v.z), w(v.w) {	}
 
-	Vector4 Vector4::operator- (const Vector4& p)
+	Vector4 Vector4::operator- (const Vector4& p) const
 	{
 		return Vector4(this->x - p.x, this->y - p.y, this->z - p.z, this-> w - p.w);
 	}
 
-	Vector4 Vector4::operator+ (const Vector4& p)
+	Vector4 Vector4::operator+ (const Vector4& p) const
 	{
 		return Vector4(this->x + p.x, this->y + p.y, this->z + p.z, this-> w + p.w);
 	}
+
+	Vector4 Vector4::operator+ (const Vector3& p) const 
+	{
+		return Vector4(this->x + p.x, this->y + p.y, this->z + p.z, this->w);
+	}
+
 
 	Vector4& Vector4::operator= (const Vector4& p)
 	{
@@ -51,6 +57,12 @@ namespace EQX
 		return *this;
 	}
 
+	Vector4 Vector4::operator+= (const Vector3& p)
+	{
+		*this = *this + p;
+		return *this;
+	}
+
 	/**
 	 * Multiply the distance between the point and the origin
 	 * w is not multiplied here or nothing is changed
@@ -68,11 +80,17 @@ namespace EQX
 
 	Vector3 Vector4::ToVec3() const
 	{
-		return Vector3(x / w, y / w, z / w);
+		if (w == 0)
+			return Vector3(x, y, z);
+		else
+			return Vector3(x / w, y / w, z / w);
 	}
 
 	void Vector4::Normalize()
 	{
+		if (w == 0)
+			return;
+
 		x /= w;
 		y /= w;
 		z /= w; 

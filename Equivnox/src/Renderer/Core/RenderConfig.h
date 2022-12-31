@@ -9,7 +9,7 @@ namespace EQX {
 		WIREFRAME, FILL
 	};
 
-	enum class RenderMode
+	enum class RenderPass
 	{
 		FULL, ZBUFFER_ONLY
 	};

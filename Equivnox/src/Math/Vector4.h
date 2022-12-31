@@ -25,11 +25,13 @@ namespace EQX {
 		Vector4(const Vector4&);
 		Vector4(Vector4&&) noexcept;
 
-		Vector4 operator- (const Vector4& p);
-		Vector4 operator+ (const Vector4& p);
+		Vector4 operator- (const Vector4& p) const;
+		Vector4 operator+ (const Vector4& p) const;
+		Vector4 operator+ (const Vector3& p) const;
 		Vector4& operator= (const Vector4& p);
 		Vector4 operator-= (const Vector4& p);
 		Vector4 operator+= (const Vector4& p);
+		Vector4 operator+= (const Vector3& p);
 		Vector4 operator*= (float s);
 
 		Vector3 ToVec3() const;

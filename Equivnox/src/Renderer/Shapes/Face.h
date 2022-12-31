@@ -20,6 +20,16 @@ namespace EQX {
 		Face(LineSeg&, LineSeg&, LineSeg&);		// make sure the line segments connects each other
 		Face(const Face&);
 		Face(Face&&) = default;
+
+		/**
+		 * output: v = ans[0] * l + ans[1] * m + ans[2] * r;
+		 * Only considers xy
+		 */
+		Vector3 baryCoord(Vector2) const;
+
+		float ZatXY(Vector2) const;
+
+		void ValidateSeq();
 	};
 
 }

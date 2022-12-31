@@ -9,7 +9,7 @@ namespace EQX
 		this->curMesh = nullptr;
 		this->cameraEnabled = true;
 		this->renderFill = RenderFill::WIREFRAME;
-		this->renderMode = RenderMode::FULL;
+		this->renderPass = RenderPass::FULL;
 		this->renderAAConfig = RenderAAConfig::ANTIALIAS_OFF;
 		this->imageType = ImageType::TGA;
 		this->outputPath = "output.tga";
@@ -39,9 +39,9 @@ namespace EQX
 		this->renderFill = f;
 	}
 
-	void Renderer::SetMode(RenderMode m)
+	void Renderer::SetPass(RenderPass m)
 	{
-		this->renderMode = m;
+		this->renderPass = m;
 	}
 
 	void Renderer::SetAA(RenderAAConfig a)
@@ -97,17 +97,17 @@ namespace EQX
 		}
 
 		image.write();
-
-		// image.flip_vertically(); // Ensure x horizontal, y vertical, origin lower-left corner
-		// image.write_tga_file(this->outputPath.c_str());
 	}
 
 	void Renderer::RenderLines(Image& image)
 	{
-		// TODO fix
-		Mat4 Projection = makeScreenSpace(this->width, this->height) *
+		Mat4 PerspMat = makeScreenSpace(this->width, this->height) *
 			makePersp(camera.width, camera.height) * makeView(camera.pos, camera.lookAt, camera.upDir);
-		// Mat4 Projection = Mat4::IDENTITY;
+
+		Mat4 Projection = Mat4::IDENTITY;
+		if (this->cameraEnabled)
+			Projection = PerspMat;
+
 		for (auto iter = curMesh->lineIndices.begin();
 			iter != curMesh->lineIndices.cend(); ++iter)
 		{
@@ -150,8 +150,31 @@ namespace EQX
 
 	void Renderer::RenderFaces(Image& image)
 	{
-		Mat4 Projection = makeScreenSpace(this->width, this->height) *
+		Mat4 PerspMat = makeScreenSpace(this->width, this->height) *
 			makePersp(camera.width, camera.height) * makeView(camera.pos, camera.lookAt, camera.upDir);
+
+		Mat4 Projection = Mat4::IDENTITY;
+		if (this->cameraEnabled)
+			Projection = PerspMat;
+
+		Image ZBuf(this->width, this->height, this->imageType);
+		if (this->renderPass == RenderPass::ZBUFFER_ONLY)
+		{
+			// Background should be white
+			for (int x = 0; x < this->width; ++x)
+				for (int y = 0; y < this->height; ++y)
+					image.set(x, y, Color::White);
+
+			for (auto iter = curMesh->faceIndices.begin();
+				iter != curMesh->faceIndices.cend(); ++iter)
+			{
+				std::array<Vertex, 3> vertices{ curMesh->vertices[(*iter)[0]],
+					curMesh->vertices[(*iter)[1]] , curMesh->vertices[(*iter)[2]] };
+				RenderFaceZBuf(image, vertices, Projection);
+			}
+			return;
+		}
+
 		for (auto iter = curMesh->faceIndices.begin();
 			iter != curMesh->faceIndices.cend(); ++iter)
 		{
@@ -160,10 +183,10 @@ namespace EQX
 			switch (this->renderAAConfig)
 			{
 			case RenderAAConfig::ANTIALIAS_OFF:
-				RenderFaceRaw(image, vertices);
+				RenderFaceRaw(image, vertices, Projection);
 				break;
 			case RenderAAConfig::MSAA:
-				RenderFaceRaw(image, vertices);
+				RenderFaceRaw(image, vertices, Projection);
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
 					curMesh->vertices[(*iter)[1]]), Projection);
 				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
@@ -177,13 +200,8 @@ namespace EQX
 
 	void Renderer::RenderLineRaw(Image& image, LineSeg l, const Mat4& Projection)
 	{
-		if (this->cameraEnabled)
-		{
-			l.start = TransformVertexPos(Projection, l.start);
-			l.end = TransformVertexPos(Projection, l.end);
-		}
-		floorVertexPos(l.start);
-		floorVertexPos(l.end);
+		l.start = TransformVertexPos(Projection, l.start);
+		l.end = TransformVertexPos(Projection, l.end);
 		LineSeg perspL(l.start, l.end);
 
 		int sx = static_cast<int>(perspL.start.pos.x);
@@ -221,17 +239,10 @@ namespace EQX
 	 
 	void Renderer::RenderLineSmooth(Image& image, LineSeg l, const Mat4& Projection)
 	{
-		// cout << "-----------" << endl;
-		if (this->cameraEnabled)
-		{
-			l.start = TransformVertexPos(Projection, l.start);
-			l.end = TransformVertexPos(Projection, l.end);
-		}
-		floorVertexPos(l.start);
-		floorVertexPos(l.end);
+		l.start = TransformVertexPos(Projection, l.start);
+		l.end = TransformVertexPos(Projection, l.end);
 		LineSeg perspL(l.start, l.end);
 
-		// cout << perspL.start.pos.x << " " << perspL.start.pos.y << " " << perspL.end.pos.x << " " << perspL.end.pos.y << endl;
 		int sx = static_cast<int>(perspL.start.pos.x);
 		int sy = static_cast<int>(perspL.start.pos.y);
 		int ex = static_cast<int>(perspL.end.pos.x);
@@ -270,21 +281,20 @@ namespace EQX
 				{
 					Vector2 center(x + xPace / 2.0f, y + yPace / 2.0f);
 					float coeff = PixelAmp(perspL, center);
-					// cout << center.x << " " << center.y << " " << P2LDistance(l, center) << endl;
 					image.set(x, y, blendColor(Color::White, image.get(x, y), coeff));
 				}
 			}
 		}
 	}
 
-	void Renderer::RenderFaceRaw(Image& image, Face f)
+	void Renderer::RenderFaceRaw(Image& image, Face f, const Mat4& Projection)
 	{
 		// TODO (GPU) Change into edge function (cross product)
-#ifdef EQX_DEBUG
-		cout << f.l.pos.x << " " << f.l.pos.y << "| "
-			<< f.m.pos.x << " " << f.m.pos.y << "| "
-			<< f.r.pos.x << " " << f.r.pos.y << endl;
-#endif
+		f.l = TransformVertexPos(Projection, f.l);
+		f.m = TransformVertexPos(Projection, f.m);
+		f.r = TransformVertexPos(Projection, f.r);
+		f.ValidateSeq();
+
 		if (std::abs(f.kLM) > SLOPE_MAX)
 		{
 			int xpos, ypos;
@@ -338,5 +348,84 @@ namespace EQX
 			}
 		}
 	}
+
+	void Renderer::RenderFaceZBuf(Image& image, Face f, const Mat4& Projection)
+	{
+		f.l = TransformVertexPos(Projection, f.l);
+		f.m = TransformVertexPos(Projection, f.m);
+		f.r = TransformVertexPos(Projection, f.r);
+		cout << f.l.pos.x << " " << f.l.pos.y << " " << f.l.pos.z << endl;
+		cout << f.m.pos.x << " " << f.m.pos.y << " " << f.m.pos.z << endl;
+		cout << f.r.pos.x << " " << f.r.pos.y << " " << f.r.pos.z << endl;
+		f.ValidateSeq();
+
+		if (std::abs(f.kLM) > SLOPE_MAX)
+		{
+			int xpos, ypos;
+			for (xpos = f.l.pos.x; xpos < f.r.pos.x; ++xpos)
+			{
+				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLR;
+					ypos <= f.m.pos.y + (xpos - f.l.pos.x) * f.kMR; ++ypos)
+				{
+					UpdateZBufColor(xpos, ypos, f, image);
+				}
+			}
+		}
+		else if (f.m.pos.y > f.r.pos.y)
+		{
+			int xpos, ypos;
+			for (xpos = f.l.pos.x; xpos <= f.m.pos.x; ++xpos)
+			{
+				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLR;
+					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLM; ++ypos)
+				{
+					UpdateZBufColor(xpos, ypos, f, image);
+				}
+			}
+			for (xpos = f.m.pos.x; xpos <= f.r.pos.x; ++xpos)
+			{
+				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLR;
+					ypos <= f.m.pos.y + (xpos - f.m.pos.x) * f.kMR; ++ypos)
+				{
+					UpdateZBufColor(xpos, ypos, f, image);
+				}
+			}
+		}
+		else
+		{
+			int xpos, ypos;
+			for (xpos = f.l.pos.x; xpos <= f.m.pos.x; ++xpos)
+			{
+				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLM;
+					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLR; ++ypos)
+				{
+					UpdateZBufColor(xpos, ypos, f, image);
+				}
+			}
+			for (xpos = f.m.pos.x; xpos <= f.r.pos.x; ++xpos)
+			{
+				for (ypos = f.m.pos.y + (xpos - f.m.pos.x) * f.kMR;
+					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLR; ++ypos)
+				{
+					UpdateZBufColor(xpos, ypos, f, image);
+				}
+			}
+		}
+	}
+
+	void Renderer::UpdateZBufColor(float x, float y, const Face& f, Image& image)
+	{
+		int curGreyScale = image.get(x, y).r;
+
+		float newZ = f.ZatXY(Vec2(x, y));
+		int newGreyScale = (newZ == 1) ? 0 : 128 - 127.f * newZ;
+
+		if (newGreyScale > 255 || newGreyScale < 0)
+			return;
+
+		if (newGreyScale < curGreyScale)
+			image.set(x, y, Color(newGreyScale));
+	}
+
 
 }

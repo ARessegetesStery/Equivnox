@@ -36,7 +36,5 @@ namespace EQX {
 		std::vector<std::array<unsigned int, 2>> lineIndices;
 
 	};
-
-	void floorVertexPos(Vertex& v);
 }
 

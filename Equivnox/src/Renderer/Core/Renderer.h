@@ -5,9 +5,8 @@
 #include "Renderer/ExternalTools/ExternalTools.h"
 #include "Renderer/Shapes/Shapes.h"
 #include "RenderConfig.h"
+#include "Preprocess.h"
 #include "Camera.h"
-
-// TODO optimize: whether construct line/shape entities
 
 namespace EQX
 {
@@ -25,7 +24,7 @@ namespace EQX
 		void Render();
 
 		void SetFill(RenderFill);
-		void SetMode(RenderMode);
+		void SetPass(RenderPass);
 		void SetAA(RenderAAConfig);
 		void SetOutputType(ImageType);
 
@@ -47,27 +46,30 @@ namespace EQX
 
 		Mesh* curMesh;
 
-
+		/*  Main Render Processes  */
 		void RenderLines(Image&);
 		void RenderFaces(Image&);
 
 		void RenderLineRaw(Image&, LineSeg, const Mat4&);
 		void RenderLineSmooth(Image&, LineSeg, const Mat4&);
 
-		void RenderFaceRaw(Image&, Face);
+		void RenderFaceRaw(Image&, Face, const Mat4&);
 
+		void RenderFaceZBuf(Image&, Face, const Mat4&);
+
+		/*  Render Configs  */
 		bool cameraEnabled;
 		RenderFill renderFill;
-		RenderMode renderMode;
+		RenderPass renderPass;
 		RenderAAConfig renderAAConfig;
-
 		ImageType imageType;
 
 		unsigned int width, height;
-
 		unsigned int MSAAMult;   // the rate of sampling in MSAA, 2^x
-
 		std::string outputPath;
+
+		/*  Helper Functions  */
+		void UpdateZBufColor(float, float, const Face&, Image&);
 
 	};
 

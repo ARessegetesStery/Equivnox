@@ -9,7 +9,9 @@ namespace EQX
 	class Vector4;
 	class Matrix4x4;
 
-	const float FLOAT_PREC = 1e-5f;
+	const float FLOAT_PREC = FLT_EPSILON;
+
+	const float FLOAT_MAX = FLT_MAX;
 
 	/// Declaration of functions in MathAlgorithm.cpp
 	extern float InvSqrt(float x);

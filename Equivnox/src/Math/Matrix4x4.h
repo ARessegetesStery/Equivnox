@@ -22,7 +22,7 @@ namespace EQX {
 
 	public:
 		Matrix4x4();
-		Matrix4x4(Vector4 c1, Vector4 c2, Vector4 c3, Vector4 c4);		// Init by columns
+		Matrix4x4(Vector4 c1, Vector4 c2, Vector4 c3, Vector4 c4);		// Init by rows
 		Matrix4x4(const Matrix4x4&);
 		Matrix4x4(Matrix4x4&&) = default;
 
@@ -31,10 +31,9 @@ namespace EQX {
 		Matrix4x4 Add(const Matrix4x4& r);
 
 		Matrix4x4 operator+ (const Matrix4x4&);
+		Matrix4x4 operator= (const Matrix4x4&);
 		Vector4 operator* (const Vector4&) const;
 		Matrix4x4 operator* (const Matrix4x4&);
-		// TODO Matrix Operations
-		// TODO MVP Matrices
 
 		static const Matrix4x4 IDENTITY;
 	};
@@ -61,7 +60,7 @@ namespace EQX {
 	 * @return Orthogonal Projection Matrix
 	 */
 	Matrix4x4 makeOrtho(float ViewportWidth, float ViewportHeight,
-		float NearClip = 0.1, float FarClip = 1000);
+		float NearClip = -0.1f, float FarClip = -100.f);
 
 	/**
 	 * Creates a matrix for perspective projection
@@ -74,7 +73,7 @@ namespace EQX {
 	 * @return Perspective Projection Matrix
 	 */
 	Matrix4x4 makePersp(float ViewportWidth, float ViewportHeight,
-		float NearClip = 0.1, float FarClip = 1000);
+		float NearClip = -0.1f, float FarClip = -100.f);
 
 	Matrix4x4 makeScreenSpace(float Width, float Height);
 

@@ -12,6 +12,8 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <set>
+#include <list>
 #include <iterator>
 
 #include "Math/MathHeader.h"

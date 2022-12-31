@@ -19,6 +19,7 @@ namespace EQX {
 
 	public:
 		Color();
+		Color(float);
 		Color(float, float, float, float);
 		Color(Vector4&);
 		Color(Vector3&);

@@ -25,20 +25,20 @@ namespace EQX {
 	Matrix4x4::Matrix4x4(Vector4 c1, Vector4 c2, Vector4 c3, Vector4 c4)
 	{
 		this->Mat[0][0] = c1.x;
-		this->Mat[1][0] = c1.y;
-		this->Mat[2][0] = c1.z;
-		this->Mat[3][0] = c1.w;
-		this->Mat[0][1] = c2.x;
+		this->Mat[0][1] = c1.y;
+		this->Mat[0][2] = c1.z;
+		this->Mat[0][3] = c1.w;
+		this->Mat[1][0] = c2.x;
 		this->Mat[1][1] = c2.y;
-		this->Mat[2][1] = c2.z;
-		this->Mat[3][1] = c2.w;
-		this->Mat[0][2] = c3.x;
-		this->Mat[1][2] = c3.y;
+		this->Mat[1][2] = c2.z;
+		this->Mat[1][3] = c2.w;
+		this->Mat[2][0] = c3.x;
+		this->Mat[2][1] = c3.y;
 		this->Mat[2][2] = c3.z;
-		this->Mat[3][2] = c3.w;
-		this->Mat[0][3] = c4.x;
-		this->Mat[1][3] = c4.y;
-		this->Mat[2][3] = c4.z;
+		this->Mat[2][3] = c3.w;
+		this->Mat[3][0] = c4.x;
+		this->Mat[3][1] = c4.y;
+		this->Mat[3][2] = c4.z;
 		this->Mat[3][3] = c4.w;
 	}
 
@@ -113,6 +113,18 @@ namespace EQX {
 		return this->Add(r);
 	}
 
+	Matrix4x4 Matrix4x4::operator=(const Matrix4x4& r)
+	{
+		for (int i = 0; i < 4; ++i)
+		{
+			for (int j = 0; j < 4; ++j)
+			{
+				this->Mat[i][j] = r.Mat[i][j];
+			}
+		}
+		return *this;
+	}
+
 	Vector4 Matrix4x4::operator*(const Vector4& v) const
 	{
 		Vector4 vec4;
@@ -138,12 +150,20 @@ namespace EQX {
 		Vector3 look = LookAt.ToVec3();
 		Vector3 up = UpDir.ToVec3();
 		Vector3 binormal = Cross(look, up).Normalize();
+		look.Normalize();
+		up.Normalize();
 		look = look.Neg();
 
-		Matrix4x4 rotation(Vector4(binormal.x, up.x, look.x, 0), Vector4(binormal.y, up.y, look.y, 0), 
-			Vector4(binormal.z, up.z, look.z, 0), Vector4(0, 0, 0, 1));
-		Matrix4x4 trans(Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0), 
-			Vector4(0, 0, 1, 0), Vector4(CameraPos).Neg());
+		Matrix4x4 rotation(
+			Vector4(binormal.x, binormal.y, binormal.z, 0),
+			Vector4(up.x	  , up.y	  , up.z	  , 0), 
+			Vector4(look.x	  , look.y    , look.z    , 0), 
+			Vector4(0		  , 0		  , 0		  , 1));
+		Matrix4x4 trans(
+			Vector4(1, 0, 0, -CameraPos.x), 
+			Vector4(0, 1, 0, -CameraPos.y),
+			Vector4(0, 0, 1, -CameraPos.z),
+			Vector4(0, 0, 0, 1));
 
 		return rotation * trans;
 	}
@@ -167,33 +187,41 @@ namespace EQX {
 		return makeView(CameraPos, LookAt, Updir);
 	}
 
-	
 	Matrix4x4 makeOrtho(float NearWidth, float NearHeight,
 		float NearClip, float FarClip)
 	{
-		return Matrix4x4(Vector4(2.0 / NearWidth, 0, 0, 0), 
-			Vector4(0, 2.0 / NearHeight, 0, 0),
-			Vector4(0, 0, 2 / FarClip - NearClip, 0), 
-			Vector4(0, 0, -(FarClip + NearClip) / 2, 1));
+		Matrix4x4 scale = Matrix4x4(
+			Vector4(2.0 / NearWidth, 0               , 0                         , 0),
+			Vector4(0              , 2.0 / NearHeight, 0                         , 0),
+			Vector4(0              , 0               , 2.0 / (NearClip - FarClip), 0),
+			Vector4(0              , 0               , 0                         , 1));
+		Matrix4x4 trans = Matrix4x4(
+			Vector4(1, 0, 0, 0),
+			Vector4(0, 1, 0, 0),
+			Vector4(0, 0, 1, -0.5f * (NearClip + FarClip)),
+			Vector4(0, 0, 0, 1));
+		return scale * trans;
 	}
 
 	Matrix4x4 makePersp(float NearWidth, float NearHeight,
 		float NearClip, float FarClip)
 	{
 		Matrix4x4 Ortho = makeOrtho(NearWidth, NearHeight, NearClip, FarClip);
-		Matrix4x4 Persp = Matrix4x4(Vector4(NearClip, 0, 0, 0), 
-			Vector4(0, NearClip, 0, 0),
-			Vector4(0, 0, NearClip + FarClip, 1), 
-			Vector4(0, 0, -NearClip * FarClip, 0));
+		Matrix4x4 Persp = Matrix4x4(
+			Vector4(NearClip, 0       , 0                   , 0), 
+			Vector4(0       , NearClip, 0                   , 0),
+			Vector4(0       , 0       , (NearClip + FarClip), -NearClip * FarClip),
+			Vector4(0       , 0       , 1                   , 0));
 		return Ortho * Persp;
 	}
 
 	Matrix4x4 makeScreenSpace(float Width, float Height)
 	{
-		return Matrix4x4(Vector4(Width / 2.0f, 0, 0, 0), 
-			Vector4(0, Height / 2.0f, 0, 0), 
-			Vector4(0, 0, 1, 0), 
-			Vector4(Width / 2.0f, Height / 2.0f, 0, 1));
+		return Matrix4x4(
+			Vector4(Width / 2.0f, 0            , 0, Width / 2.0f),
+			Vector4(0           , Height / 2.0f, 0, Height / 2.0f),
+			Vector4(0           , 0            , 1, 0), 
+			Vector4(0           , 0            , 0, 1));
 	}
 
 }

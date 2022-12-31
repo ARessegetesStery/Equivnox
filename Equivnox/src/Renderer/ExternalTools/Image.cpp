@@ -13,16 +13,18 @@ namespace EQX {
 	Color Color::White = Color(255, 255, 255, 255);
 	Color Color::Black = Color(0, 0, 0, 255);
 
-	Color::Color() : r(0), g(0), b(0), a(255) {	}
+	Color::Color() : r(0), g(0), b(0), a(255) {	 }
+
+	Color::Color(float grey) : r(grey), g(grey), b(grey), a(255) {  }
 
 	Color::Color(float r, float g, float b, float a) :
-		r(r), g(g), b(b), a(a) {	}
+		r(r), g(g), b(b), a(a) {  }
 
-	Color::Color(Vector4& v) : r(v.x), g(v.y), b(v.z), a(v.w) {   }
+	Color::Color(Vector4& v) : r(v.x), g(v.y), b(v.z), a(v.w) {  }
 
 	Color::Color(Vector3& v) : Color({ v.x, v.y, v.z, 255 }) {	}
 
-	Color::Color(const Color& c) : r(c.r), g(c.g), b(c.b), a(c.a) {	}
+	Color::Color(const Color& c) : r(c.r), g(c.g), b(c.b), a(c.a) {	 }
 
 	Color& Color::operator= (const Color& c)
 	{
