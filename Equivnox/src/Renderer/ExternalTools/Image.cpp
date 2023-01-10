@@ -26,6 +26,56 @@ namespace EQX {
 
 	Color::Color(const Color& c) : r(c.r), g(c.g), b(c.b), a(c.a) {	 }
 
+	unsigned char& Color::operator[] (size_t index)
+	{
+		if (index == 0)
+			return r;
+		else if (index == 1)
+			return g;
+		else if (index == 2)
+			return b;
+		else if (index == 3)
+			return a;
+		return a;
+	}
+
+	const unsigned char& Color::operator[] (size_t index) const
+	{
+		if (index == 0)
+			return r;
+		else if (index == 1)
+			return g;
+		else if (index == 2)
+			return b;
+		else if (index == 3)
+			return a;
+		return a;
+	}
+
+	Color operator* (const float k, const Color v)
+	{
+		Color ans;
+		for (size_t index = 0; index != 4; ++index)
+		{
+			unsigned int color = v[index];
+			color *= k;
+			if (color > 255)
+				color = 255;
+			ans[index] = color;
+		}
+		return ans;
+	}
+
+	Color operator* (const Color v, const float k)
+	{
+		return k * v;
+	}
+
+	Color operator/(const Color v, const float k)
+	{
+		return (1/k) * v;
+	}
+
 	Color& Color::operator= (const Color& c)
 	{
 		this->r = c.r;
@@ -33,6 +83,32 @@ namespace EQX {
 		this->b = c.b;
 		this->a = c.a;
 		return *this;
+	}
+
+	Color LitColor(const Color c1, const Color c2)
+	{
+		Color ans;
+		for (size_t index = 0; index != 4; ++index)
+		{
+			unsigned int color = static_cast<unsigned int>(c1[index]) * static_cast<unsigned int>(c2[index]) / 255;
+			if (color > 255)
+				color = 255;
+			ans[index] = color;
+		}
+		return ans;
+	}
+
+	Color Color::operator+ (Color& c)
+	{
+		Color ans;
+		for (size_t index = 0; index != 4; ++index)
+		{
+			unsigned int color = c[index] + (*this)[index];
+			if (color > 255)
+				color = 255;
+			ans[index] = color;
+		}
+		return ans;
 	}
 
 
@@ -62,6 +138,22 @@ namespace EQX {
 	{
 		if (canvas)
 			delete[] canvas;
+	}
+
+	Image& Image::operator= (const Image& image)
+	{
+		if (this->canvas)
+			delete[] canvas;
+
+		this->type = image.type;
+		this->width = image.width;
+		this->height = image.height;
+		this->canvas = new Color[image.width * image.height];
+		this->filename = image.filename;
+		for (unsigned int i = 0; i != image.width * image.height; ++i)
+			this->canvas[i] = image.canvas[i];
+
+		return *this;
 	}
 
 	// INSP change "h * this->width + w" to "h * w + w" for interesting results

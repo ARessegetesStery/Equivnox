@@ -26,6 +26,7 @@ namespace EQX {
 		 * Only considers xy
 		 */
 		Vector3 baryCoord(Vector2) const;
+		Vector3 baryCoord(float, float) const;
 
 		float ZatXY(Vector2) const;
 

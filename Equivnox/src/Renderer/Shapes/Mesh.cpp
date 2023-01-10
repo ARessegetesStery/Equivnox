@@ -147,7 +147,9 @@ namespace EQX {
 	{
 		for (auto iter = vertices.begin(); iter != vertices.cend(); ++iter)
 		{
+			// cout << iter->pos.z;
 			iter->pos = iter->pos * s;
+			// cout << iter->pos.z << endl;;
 		}
 	}
 

@@ -15,6 +15,14 @@ namespace EQX
 
 	Vector3::Vector3(const Vector3& v) : x(v.x), y(v.y), z(v.z) {  }
 
+	Vector3::Vector3(const Vector4& v)
+	{
+		float w = (v.w == 0) ? 1 : v.w;
+		this->x = v.x / w;
+		this->y = v.y / w;
+		this->z = v.z / w;
+	}
+
 	Vector3::Vector3(Vector3&& v) noexcept : x(v.x), y(v.y), z(v.z) {  }
 
 	Vector3 Vector3::operator- (const Vector3& p)
@@ -27,9 +35,9 @@ namespace EQX
 		return Vector3(this->x + p.x, this->y + p.y, this->z + p.z);
 	}
 
-	Vector3 Vector3::operator* (const float coeff)
+	Vector3 Vector3::operator/ (const float k)
 	{
-		return Vector3(x * coeff, y * coeff, z * coeff);
+		return Vector3(this->x / k, this->y / k, this->z / k);
 	}
 
 	Vector3& Vector3::operator= (const Vector3& p)
@@ -106,6 +114,16 @@ namespace EQX
 		return Vector3(x / norm, y / norm, z / norm);
 	}
 
+	Vector4 Vector3::ToVec4() const
+	{
+		return Vector4(this->x, this->y, this->z, 1.0f);
+	}
+
+	float Vector3::NormSquare() const
+	{
+		return x * x + y * y + z * z;
+	}
+
 	float Vector3::Norm() const
 	{
 		return sqrt(x * x + y * y + z * z);
@@ -123,4 +141,20 @@ namespace EQX
 			v1.x * v2.y - v1.y * v2.x);
 	}
 
+	Vector3 operator* (const float k, const Vector3& v)
+	{
+		return Vec3(k * v.x, k * v.y, k * v.z);
+	}
+
+	Vector3 operator* (const Vector3& v, const float k)
+	{
+		return Vec3(k * v.x, k * v.y, k * v.z);
+	}
+
+#ifdef EQX_DEBUG
+	void Print(const Vector3& vec)
+	{
+		cout << vec.x << " " << vec.y << " " << vec.z << " " << endl;
+	}
+#endif
 }

@@ -4,6 +4,8 @@
 
 namespace EQX {
 
+	extern class Vector4;
+
 	class Vector3
 	{
 	public:
@@ -14,11 +16,12 @@ namespace EQX {
 		Vector3();
 		Vector3(float, float, float);
 		Vector3(const Vector3&);
+		Vector3(const Vector4&);
 		Vector3(Vector3&&) noexcept;
 
 		Vector3 operator- (const Vector3& p);
 		Vector3 operator+ (const Vector3& p);
-		Vector3 operator* (const float coeff);
+		Vector3 operator/ (const float k);
 		Vector3& operator= (const Vector3& p);
 		Vector3 operator-= (const Vector3& p);
 		Vector3 operator+= (const Vector3& p);
@@ -30,7 +33,9 @@ namespace EQX {
 
 		Vector3 Neg() const;
 		Vector3 Normalize() const;
+		Vector4 ToVec4() const;
 
+		float NormSquare() const;
 		float Norm() const;
 
 		static const Vector3 ZERO;
@@ -44,4 +49,10 @@ namespace EQX {
 
 	bool operator== (const Vector3&, const Vector3&);
 
+	Vector3 operator* (const float, const Vector3&);
+	Vector3 operator* (const Vector3&, const float);
+	
+#ifdef EQX_DEBUG
+	void Print(const Vector3&);
+#endif
 }

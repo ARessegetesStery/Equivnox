@@ -90,12 +90,18 @@ void ObjParser::Parse()
             fs.push_back(F);
         }
     }
+
+    // writing to mesh
     for (auto iter = fs.begin(); iter != fs.cend(); ++iter)
     {
-        cout << ":: " << iter->f[0].x << endl;
-        cout << v[iter->f[0].x].x << " " << v[iter->f[0].x].y << " " << v[iter->f[0].x].z << endl;\
-        p_mesh->AddFace({ {v[iter->f[0].x], v[iter->f[1].x], v[iter->f[2].x]},
-            {v[iter->f[2].x], v[iter->f[0].x], v[iter->f[3].x]} });
+        // cout << ":: " << iter->f[0].x << endl;
+        // cout << v[iter->f[0].x].x << " " << v[iter->f[0].x].y << " " << v[iter->f[0].x].z << endl;
+        p_mesh->AddFace(Vertex(v[iter->f[0].x], vn[iter->f[0].z], vt[iter->f[0].y]),
+            Vertex(v[iter->f[1].x], vn[iter->f[1].z], vt[iter->f[1].y]), 
+            Vertex(v[iter->f[2].x], vn[iter->f[2].z], vt[iter->f[2].y]));
+        p_mesh->AddFace(Vertex(v[iter->f[2].x], vn[iter->f[2].z], vt[iter->f[2].y]),
+            Vertex(v[iter->f[0].x], vn[iter->f[0].z], vt[iter->f[0].y]),
+            Vertex(v[iter->f[3].x], vn[iter->f[3].z], vt[iter->f[3].y]));
     }
 
     infile.close();

@@ -27,6 +27,11 @@ namespace EQX {
 		UNIFORM, VERTEX, TEXTURE
 	};
 
+	enum class RenderLightConfig
+	{
+		PHONG, PARTICLE
+	};
+
 #ifdef EQX_DEBUG
 	const TGAColor TGAWhite = TGAColor(255, 255, 255, 255);
 	const TGAColor TGANone = TGAColor(0, 0, 0, 255);

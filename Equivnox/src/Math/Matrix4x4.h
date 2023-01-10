@@ -22,13 +22,20 @@ namespace EQX {
 
 	public:
 		Matrix4x4();
+		Matrix4x4(float m00, float m01, float m02, float m03,
+			float m10, float m11, float m12, float m13,
+			float m20, float m21, float m22, float m23,
+			float m30, float m31, float m32, float m33);
 		Matrix4x4(Vector4 c1, Vector4 c2, Vector4 c3, Vector4 c4);		// Init by rows
 		Matrix4x4(const Matrix4x4&);
 		Matrix4x4(Matrix4x4&&) = default;
 
 		// concatenate/add gives post-operations
-		Matrix4x4 Concatenate(const Matrix4x4& r);
-		Matrix4x4 Add(const Matrix4x4& r);
+		Matrix4x4 Concatenate(const Matrix4x4& r) const;
+		Matrix4x4 Add(const Matrix4x4& r) const;
+
+		// If the matrix is singular, return the zero matrix
+		Matrix4x4 Inverse() const;
 
 		Matrix4x4 operator+ (const Matrix4x4&);
 		Matrix4x4 operator= (const Matrix4x4&);
@@ -36,6 +43,7 @@ namespace EQX {
 		Matrix4x4 operator* (const Matrix4x4&);
 
 		static const Matrix4x4 IDENTITY;
+		static const Matrix4x4 ZEROS;
 	};
 
 	/**

@@ -39,6 +39,11 @@ namespace EQX {
 		return Vec3(alpha, beta, 1 - alpha - beta);
 	}
 
+	Vector3 Face::baryCoord(float x, float y) const
+	{
+		return baryCoord(Vec2(x, y));
+	}
+
 	float Face::ZatXY(Vector2 xy) const
 	{
 		Vec3 baryCoord = this->baryCoord(xy);

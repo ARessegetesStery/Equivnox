@@ -26,10 +26,20 @@ namespace EQX {
 		Color(const Color&);
 
 		Color& operator= (const Color&);
+		Color operator+ (Color&);
+		unsigned char& operator[] (size_t index);
+		const unsigned char& operator[] (size_t index) const;
 
 		static Color White;
 		static Color Black;
 	};
+
+	// Includes clamping beneath 255
+	Color operator* (const Color, const float);
+	Color operator* (const float, const Color);
+	Color operator/ (const Color, const float);
+	Color LitColor(const Color, const Color);
+
 
 	/**
 	 * The lower-left corner is of coordinate (0, 0)
@@ -49,6 +59,8 @@ namespace EQX {
 		Image(unsigned int, unsigned int, ImageType, std::string = "output");
 		Image(const Image&) = delete;
 		~Image();
+
+		Image& operator= (const Image&);
 
 		void set(unsigned int, unsigned int, Color);
 		Color get(unsigned int, unsigned int) const;
