@@ -134,7 +134,8 @@ namespace EQX
 	void Renderer::RenderLines(Image& image)
 	{
 		Mat4 PerspMat = makeScreenSpace(this->width, this->height) *
-			makePersp(camera.width, camera.height) * makeView(camera.pos, camera.lookAt, camera.upDir);
+			makePersp(camera.width, camera.height, -camera.nearClip, -camera.farClip) * 
+			makeView(camera.pos, camera.lookAt, camera.upDir);
 
 		Mat4 Projection = Mat4::IDENTITY;
 		if (this->cameraEnabled)
@@ -401,10 +402,6 @@ namespace EQX
 		f.r = TransformVertexPos(projection, f.r);
 		f.ValidateSeq();
 
-		//  cout << f.l.normal.x << " " << f.l.normal.y << " " << f.l.normal.z << "|" 
-		//  	<< f.m.normal.x << " " << f.m.normal.y << " " << f.m.normal.z << "|"
-		//  	<< f.r.normal.x << " " << f.r.normal.y << " " << f.r.normal.z << "|" << endl;
-
 		if (std::abs(f.kLM) > SLOPE_MAX)
 		{
 			int xpos, ypos;
@@ -463,11 +460,14 @@ namespace EQX
 	{
 		int curGreyScale = ZBuf.get(x, y).r;
 
-		float newZ = f.ZatXY(Vec2(x, y));
-		int newGreyScale = (newZ == 1) ? 0 : 128 - 127.f * newZ;
+		float zpos = f.ZatXY(Vec2(x, y));
+		int newGreyScale = (zpos == 1) ? 0 : 128 - 127.f * zpos;
 
 		if (newGreyScale > 255 || newGreyScale < 0)
 			return;
+
+		if (x == 169 && y == 167)
+			cout << newGreyScale << endl << "<<<<<<<<<" << endl;
 
 		if (newGreyScale < curGreyScale)
 			ZBuf.set(x, y, Color(newGreyScale));
@@ -487,17 +487,16 @@ namespace EQX
 		int curGreyScale = ZBuffer.get(xpos, ypos).r;
 
 		float zpos = f.ZatXY(Vec2(xpos, ypos));
-		int newGreyScale = (zpos == 1) ? 0 : 128 - 127.f * zpos;
+		float newGreyScale = (zpos == 1) ? 0 : 128 - 127.f * zpos;
 
 		if (newGreyScale > 255 || newGreyScale < 0)
 			return;
 
-		if (newGreyScale == curGreyScale)
+		if (newGreyScale < curGreyScale + 1)
 		{
 			Vec3 curPos = Vec3(xpos, ypos, zpos);
 			Vec3 originalPos = inverseProjection * (curPos.ToVec4());
 			Vec3 baryCoord = fOriginal.baryCoord(originalPos.x, originalPos.y);
-			// cout << baryCoord[0] << " " << baryCoord[1] << " " << baryCoord[2] <<  endl;
 			Vec3 fragNormal = baryCoord[0] * fOriginal.l.normal +
 				baryCoord[1] * fOriginal.m.normal + baryCoord[2] * fOriginal.r.normal;
 			Color pixelColor = Color(0);
@@ -511,15 +510,12 @@ namespace EQX
 						float distance = (l.Position - originalPos).Norm();
 						Vec3 lightDir = (l.Position - originalPos) / distance;
 						Vec3 viewDir = (this->camera.pos.ToVec3() - originalPos).Normalize();
-						// Print(curPos);
-						// cout << "---------------" << endl;
 						Vector3 halfDir = (lightDir + viewDir).Normalize();
 						Color ambient = 0.1 * texColor;
 						Color diffuse = (LitColor(l.lightColor, texColor) * l.intensity) / (distance * distance) *
 							std::max(0.f, Dot(fragNormal, lightDir));
 						Color specular = l.lightColor * l.intensity / (distance * distance) *
-							std::max(0.f, Dot(fragNormal, halfDir));
-						// cout << (int)ambient.r << " " << (int)diffuse.r << " " << (int)specular.r << endl;
+							pow(std::max(0.f, Dot(fragNormal, halfDir)), 8);
 						Color resultColor = ambient + diffuse + specular;
 						pixelColor = pixelColor + resultColor;
 					}

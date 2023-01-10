@@ -47,6 +47,8 @@ namespace EQX {
 	float Face::ZatXY(Vector2 xy) const
 	{
 		Vec3 baryCoord = this->baryCoord(xy);
+		 if (baryCoord[0] < 0 || baryCoord[1] < 0 || baryCoord[2] < 0)
+		 	return -Z_MAX; 
 		return baryCoord[0] * l.pos.z + baryCoord[1] * m.pos.z + baryCoord[2] * r.pos.z;
 	}
 

@@ -4,9 +4,8 @@
 
 namespace EQX {
 
-// TODO test
-void ObjParser::Parse()
-{
+    void ObjParser::Parse()
+    {
     std::ifstream infile;
     infile.open((filename + ".obj"), std::ios::in);
 

@@ -5,6 +5,7 @@
 #include "vendor/TGA/tgaimage.h"
 
 namespace EQX {
+	// TODO create compact image for ZBuf; create RGBA ZBuf for higher precision depth info
 
 	enum class ImageType
 	{
@@ -14,6 +15,7 @@ namespace EQX {
 
 	class Color
 	{
+		friend class _ColorIntermediate;
 	public:
 		unsigned char r, g, b, a;
 
@@ -39,7 +41,6 @@ namespace EQX {
 	Color operator* (const float, const Color);
 	Color operator/ (const Color, const float);
 	Color LitColor(const Color, const Color);
-
 
 	/**
 	 * The lower-left corner is of coordinate (0, 0)

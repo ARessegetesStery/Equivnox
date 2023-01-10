@@ -26,13 +26,13 @@ int main(int argc, char** argv) {
 
 	EQX::ObjParser objParser(&m, "Cube");
 	objParser.Parse();
-	m.Scale(0.2f);
+	m.Scale(0.3f);
 
 	EQX::Vertex v1(EQX::Vector2(147, 161)), v2(EQX::Vector2(158, 231)), v3(EQX::Vector2(177, 267));
 
 	std::array<EQX::Vertex, 3> vertices{ EQX::Vector2(10, 80), EQX::Vector2(40, 90), EQX::Vector2(40, 140) };
 	EQX::Face f(v1, v2, v3);
-	m.Shift(EQX::Vector3(0, 0, 1));
+	m.Shift(EQX::Vector3(0, 0, 0.4));
 	// m.AddLine(v1, v3);
 	// m.AddFace(f);
 
@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
 	coreRenderer.camera.upDir = EQX::Vec3(0, 1, 0);
 	// coreRenderer.DisableCamera();
 
-	coreRenderer.addLight(EQX::Light(coreRenderer.camera.pos, EQX::Color::White, 10, EQX::LightType::Point));
+	coreRenderer.addLight(EQX::Light(coreRenderer.camera.pos, EQX::Color::White, 100.f, EQX::LightType::Point));
 
 	coreRenderer.Render();
 }
