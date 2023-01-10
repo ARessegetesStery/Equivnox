@@ -14,8 +14,6 @@ namespace EQX {
 		float height;
 		float nearClip;
 		float farClip;
-		
-		float ZBufPrecision;	// Updated when clip distance changed; for avoiding zigzag in final image
 
 	public:
 		Camera();

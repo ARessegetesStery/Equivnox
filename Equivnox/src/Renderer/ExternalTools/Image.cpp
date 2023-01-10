@@ -20,6 +20,18 @@ namespace EQX {
 	Color::Color(float r, float g, float b, float a) :
 		r(r), g(g), b(b), a(a) {  }
 
+	Color::Color(_ColorIntermediate c_temp)
+	{
+		for (size_t ind = 0; ind < 4; ++ind)
+		{
+			if (c_temp[ind] > 255)
+				c_temp[ind] = 255;
+			else if (c_temp[ind] < 0)
+				c_temp[ind] = 0;
+			(*this)[ind] = static_cast<unsigned char>(c_temp[ind]);
+		}
+	}
+
 	Color::Color(Vector4& v) : r(v.x), g(v.y), b(v.z), a(v.w) {  }
 
 	Color::Color(Vector3& v) : Color({ v.x, v.y, v.z, 255 }) {	}
@@ -52,28 +64,24 @@ namespace EQX {
 		return a;
 	}
 
-	Color operator* (const float k, const Color v)
+	_ColorIntermediate operator* (const float k, const Color v)
 	{
-		Color ans;
+		_ColorIntermediate ans(v);
 		for (size_t index = 0; index != 4; ++index)
-		{
-			unsigned int color = v[index];
-			color *= k;
-			if (color > 255)
-				color = 255;
-			ans[index] = color;
-		}
+			ans[index] = k * ans[index];
 		return ans;
 	}
 
-	Color operator* (const Color v, const float k)
+	_ColorIntermediate operator* (const Color v, const float k)
 	{
 		return k * v;
 	}
 
-	Color operator/(const Color v, const float k)
+	_ColorIntermediate operator/(const Color v, const float k)
 	{
-		return (1/k) * v;
+		if (k == 0)
+			return v;
+		return (1 / k) * v;
 	}
 
 	Color& Color::operator= (const Color& c)
@@ -87,30 +95,98 @@ namespace EQX {
 
 	Color LitColor(const Color c1, const Color c2)
 	{
-		Color ans;
+		_ColorIntermediate ans(c1);
 		for (size_t index = 0; index != 4; ++index)
-		{
-			unsigned int color = static_cast<unsigned int>(c1[index]) * static_cast<unsigned int>(c2[index]) / 255;
-			if (color > 255)
-				color = 255;
-			ans[index] = color;
-		}
+			ans[index] = ans[index] * static_cast<float>(c2[index]) / 255;
 		return ans;
 	}
 
-	Color Color::operator+ (Color& c)
+	_ColorIntermediate::_ColorIntermediate(Color c)
 	{
-		Color ans;
-		for (size_t index = 0; index != 4; ++index)
-		{
-			unsigned int color = c[index] + (*this)[index];
-			if (color > 255)
-				color = 255;
-			ans[index] = color;
-		}
+		for (size_t ind = 0; ind != 4; ++ind)
+			(*this)[ind] = static_cast<float>(c[ind]);
+	}
+
+	_ColorIntermediate::_ColorIntermediate(const _ColorIntermediate& c)
+	{
+		for (size_t ind = 0; ind != 4; ++ind)
+			(*this)[ind] = c[ind];
+	}
+
+	float& _ColorIntermediate::operator[](size_t index)
+	{
+		if (index == 0)
+			return this->r;
+		if (index == 1)
+			return this->g;
+		if (index == 2)
+			return this->b;
+		if (index == 3)
+			return this->a;
+		return this->r;
+	}
+
+	const float& _ColorIntermediate::operator[](size_t index) const
+	{
+		if (index == 0)
+			return this->r;
+		if (index == 1)
+			return this->g;
+		if (index == 2)
+			return this->b;
+		if (index == 3)
+			return this->a;
+		return this->r;
+	}
+
+	_ColorIntermediate operator*(const _ColorIntermediate c, const float k)
+	{
+		_ColorIntermediate ans(c);
+		for (size_t ind = 0; ind != 4; ++ind)
+			ans[ind] = c[ind] * k;
 		return ans;
 	}
 
+	_ColorIntermediate operator*(const float k, const _ColorIntermediate c)
+	{
+		return c * k;
+	}
+
+	_ColorIntermediate operator/(const _ColorIntermediate c, const float k)
+	{
+		if (k == 0)
+			return c;
+		return (1 / k) * c;
+	}
+
+	_ColorIntermediate operator+(const Color c1, const Color c2)
+	{
+		_ColorIntermediate ans(c1);
+		for (size_t ind = 0; ind != 4; ++ind)
+			ans[ind] = ans[ind] + static_cast<float>(c2[ind]);
+		return ans;
+	}
+
+	_ColorIntermediate operator+(const _ColorIntermediate c1, const _ColorIntermediate c2)
+	{
+		_ColorIntermediate ans(c1);
+		for (size_t ind = 0; ind != 4; ++ind)
+			ans[ind] = ans[ind] + c2[ind];
+		return ans;
+	}
+
+	_ColorIntermediate operator+(const Color c1, const _ColorIntermediate c2)
+	{
+		_ColorIntermediate ans(c1);
+		for (size_t ind = 0; ind != 4; ++ind)
+			ans[ind] = ans[ind] + c2[ind];
+		return ans;
+	}
+
+	_ColorIntermediate operator+(const _ColorIntermediate c1, const Color c2)
+	{
+		return c2 + c1;
+	}
 
 	Image::Image()
 	{
@@ -186,8 +262,6 @@ namespace EQX {
 			{
 				w = i % width;
 				h = i / width;
-				//if (canvas[i].r != 0)
-					//cout << w << " " << h << " " << (int)(canvas[i].r) << endl;
 				image.set(w, h, toTGAColor(canvas[i]));
 			}
 			image.flip_vertically(); // Ensure x horizontal, y vertical, origin lower-left corner

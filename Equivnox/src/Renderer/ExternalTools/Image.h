@@ -23,12 +23,12 @@ namespace EQX {
 		Color();
 		Color(float);
 		Color(float, float, float, float);
+		Color(_ColorIntermediate);			// clamps at 0 and 255
 		Color(Vector4&);
 		Color(Vector3&);
 		Color(const Color&);
 
 		Color& operator= (const Color&);
-		Color operator+ (Color&);
 		unsigned char& operator[] (size_t index);
 		const unsigned char& operator[] (size_t index) const;
 
@@ -36,11 +36,33 @@ namespace EQX {
 		static Color Black;
 	};
 
-	// Includes clamping beneath 255
-	Color operator* (const Color, const float);
-	Color operator* (const float, const Color);
-	Color operator/ (const Color, const float);
+	_ColorIntermediate operator* (const Color, const float);
+	_ColorIntermediate operator* (const float, const Color);
+	_ColorIntermediate operator/ (const Color, const float);
 	Color LitColor(const Color, const Color);
+
+	// Class handling value overflow for class Color
+	class _ColorIntermediate
+	{
+		friend class Color;
+	public:
+		float r, g, b, a;
+
+	public:
+		_ColorIntermediate(Color);
+		_ColorIntermediate(const _ColorIntermediate&);
+
+		float& operator[] (size_t index);
+		const float& operator[] (size_t index) const;
+	};
+
+	_ColorIntermediate operator* (const _ColorIntermediate, const float);
+	_ColorIntermediate operator* (const float, const _ColorIntermediate);
+	_ColorIntermediate operator/ (const _ColorIntermediate, const float);
+	_ColorIntermediate operator+ (const Color c1, const Color c2);
+	_ColorIntermediate operator+ (const _ColorIntermediate c1, const _ColorIntermediate c2);
+	_ColorIntermediate operator+ (const Color c1, const _ColorIntermediate c2);
+	_ColorIntermediate operator+ (const _ColorIntermediate c1, const Color c2);
 
 	/**
 	 * The lower-left corner is of coordinate (0, 0)

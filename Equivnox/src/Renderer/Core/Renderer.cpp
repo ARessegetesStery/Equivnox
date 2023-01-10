@@ -466,9 +466,6 @@ namespace EQX
 		if (newGreyScale > 255 || newGreyScale < 0)
 			return;
 
-		if (x == 169 && y == 167)
-			cout << newGreyScale << endl << "<<<<<<<<<" << endl;
-
 		if (newGreyScale < curGreyScale)
 			ZBuf.set(x, y, Color(newGreyScale));
 	}

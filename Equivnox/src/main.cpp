@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
 	coreRenderer.camera.upDir = EQX::Vec3(0, 1, 0);
 	// coreRenderer.DisableCamera();
 
-	coreRenderer.addLight(EQX::Light(coreRenderer.camera.pos, EQX::Color::White, 100.f, EQX::LightType::Point));
+	coreRenderer.addLight(EQX::Light(coreRenderer.camera.pos, EQX::Color::White, 1.f, EQX::LightType::Point));
 
 	coreRenderer.Render();
 }
