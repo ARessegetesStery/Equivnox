@@ -13,7 +13,7 @@ namespace EQX
 		this->renderAAConfig = RenderAAConfig::ANTIALIAS_OFF;
 		this->renderLightConfig = RenderLightConfig::PHONG;
 		this->imageType = ImageType::TGA;
-		this->outputPath = "output.tga";
+		this->outputPath = "output";
 		this->width = 400;
 		this->height = 400;
 		this->MSAAMult = 2;
@@ -35,31 +35,6 @@ namespace EQX
 		this->curMesh = nullptr;
 	}
 
-	void Renderer::SetFill(RenderFill f)
-	{
-		this->renderFill = f;
-	}
-
-	void Renderer::SetPass(RenderPass m)
-	{
-		this->renderPass = m;
-	}
-
-	void Renderer::SetAA(RenderAAConfig a)
-	{
-		this->renderAAConfig = a;
-	}
-
-	void Renderer::SetLight(RenderLightConfig l)
-	{
-		this->renderLightConfig = l;
-	}
-
-	void Renderer::SetOutputType(ImageType t)
-	{
-		this->imageType = t;
-	}
-
 	void Renderer::SetMSAAMult(unsigned int scale)
 	{
 		if (scale == 0 || scale == 1)
@@ -68,22 +43,6 @@ namespace EQX
 			MSAAMult = 6;
 		else
 			MSAAMult = scale;
-	}
-
-	void Renderer::SetCanvas(unsigned int w, unsigned int h)
-	{
-		this->width = w;
-		this->height = h;
-	}
-
-	void Renderer::SetCanvasHeight(unsigned int h)
-	{
-		this->height = h;
-	}
-
-	void Renderer::SetCanvasWidth(unsigned int w)
-	{
-		this->width = w;
 	}
 
 	void Renderer::addLight(Light l)
@@ -99,7 +58,7 @@ namespace EQX
 
 	void Renderer::Render()
 	{
-		Image image(this->width, this->height, this->imageType);
+		Image image(this->width, this->height);
 
 		/*  Initializing the background color to be black  */
 		for (int x = 0; x < this->width; ++x)
@@ -128,7 +87,7 @@ namespace EQX
 			break;
 		}
 
-		image.write();
+		image.write(this->imageType, this->outputPath);
 	}
 
 	void Renderer::RenderLines(Image& image)
@@ -183,7 +142,7 @@ namespace EQX
 
 	void Renderer::RenderFaces(Image& image)
 	{
-		Image ZBuf(this->width, this->height, this->imageType);
+		ImageGrey ZBuf(this->width, this->height);
 
 		// Background of ZBuf should be white
 		for (int x = 0; x < this->width; ++x)
@@ -395,7 +354,7 @@ namespace EQX
 		}
 	}
 
-	void Renderer::RenderFaceZBuf(Image& image, Face f)
+	void Renderer::RenderFaceZBuf(ImageGrey& image, Face f)
 	{
 		f.l = TransformVertexPos(projection, f.l);
 		f.m = TransformVertexPos(projection, f.m);
@@ -456,7 +415,7 @@ namespace EQX
 		}
 	}
 
-	void Renderer::UpdateZBufColor(float x, float y, const Face& f, Image& ZBuf)
+	void Renderer::UpdateZBufColor(float x, float y, const Face& f, ImageGrey& ZBuf)
 	{
 		int curGreyScale = ZBuf.get(x, y).r;
 

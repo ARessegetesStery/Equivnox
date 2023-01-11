@@ -190,24 +190,35 @@ namespace EQX {
 
 	Image::Image()
 	{
-		this->type = ImageType::TGA;
 		this->width = 100;
 		this->height = 100;
 		this->canvas = new Color[100 * 100];
-		this->filename = "output";
 		for (unsigned int i = 0; i != 100 * 100; ++i)
 			this->canvas[i] = Color::Black;
 	}
 
-	Image::Image(unsigned int w, unsigned int h, ImageType t, std::string n)
+	Image::Image(const ImageGrey& image)
 	{
-		this->type = t;
+		this->width = image.getWidth();
+		this->height = image.getHeight();
+		const unsigned char* imageCanvas = image.GetCanvas();
+		this->canvas = new Color[static_cast<size_t>(this->width) * static_cast<size_t>(this->height)];
+		for (size_t i = 0; i != static_cast<size_t>(this->width) * static_cast<size_t>(this->height); ++i)
+			this->canvas[i] = Color(imageCanvas[i]);
+	}
+
+	Image::Image(unsigned int w, unsigned int h)
+	{
 		this->width = w;
 		this->height = h;
 		this->canvas = new Color[static_cast<size_t>(w) * static_cast<size_t>(h)];
-		this->filename = n;
 		for (size_t i = 0; i != static_cast<size_t>(w) * static_cast<size_t>(h); ++i)
 			this->canvas[i] = Color::Black;
+	}
+
+	Image::Image(const Image& image)
+	{
+		*this = image;
 	}
 
 	Image::~Image()
@@ -221,13 +232,26 @@ namespace EQX {
 		if (this->canvas)
 			delete[] canvas;
 
-		this->type = image.type;
 		this->width = image.width;
 		this->height = image.height;
 		this->canvas = new Color[image.width * image.height];
-		this->filename = image.filename;
 		for (unsigned int i = 0; i != image.width * image.height; ++i)
 			this->canvas[i] = image.canvas[i];
+
+		return *this;
+	}
+
+	Image& Image::operator=(const ImageGrey& image)
+	{
+		if (this->canvas)
+			delete[] canvas;
+
+		this->width = image.getWidth();
+		this->height = image.getHeight();
+		this->canvas = new Color[image.getWidth() * image.getHeight()];
+		const unsigned char* imageCanvas = image.GetCanvas();
+		for (unsigned int i = 0; i != image.getWidth() * image.getHeight(); ++i)
+			this->canvas[i] = Color(imageCanvas[i]);
 
 		return *this;
 	}
@@ -252,9 +276,9 @@ namespace EQX {
 			this->canvas[i] = Color::Black;
 	}
 
-	void Image::write()
+	void Image::write(ImageType type, std::string filename)
 	{
-		if (this->type == ImageType::TGA)
+		if (type == ImageType::TGA)
 		{
 			TGAImage image(this->width, this->height, TGAImage::RGBA);
 			unsigned int w, h;
@@ -265,16 +289,100 @@ namespace EQX {
 				image.set(w, h, toTGAColor(canvas[i]));
 			}
 			image.flip_vertically(); // Ensure x horizontal, y vertical, origin lower-left corner
-			image.write_tga_file((this->filename + ".tga").c_str());
+			image.write_tga_file((filename + ".tga").c_str());
 		}
-		if (this->type == ImageType::PNG)
+		if (type == ImageType::PNG)
 		{
 			stbi_flip_vertically_on_write(true);
 			
 			int info;
-			info = stbi_write_png((this->filename + ".png").c_str(), this->width, this->height, 4, this->canvas, 0);
+			info = stbi_write_png((filename + ".png").c_str(), this->width, this->height, 4, this->canvas, 0);
 			if (!info)
-				cout << "Writing to " << this->filename << ".png failed." << endl;
+				cout << "Writing to " << filename << ".png failed." << endl;
+		}
+	}
+
+	ImageGrey::ImageGrey()
+	{
+		this->width = 100;
+		this->height = 100;
+		this->canvas = new unsigned char[100 * 100];
+		for (unsigned int i = 0; i != 100 * 100; ++i)
+			this->canvas[i] = 0;
+	}
+
+	ImageGrey::ImageGrey(unsigned int w, unsigned int h)
+	{
+		this->width = w;
+		this->height = h;
+		this->canvas = new unsigned char[static_cast<size_t>(w) * static_cast<size_t>(h)];
+		for (size_t i = 0; i != static_cast<size_t>(w) * static_cast<size_t>(h); ++i)
+			this->canvas[i] = 0;
+	}
+
+	ImageGrey::~ImageGrey()
+	{
+		if (canvas)
+			delete[] canvas;
+	}
+
+	ImageGrey& ImageGrey::operator= (const ImageGrey& image)
+	{
+		if (this->canvas)
+			delete[] canvas;
+
+		this->width = image.width;
+		this->height = image.height;
+		this->canvas = new unsigned char[image.width * image.height];
+		for (unsigned int i = 0; i != image.width * image.height; ++i)
+			this->canvas[i] = image.canvas[i];
+
+		return *this;
+	}
+
+	void ImageGrey::set(unsigned int w, unsigned int h, Color c)
+	{
+		if (!(!canvas || w >= width || h >= height))
+			this->canvas[(size_t)(h * this->width + w)] = c.r;
+	}
+
+	Color ImageGrey::get(unsigned int w, unsigned int h) const
+	{
+		if (!(!canvas || w >= width || h >= height))
+			return Color(this->canvas[(size_t)(h * this->width + w)]);
+		return Color::Black;
+	}
+
+	void ImageGrey::clear()
+	{
+		for (unsigned int i = 0; i != this->width * this->height; ++i)
+			this->canvas[i] = 0;
+	}
+
+	void ImageGrey::write(ImageType type, std::string filename)
+	{
+		if (type == ImageType::TGA)
+		{
+			TGAImage image(this->width, this->height, TGAImage::RGBA);
+			unsigned int w, h;
+			for (unsigned int i = 0; i < width * height; ++i)
+			{
+				w = i % width;
+				h = i / width;
+				image.set(w, h, toTGAColor(Color(canvas[i])));
+			}
+			image.flip_vertically(); // Ensure x horizontal, y vertical, origin lower-left corner
+			image.write_tga_file((filename + ".tga").c_str());
+		}
+		if (type == ImageType::PNG)
+		{
+			stbi_flip_vertically_on_write(true);
+
+			Image imageRGBA(*this);
+			int info;
+			info = stbi_write_png((filename + ".png").c_str(), this->width, this->height, 4, imageRGBA.GetCanvas(), 0);
+			if (!info)
+				cout << "Writing to " << filename << ".png failed." << endl;
 		}
 	}
 

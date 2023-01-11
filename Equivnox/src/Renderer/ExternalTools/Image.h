@@ -7,6 +7,11 @@
 namespace EQX {
 	// TODO create compact image for ZBuf; create RGBA ZBuf for higher precision depth info
 
+	class Color;
+	class _ColorIntermediate;
+	class Image;
+	class ImageGrey;
+
 	enum class ImageType
 	{
 		TGA,	// Relies on tgaimage.h
@@ -73,28 +78,55 @@ namespace EQX {
 	{
 	private:
 		unsigned int width, height;
-		ImageType type;
 		Color* canvas;
-		std::string filename;
 
 	public:
 		Image();
-		Image(unsigned int, unsigned int, ImageType, std::string = "output");
-		Image(const Image&) = delete;
+		Image(const ImageGrey&);
+		Image(unsigned int, unsigned int);
+		Image(const Image&);
 		~Image();
 
 		Image& operator= (const Image&);
+		Image& operator= (const ImageGrey&);
 
 		void set(unsigned int, unsigned int, Color);
 		Color get(unsigned int, unsigned int) const;
 
 		void clear();
-		void write();
+		void write(ImageType type = ImageType::TGA, std::string filename = "output");
 
-		inline unsigned int getWidth() { return width; }
-		inline unsigned int getHeight() { return height; }
-		inline ImageType getType() { return type; }
-		inline void setType(ImageType t) { type = t; };
+		inline const Color* GetCanvas() const { return this->canvas; };
+
+		inline unsigned int getWidth() const { return width; }
+		inline unsigned int getHeight() const { return height; }
+	};
+
+	// Mono-channel image
+	class ImageGrey
+	{
+	private:
+		unsigned int width, height;
+		unsigned char* canvas;
+
+	public:
+		ImageGrey();
+		ImageGrey(unsigned int, unsigned int);
+		ImageGrey(const ImageGrey&) = delete;
+		~ImageGrey();
+
+		ImageGrey& operator= (const ImageGrey&);
+
+		void set(unsigned int, unsigned int, Color);
+		Color get(unsigned int, unsigned int) const;
+
+		void clear();
+		void write(ImageType type = ImageType::TGA, std::string filename = "output");
+
+		const unsigned char* GetCanvas() const { return this->canvas; };
+
+		inline unsigned int getWidth() const { return width; }
+		inline unsigned int getHeight() const { return height; }
 	};
 
 	Color blendColor(Color fore, Color back, float coeff);
