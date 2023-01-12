@@ -34,12 +34,15 @@ namespace EQX {
 		Color(const Color&);
 
 		Color& operator= (const Color&);
+		Color& operator+= (const Color&);
 		unsigned char& operator[] (size_t index);
 		const unsigned char& operator[] (size_t index) const;
 
 		static Color White;
 		static Color Black;
 	};
+
+	void Print(const Color&);
 
 	_ColorIntermediate operator* (const Color, const float);
 	_ColorIntermediate operator* (const float, const Color);

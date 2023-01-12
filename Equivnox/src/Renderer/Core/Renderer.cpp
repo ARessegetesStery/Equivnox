@@ -16,7 +16,7 @@ namespace EQX
 		this->outputPath = "output";
 		this->width = 400;
 		this->height = 400;
-		this->MSAAMult = 2;
+		this->MSAAMult = 8;
 	}
 
 	Renderer& Renderer::Init()
@@ -39,8 +39,8 @@ namespace EQX
 	{
 		if (scale == 0 || scale == 1)
 			MSAAMult = 2;
-		else if (scale > 6)
-			MSAAMult = 6;
+		else if (scale > 8)
+			MSAAMult = 8;
 		else
 			MSAAMult = scale;
 	}
@@ -186,17 +186,8 @@ namespace EQX
 			switch (this->renderAAConfig)
 			{
 			case RenderAAConfig::ANTIALIAS_OFF:
-				RenderFaceRaw(image, face, ZBuf);
-				break;
 			case RenderAAConfig::MSAA:
-				// TODO change into real MSAA
-				RenderFaceRaw(image, face, ZBuf);
-				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[1]]), projection);
-				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[2]]), projection);
-				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[2]],
-					curMesh->vertices[(*iter)[1]]), projection);
+				RenderFaceSingle(image, face, ZBuf);
 				break;
 			}
 		}
@@ -291,7 +282,7 @@ namespace EQX
 		}
 	}
 	
-	void Renderer::RenderFaceRaw(Image& image, Face f, const Image& ZBuffer)
+	void Renderer::RenderFaceSingle(Image& image, Face f, const Image& ZBuffer)
 	{
 		// TODO (GPU) Change into edge function (cross product)
 		Face original = f;
@@ -315,18 +306,18 @@ namespace EQX
 		else if (f.kLM > f.kLR)
 		{
 			int xpos, ypos;
-			for (xpos = f.l.pos.x; xpos <= f.m.pos.x; ++xpos)
+			for (xpos = f.l.pos.x; xpos < floor(f.m.pos.x); ++xpos)
 			{
-				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLR;
-					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLM; ++ypos)
+				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLR - 1;
+					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLM + 1; ++ypos)
 				{
 					UpdateFragColor(xpos, ypos, f, original, image, ZBuffer);
 				}
 			}
 			for (xpos = f.m.pos.x; xpos <= f.r.pos.x; ++xpos)
 			{
-				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLR;
-					ypos <= f.m.pos.y + (xpos - f.m.pos.x) * f.kMR; ++ypos)
+				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLR - 1;
+					ypos <= f.m.pos.y + (xpos - f.m.pos.x) * f.kMR + 1; ++ypos)
 				{
 					UpdateFragColor(xpos, ypos, f, original, image, ZBuffer);
 				}
@@ -335,23 +326,25 @@ namespace EQX
 		else
 		{
 			int xpos, ypos;
-			for (xpos = f.l.pos.x; xpos <= f.m.pos.x; ++xpos)
+			for (xpos = f.l.pos.x; xpos < floor(f.m.pos.x); ++xpos)
 			{
-				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLM;
-					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLR; ++ypos)
+				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLM - 1;
+					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLR + 1; ++ypos)
 				{
 					UpdateFragColor(xpos, ypos, f, original, image, ZBuffer);
 				}
 			}
 			for (xpos = f.m.pos.x; xpos <= f.r.pos.x; ++xpos)
 			{
-				for (ypos = f.m.pos.y + (xpos - f.m.pos.x) * f.kMR;
-					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLR; ++ypos)
+				for (ypos = f.m.pos.y + (xpos - f.m.pos.x) * f.kMR - 1;
+					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLR + 1; ++ypos)
 				{
 					UpdateFragColor(xpos, ypos, f, original, image, ZBuffer);
 				}
 			}
 		}
+
+		
 	}
 
 	void Renderer::RenderFaceZBuf(ImageGrey& image, Face f)
@@ -419,7 +412,7 @@ namespace EQX
 	{
 		int curGreyScale = ZBuf.get(x, y).r;
 
-		float zpos = f.ZatXY(Vec2(x, y));
+		float zpos = f.ZatXYFace(Vec2(x, y));
 		int newGreyScale = (zpos == 1) ? 0 : 128 - 127.f * zpos;
 
 		if (newGreyScale > 255 || newGreyScale < 0)
@@ -441,49 +434,107 @@ namespace EQX
 
 		/*  Full Pixel Processing  */
 		int curGreyScale = ZBuffer.get(xpos, ypos).r;
+		Color pixelColor = Color(0);
+		Color texColor = Color(200); // TODO Texture Reading
 
-		float zpos = f.ZatXY(Vec2(xpos, ypos));
-		float newGreyScale = (zpos == 1) ? 0 : 128 - 127.f * zpos;
-
-		if (newGreyScale > 255 || newGreyScale < 0)
-			return;
-
-		if (newGreyScale < curGreyScale + 1)
+		if (this->renderAAConfig == RenderAAConfig::ANTIALIAS_OFF)
 		{
+			if (!IsPointInTriangle(Vec2(xpos, ypos), f))
+				return;
+
+			// Set z to -Z_MAX if point is outside the triangle
+			float zpos = f.ZatXYFace(Vec2(xpos, ypos));
 			Vec3 curPos = Vec3(xpos, ypos, zpos);
 			Vec3 originalPos = inverseProjection * (curPos.ToVec4());
 			Vec3 baryCoord = fOriginal.baryCoord(originalPos.x, originalPos.y);
 			Vec3 fragNormal = baryCoord[0] * fOriginal.l.normal +
 				baryCoord[1] * fOriginal.m.normal + baryCoord[2] * fOriginal.r.normal;
-			Color pixelColor = Color(0);
-			if (this->renderLightConfig == RenderLightConfig::PHONG)
+
+			float newGreyScale = (zpos == 1) ? 0 : 128 - 127.f * zpos;
+			if (newGreyScale > 255 || newGreyScale < 0)
+				return;
+
+			if (newGreyScale < curGreyScale + 1)
 			{
-				Color texColor = Color(200); // TODO Texture Reading
-				for (auto l : this->lights)
+				if (this->renderLightConfig == RenderLightConfig::PHONG)
 				{
-					if (l.lightType == LightType::Point)
+					for (const auto& l : this->lights)
 					{
-						float distance = (l.Position - originalPos).Norm();
-						Vec3 lightDir = (l.Position - originalPos) / distance;
-						Vec3 viewDir = (this->camera.pos.ToVec3() - originalPos).Normalize();
-						Vector3 halfDir = (lightDir + viewDir).Normalize();
-						Color ambient = 0.1 * texColor;
-						Color diffuse = (LitColor(l.lightColor, texColor) * l.intensity) / (distance * distance) *
-							std::max(0.f, Dot(fragNormal, lightDir));
-						Color specular = l.lightColor * l.intensity / (distance * distance) *
-							pow(std::max(0.f, Dot(fragNormal, halfDir)), 8);
-						Color resultColor = ambient + diffuse + specular;
-						pixelColor = pixelColor + resultColor;
+						if (l.lightType == LightType::Point)
+						{
+							Color resultColor = PhongLighting(originalPos, fragNormal, texColor, l);
+							pixelColor = pixelColor + resultColor;
+						}
 					}
+					image.set(xpos, ypos, pixelColor);
 				}
-				image.set(xpos, ypos, pixelColor);
+				else if (this->renderLightConfig == RenderLightConfig::PARTICLE)
+					// TODO GI
+					image.set(xpos, ypos, Color::White);
+				else
+					image.set(xpos, ypos, Color::White);
 			}
-			else if (this->renderLightConfig == RenderLightConfig::PARTICLE)
-				// TODO GI
-				image.set(xpos, ypos, Color::White);
-			else
-				image.set(xpos, ypos, Color::White);
 		}
+		else if (this->renderAAConfig == RenderAAConfig::MSAA)
+		{
+			// Obtains z value presuming that the point is in the triangle
+			float zpos = f.ZatXYPlane(Vec2(xpos, ypos));
+			Vec3 curPos = Vec3(xpos, ypos, zpos);
+			Vec3 originalPos = inverseProjection * (curPos.ToVec4());
+			Vec3 baryCoord = fOriginal.baryCoord(originalPos.x, originalPos.y);
+			Vec3 fragNormal = baryCoord[0] * fOriginal.l.normal +
+			baryCoord[1] * fOriginal.m.normal + baryCoord[2] * fOriginal.r.normal;
+
+			Color originalColor = image.get(xpos, ypos);
+			Color resultColor = Color(0);
+			Face face(f);
+
+			/*  Shading  */
+			if (this->renderLightConfig == RenderLightConfig::PHONG)
+				for (const auto& l : this->lights)
+					if (l.lightType == LightType::Point)
+						resultColor += PhongLighting(originalPos, fragNormal, texColor, l);
+
+			/*  MSAA  */
+			int samplerCnt = MSAAMult * MSAAMult;
+			int validSamplerCnt = 0;
+			float step = 1.f / (MSAAMult + 1);
+			for (int i = 1; i <= MSAAMult; ++i)
+			{
+				for (int j = 1; j <= MSAAMult; ++j)
+				{
+					Vec2 curPos = Vec2(xpos - 0.5f + float(i) * step, ypos - 0.5f + float(j) * step);
+
+					/*  Occlusion Test  */
+					float z = face.ZatXYFace(curPos.x, curPos.y);
+					float newGreyScale = (z == 1) ? 0 : 128 - 127.f * z;
+					if (newGreyScale >= curGreyScale + 2)
+						continue;
+
+					/*  Coverage Test  */
+					if (IsPointInTriangle(curPos, face))
+						++validSamplerCnt;
+				}
+			}
+			resultColor = resultColor * validSamplerCnt / samplerCnt;
+			resultColor = resultColor + originalColor;
+			image.set(xpos, ypos, resultColor);
+		}
+	}
+
+	Color Renderer::PhongLighting(Vec3 originalPos, Vec3 fragNormal, Color texColor, const Light& l) const
+	{
+		float distance = (l.Position - originalPos).Norm();
+		Vec3 lightDir = (l.Position - originalPos) / distance;
+		Vec3 viewDir = (this->camera.pos.ToVec3() - originalPos).Normalize();
+		Vector3 halfDir = (lightDir + viewDir).Normalize();
+		Color ambient = 0.1 * texColor;
+		Color diffuse = (LitColor(l.lightColor, texColor) * l.intensity) / (distance * distance) *
+			std::max(0.f, Dot(fragNormal, lightDir));
+		Color specular = l.lightColor * l.intensity / (distance * distance) *
+			pow(std::max(0.f, Dot(fragNormal, halfDir)), 8);
+		Color resultColor = ambient + diffuse + specular;
+		return resultColor;
 	}
 
 }

@@ -58,7 +58,7 @@ namespace EQX
 		void RenderLineRaw(Image&, LineSeg, const Mat4&);
 		void RenderLineSmooth(Image&, LineSeg, const Mat4&);
 
-		void RenderFaceRaw(Image& image, Face f, const Image& ZBuffer);
+		void RenderFaceSingle(Image& image, Face f, const Image& ZBuffer);
 		void RenderFaceZBuf(ImageGrey& image, Face f);
 
 		/*  Render Configs  */
@@ -91,6 +91,8 @@ namespace EQX
 		 * @param ZBuffer - Precomputed ZBuffer
 		 */
 		void UpdateFragColor(float x, float y, const Face& f, const Face& fOriginal, Image& image, const Image& ZBuffer);
+
+		Color PhongLighting(Vec3 originalPos, Vec3 fragNormal, Color texColor, const Light& l) const;
 
 		void ValidateConfig();		// Ensures no config conflict presents
 	};

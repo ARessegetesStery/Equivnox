@@ -45,19 +45,19 @@ namespace EQX
 		return *this;
 	}
 
-	Vector4 Vector4::operator-= (const Vector4& p)
+	Vector4& Vector4::operator-= (const Vector4& p)
 	{
 		*this = *this - p;
 		return *this;
 	}
 
-	Vector4 Vector4::operator+= (const Vector4& p)
+	Vector4& Vector4::operator+= (const Vector4& p)
 	{
 		*this = *this + p;
 		return *this;
 	}
 
-	Vector4 Vector4::operator+= (const Vector3& p)
+	Vector4& Vector4::operator+= (const Vector3& p)
 	{
 		*this = *this + p;
 		return *this;
@@ -70,7 +70,7 @@ namespace EQX
 	 * @param s scale of multiplication
 	 * @return 
 	 */
-	Vector4 Vector4::operator*= (float s)
+	Vector4& Vector4::operator*= (float s)
 	{
 		this->x *= s;
 		this->y *= s;

@@ -37,9 +37,9 @@ int main(int argc, char** argv) {
 	// m.AddFace(f);
 
 	coreRenderer.BindMesh(&m);
-	coreRenderer.SetPass(EQX::RenderPass::ZBUFFER_ONLY);
+	coreRenderer.SetPass(EQX::RenderPass::FULL);
 	coreRenderer.SetFill(EQX::RenderFill::FILL);
-	coreRenderer.SetAA(EQX::RenderAAConfig::ANTIALIAS_OFF);
+	coreRenderer.SetAA(EQX::RenderAAConfig::MSAA);
 	coreRenderer.SetOutputType(EQX::ImageType::TGA);
 	coreRenderer.SetLight(EQX::RenderLightConfig::PHONG);
 

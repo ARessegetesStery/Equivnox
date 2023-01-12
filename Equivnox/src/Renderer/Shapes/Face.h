@@ -28,9 +28,21 @@ namespace EQX {
 		Vector3 baryCoord(Vector2) const;
 		Vector3 baryCoord(float, float) const;
 
-		float ZatXY(Vector2) const;
+		// Returns -Z_MAX if the point falls outside the triangle
+		float ZatXYFace(Vector2) const;
+		float ZatXYFace(float, float) const;
+
+		// Returns z value on the spanned surface of the face
+		float ZatXYPlane(Vector2) const;
+		float ZatXYPlane(float, float) const;
 
 		void ValidateSeq();
 	};
+
+	/**
+	 * If a point is on the edge or at the vertex, return true.
+	 * Only works for 2D case: the z info of vertex and face is discarded
+	 */
+	bool IsPointInTriangle(Vertex, Face);
 
 }

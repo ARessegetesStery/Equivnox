@@ -19,4 +19,14 @@ namespace EQX
 		x = x * (1.5f - xhalf * x * x); 
 		return x;
 	}
+
+	float sgn(float x)
+	{
+		if (x == 0.f)
+			return 0.f;
+		else if (x > 0.f)
+			return 1.f;
+		else
+			return -1.f;
+	}
 }

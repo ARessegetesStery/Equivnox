@@ -44,12 +44,28 @@ namespace EQX {
 		return baryCoord(Vec2(x, y));
 	}
 
-	float Face::ZatXY(Vector2 xy) const
+	float Face::ZatXYFace(Vector2 xy) const
 	{
 		Vec3 baryCoord = this->baryCoord(xy);
 		 if (baryCoord[0] < 0 || baryCoord[1] < 0 || baryCoord[2] < 0)
 		 	return -Z_MAX; 
 		return baryCoord[0] * l.pos.z + baryCoord[1] * m.pos.z + baryCoord[2] * r.pos.z;
+	}
+
+	float Face::ZatXYFace(float x, float y) const
+	{
+		return this->ZatXYFace(Vec2(x, y));
+	}
+
+	float Face::ZatXYPlane(Vector2 xy) const
+	{
+		Vec3 baryCoord = this->baryCoord(xy);
+		return baryCoord[0] * l.pos.z + baryCoord[1] * m.pos.z + baryCoord[2] * r.pos.z;
+	}
+
+	float Face::ZatXYPlane(float x, float y) const
+	{
+		return this->ZatXYPlane(Vec2(x, y));
 	}
 
 	void Face::ValidateSeq()
@@ -72,5 +88,18 @@ namespace EQX {
 			m = std::min(r, m, LowerVertex);
 			r = std::max(r, m, LowerVertex);
 		}
+	}
+
+	bool IsPointInTriangle(Vertex v, Face f)
+	{
+		f.l.pos.z = 0;
+		f.m.pos.z = 0;
+		f.r.pos.z = 0;
+		v.pos.z = 0;
+		Vec3 dir1 = (Cross(f.l.pos - v.pos, f.m.pos - f.l.pos));
+		Vec3 dir2 = (Cross(f.m.pos - v.pos, f.r.pos - f.m.pos));
+		Vec3 dir3 = (Cross(f.r.pos - v.pos, f.l.pos - f.r.pos));
+		// Need to verify three because of the presence of sgn() = 0: consider (1, 0, -1)
+		return sgn(dir1.z) * sgn(dir2.z) >= 0 && sgn(dir1.z) * sgn(dir3.z) >= 0 && sgn(dir2.z) * sgn(dir3.z) >= 0;
 	}
 }

@@ -67,9 +67,15 @@ namespace EQX {
 	_ColorIntermediate operator* (const float k, const Color v)
 	{
 		_ColorIntermediate ans(v);
-		for (size_t index = 0; index != 4; ++index)
+		for (size_t index = 0; index != 3; ++index)
 			ans[index] = k * ans[index];
 		return ans;
+	}
+
+	void Print(const Color& c)
+	{
+		cout << "Color: " << static_cast<int>(c.r) << " " << static_cast<int>(c.g) << 
+			" " << static_cast<int>(c.b) << " " << static_cast<int>(c.a) << endl;
 	}
 
 	_ColorIntermediate operator* (const Color v, const float k)
@@ -93,11 +99,18 @@ namespace EQX {
 		return *this;
 	}
 
+	Color& Color::operator+=(const Color& c)
+	{
+		*this = *this + c;
+		return *this;
+	}
+
 	Color LitColor(const Color c1, const Color c2)
 	{
 		_ColorIntermediate ans(c1);
-		for (size_t index = 0; index != 4; ++index)
+		for (size_t index = 0; index != 3; ++index)
 			ans[index] = ans[index] * static_cast<float>(c2[index]) / 255;
+		ans.a = std::max(c1.a, c2.a);
 		return ans;
 	}
 
@@ -142,7 +155,7 @@ namespace EQX {
 	_ColorIntermediate operator*(const _ColorIntermediate c, const float k)
 	{
 		_ColorIntermediate ans(c);
-		for (size_t ind = 0; ind != 4; ++ind)
+		for (size_t ind = 0; ind != 3; ++ind)
 			ans[ind] = c[ind] * k;
 		return ans;
 	}
@@ -162,7 +175,7 @@ namespace EQX {
 	_ColorIntermediate operator+(const Color c1, const Color c2)
 	{
 		_ColorIntermediate ans(c1);
-		for (size_t ind = 0; ind != 4; ++ind)
+		for (size_t ind = 0; ind != 3; ++ind)
 			ans[ind] = ans[ind] + static_cast<float>(c2[ind]);
 		return ans;
 	}
@@ -170,7 +183,7 @@ namespace EQX {
 	_ColorIntermediate operator+(const _ColorIntermediate c1, const _ColorIntermediate c2)
 	{
 		_ColorIntermediate ans(c1);
-		for (size_t ind = 0; ind != 4; ++ind)
+		for (size_t ind = 0; ind != 3; ++ind)
 			ans[ind] = ans[ind] + c2[ind];
 		return ans;
 	}
@@ -178,7 +191,7 @@ namespace EQX {
 	_ColorIntermediate operator+(const Color c1, const _ColorIntermediate c2)
 	{
 		_ColorIntermediate ans(c1);
-		for (size_t ind = 0; ind != 4; ++ind)
+		for (size_t ind = 0; ind != 3; ++ind)
 			ans[ind] = ans[ind] + c2[ind];
 		return ans;
 	}

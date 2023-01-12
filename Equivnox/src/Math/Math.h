@@ -15,4 +15,5 @@ namespace EQX
 
 	/// Declaration of functions in MathAlgorithm.cpp
 	extern float InvSqrt(float x);
+	extern float sgn(float x);
 }

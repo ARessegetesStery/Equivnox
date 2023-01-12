@@ -14,12 +14,12 @@ namespace EQX
 
 	Vector2::Vector2(Vector2&& v) noexcept : x(v.x), y(v.y) {  }
 
-	Vector2 Vector2::operator- (const Vector2& p)
+	Vector2 Vector2::operator- (const Vector2& p) const
 	{
 		return Vector2(this->x - p.x, this->y - p.y);
 	}
 
-	Vector2 Vector2::operator+ (const Vector2& p)
+	Vector2 Vector2::operator+ (const Vector2& p) const
 	{
 		return Vector2(this->x + p.x, this->y + p.y);
 	}
@@ -31,19 +31,19 @@ namespace EQX
 		return *this;
 	}
 
-	Vector2 Vector2::operator-= (const Vector2& p)
+	Vector2& Vector2::operator-= (const Vector2& p)
 	{
 		*this = *this - p;
 		return *this;
 	}
 
-	Vector2 Vector2::operator+= (const Vector2& p)
+	Vector2& Vector2::operator+= (const Vector2& p)
 	{
 		*this = *this + p;
 		return *this;
 	}
 
-	Vector2 Vector2::operator*= (float s)
+	Vector2& Vector2::operator*= (float s)
 	{
 		this->x *= s;
 		this->y *= s;

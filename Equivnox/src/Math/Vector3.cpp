@@ -25,17 +25,17 @@ namespace EQX
 
 	Vector3::Vector3(Vector3&& v) noexcept : x(v.x), y(v.y), z(v.z) {  }
 
-	Vector3 Vector3::operator- (const Vector3& p)
+	Vector3 Vector3::operator- (const Vector3& p) const
 	{
 		return Vector3(this->x - p.x, this->y - p.y, this->z - p.z);
 	}
 
-	Vector3 Vector3::operator+ (const Vector3& p)
+	Vector3 Vector3::operator+ (const Vector3& p) const
 	{
 		return Vector3(this->x + p.x, this->y + p.y, this->z + p.z);
 	}
 
-	Vector3 Vector3::operator/ (const float k)
+	Vector3 Vector3::operator/ (const float k) const
 	{
 		return Vector3(this->x / k, this->y / k, this->z / k);
 	}
@@ -48,19 +48,19 @@ namespace EQX
 		return *this;
 	}
 
-	Vector3 Vector3::operator-= (const Vector3& p)
+	Vector3& Vector3::operator-= (const Vector3& p)
 	{
 		*this = *this - p;
 		return *this;
 	}
 
-	Vector3 Vector3::operator+= (const Vector3& p)
+	Vector3& Vector3::operator+= (const Vector3& p)
 	{
 		*this = *this + p;
 		return *this;
 	}
 
-	Vector3 Vector3::operator*= (float s)
+	Vector3& Vector3::operator*= (float s)
 	{
 		this->x *= s;
 		this->y *= s;
