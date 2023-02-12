@@ -1,7 +1,7 @@
 #include "eqxpch.h"
 
 #include "Renderer/Core/Core.h"
-#include "Renderer/Shapes/Shapes.h"
+#include "Renderer/Geometry/Geometry.h"
 #include "Loader/Loader.h"
 #include "Renderer/ExternalTools/Image.h"
 #include "Math/MathHeader.h"

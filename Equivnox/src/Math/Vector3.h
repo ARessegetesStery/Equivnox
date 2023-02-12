@@ -2,9 +2,9 @@
 
 #include "eqxpch.h"
 
-namespace EQX {
+#include "Math.h"
 
-	extern class Vector4;
+namespace EQX {
 
 	class Vector3
 	{
@@ -14,7 +14,7 @@ namespace EQX {
 		float z;
 
 		Vector3();
-		Vector3(float, float, float);
+		Vector3(const float, const float, const float);
 		Vector3(const Vector3&);
 		Vector3(const Vector4&);
 		Vector3(Vector3&&) noexcept;

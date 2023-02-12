@@ -42,7 +42,10 @@ namespace EQX {
 		Vector4 operator* (const Vector4&) const;
 		Matrix4x4 operator* (const Matrix4x4&);
 
-		static const Matrix4x4 IDENTITY;
+		float& operator[] (size_t index);
+		const float operator[] (size_t index) const;
+
+		static const Matrix4x4 Identity;
 		static const Matrix4x4 ZEROS;
 	};
 
@@ -55,7 +58,7 @@ namespace EQX {
 	 * @param UpDir The upward orthogonal direction of camera
 	 * @return 4*4 View Matrix
 	 */
-	Matrix4x4 makeView(Vector4 CameraPos, Vector4 LookAt, Vector4 UpDir);
+	Matrix4x4 MakeView(Vector4 CameraPos, Vector4 LookAt, Vector4 UpDir);
 
 	/**
 	 * Creates a matrix for orthogonal projection
@@ -80,9 +83,9 @@ namespace EQX {
 	 * @param FarClip Far clipping distance
 	 * @return Perspective Projection Matrix
 	 */
-	Matrix4x4 makePersp(float ViewportWidth, float ViewportHeight,
+	Matrix4x4 MakePersp(float ViewportWidth, float ViewportHeight,
 		float NearClip = -0.1f, float FarClip = -100.f);
 
-	Matrix4x4 makeScreenSpace(float Width, float Height);
+	Matrix4x4 MakeScreenSpace(float Width, float Height);
 
 }

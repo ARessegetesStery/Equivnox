@@ -8,7 +8,7 @@ namespace EQX
 
 	Vector2::Vector2() : x(0), y(0) {  }
 
-	Vector2::Vector2(float x, float y) : x(x), y(y) {  }
+	Vector2::Vector2(const float x, const float y) : x(x), y(y) {  }
 
 	Vector2::Vector2(const Vector2& v) : x(v.x), y(v.y) {  }
 
@@ -86,9 +86,14 @@ namespace EQX
 		return (v1.x == v2.x) && (v1.y == v2.y);
 	}
 
-	float Dot(const Vector2& v1, const Vector2& v2)
+	Vector2 operator*(const float c, const Vector2& v)
 	{
-		return v1.x * v2.x + v1.y * v2.y;
+		return Vector2(c * v.x, c * v.y);
+	}
+
+	Vector2 operator*(const Vector2& v, const float c)
+	{
+		return Vector2(c * v.x, c * v.y);
 	}
 
 }

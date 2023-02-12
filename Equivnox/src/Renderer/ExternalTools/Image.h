@@ -135,4 +135,5 @@ namespace EQX {
 	Color blendColor(Color fore, Color back, float coeff);
 
 	TGAColor toTGAColor(Color);
+
 }

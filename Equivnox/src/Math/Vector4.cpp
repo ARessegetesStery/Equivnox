@@ -8,7 +8,7 @@ namespace EQX
 
 	Vector4::Vector4() : x(0), y(0), z(0), w(1) {  }
 
-	Vector4::Vector4(float x, float y, float z, float w) 
+	Vector4::Vector4(const float x, const float y, const float z, const float w) 
 		: x(x), y(y), z(z), w(w) {  }
 
 	Vector4::Vector4(const Vector3& v3)
@@ -151,11 +151,6 @@ namespace EQX
 	Vector4 operator*(const float coeff, const Vector4& v4)
 	{
 		return v4 * coeff;
-	}
-
-	float Dot(const Vector4& v1, const Vector4& v2)
-	{
-		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w;
 	}
 
 	Vector4 Cross(const Vector4& v1, const Vector4& v2)

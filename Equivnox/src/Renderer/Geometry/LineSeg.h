@@ -25,7 +25,4 @@ namespace EQX {
 
 	float GetSlope(Vertex& v1, Vertex& v2);
 
-	// For Line Rendering
-	const float SLOPE_MAX = 1000;
-
 }

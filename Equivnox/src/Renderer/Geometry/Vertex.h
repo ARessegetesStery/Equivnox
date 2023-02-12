@@ -41,7 +41,6 @@ namespace EQX
 	 * @param r vertex supposedly with larger x
 	 */
 	bool LefterVertex(const Vertex& l, const Vertex& r);
-
 	/**
 	 * return true if l.y is smaller than or equal to u.y
 	 *
@@ -49,4 +48,7 @@ namespace EQX
 	 * @param u vertex supposedly with larger y
 	 */
 	bool LowerVertex(const Vertex& l, const Vertex& u);
+
+	// General operator<(s) defined for Vertex
+	bool LefterLowerBehindVertex(const Vertex& l, const Vertex& r);
 }

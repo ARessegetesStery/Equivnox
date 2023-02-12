@@ -6,6 +6,7 @@ namespace EQX
 {
 	Renderer::Renderer()
 	{
+		/*  Configurations  */
 		this->curMesh = nullptr;
 		this->cameraEnabled = true;
 		this->renderFill = RenderFill::WIREFRAME;
@@ -14,9 +15,13 @@ namespace EQX
 		this->renderLightConfig = RenderLightConfig::PHONG;
 		this->imageType = ImageType::TGA;
 		this->outputPath = "output";
+		this->ssTransform = Mat4::Identity;
+		this->perspTransform = Mat4::Identity;
+		this->transform = Mat4::Identity;
+		this->inverseTransform = Mat4::Identity;
 		this->width = 400;
 		this->height = 400;
-		this->MSAAMult = 8;
+		this->MSAAMult = 4;
 	}
 
 	Renderer& Renderer::Init()
@@ -65,14 +70,16 @@ namespace EQX
 			for (int y = 0; y < this->height; ++y)
 				image.set(x, y, Color::Black);
 
-		/*  Setup Projection  */
-		Mat4 PerspMat = makeScreenSpace(this->width, this->height) *
-			makePersp(camera.width, camera.height) * makeView(camera.pos, camera.lookAt, camera.upDir);
+		/*  Setup Transform Matrix  */
+		Mat4 ssMat = MakeScreenSpace(this->width, this->height);
+		Mat4 perspMat = MakePersp(camera.width, camera.height) * MakeView(camera.pos, camera.lookAt, camera.upDir);
 		if (this->cameraEnabled)
-			this->projection = PerspMat;
-		else
-			this->projection = Mat4::IDENTITY;
-		this->inverseProjection = this->projection.Inverse();
+		{
+			this->ssTransform = ssMat;
+			this->perspTransform = perspMat;
+			this->transform = ssMat * perspMat;
+			this->inverseTransform = this->transform.Inverse();
+		}
 
 		/*  Render Meshes  */
 		switch (renderFill)
@@ -90,13 +97,13 @@ namespace EQX
 		image.write(this->imageType, this->outputPath);
 	}
 
-	void Renderer::RenderLines(Image& image)
+	void Renderer::RenderLines(EQX_OUT Image& image) const
 	{
-		Mat4 PerspMat = makeScreenSpace(this->width, this->height) *
-			makePersp(camera.width, camera.height, -camera.nearClip, -camera.farClip) * 
-			makeView(camera.pos, camera.lookAt, camera.upDir);
+		Mat4 PerspMat = MakeScreenSpace(this->width, this->height) *
+			MakePersp(camera.width, camera.height, -camera.nearClip, -camera.farClip) * 
+			MakeView(camera.pos, camera.lookAt, camera.upDir);
 
-		Mat4 Projection = Mat4::IDENTITY;
+		Mat4 Projection = Mat4::Identity;
 		if (this->cameraEnabled)
 			Projection = PerspMat;
 
@@ -140,7 +147,7 @@ namespace EQX
 		}
 	}
 
-	void Renderer::RenderFaces(Image& image)
+	void Renderer::RenderFaces(EQX_OUT Image& image) const
 	{
 		ImageGrey ZBuf(this->width, this->height);
 
@@ -154,10 +161,13 @@ namespace EQX
 		{
 			std::array<Vertex, 3> vertices{ curMesh->vertices[(*iter)[0]],
 				curMesh->vertices[(*iter)[1]] , curMesh->vertices[(*iter)[2]] };
+			Face fOriginal(vertices);
+			Face fTransformed(fOriginal);
+			TransformFace(fTransformed, transform);
 
 			// If camera disabled, no need to render ZBuffer
 			if (this->cameraEnabled)
-				RenderFaceZBuf(ZBuf, vertices);
+				RenderFaceZBuf(ZBuf, fTransformed);
 		}
 
 		/*  Rendering Only ZBuffer  */
@@ -173,30 +183,26 @@ namespace EQX
 		{
 			std::array<Vertex, 3> vertices{ curMesh->vertices[(*iter)[0]], 
 				curMesh->vertices[(*iter)[1]] , curMesh->vertices[(*iter)[2]] };
-			Face face(vertices);
+			Face fOriginal(vertices);
+			Face fTransformed(fOriginal);
+			TransformFace(fTransformed, perspTransform);
 
 			/*  Back-Surface Culling  */
 			if (vertices[0].normal.z < 0 && vertices[1].normal.z < 0 && vertices[2].normal.z < 0)
-			{
-				// cout << "Culled" << endl;
 				continue;
-			}
 
-			// Render Each Fragment
-			switch (this->renderAAConfig)
-			{
-			case RenderAAConfig::ANTIALIAS_OFF:
-			case RenderAAConfig::MSAA:
-				RenderFaceSingle(image, face, ZBuf);
-				break;
-			}
+			/*  Render Each Fragment with Clipping  */
+			std::vector<Face> fsClipped;
+			if (FrustumClipping(fTransformed, fsClipped))
+				for (auto& fClipped : fsClipped)
+					RenderFaceSingle(image, fOriginal, fClipped, ZBuf);
 		}
 	}
 
-	void Renderer::RenderLineRaw(Image& image, LineSeg l, const Mat4& Projection)
+	void Renderer::RenderLineRaw(EQX_OUT Image& image, LineSeg l, const Mat4& Projection) const
 	{
-		l.start = TransformVertexPos(Projection, l.start);
-		l.end = TransformVertexPos(Projection, l.end);
+		TransformVertexPos(Projection, l.start);
+		TransformVertexPos(Projection, l.end);
 		LineSeg perspL(l.start, l.end);
 
 		int sx = static_cast<int>(perspL.start.pos.x);
@@ -232,10 +238,10 @@ namespace EQX
 		}
 	}
 	 
-	void Renderer::RenderLineSmooth(Image& image, LineSeg l, const Mat4& Projection)
+	void Renderer::RenderLineSmooth(EQX_OUT Image& image, LineSeg l, const Mat4& Projection) const
 	{
-		l.start = TransformVertexPos(Projection, l.start);
-		l.end = TransformVertexPos(Projection, l.end);
+		TransformVertexPos(Projection, l.start);
+		TransformVertexPos(Projection, l.end);
 		LineSeg perspL(l.start, l.end);
 
 		int sx = static_cast<int>(perspL.start.pos.x);
@@ -250,23 +256,13 @@ namespace EQX
 			yPace = -1;
 
 		if (sy == ey)
-		{
 			for (int x = sx; x != ex + xPace; x += xPace)
-			{
 				image.set(x, sy, blendColor(Color::White, image.get(x, sy), 1.0));
-			}
-		}
 		else if (abs(perspL.k) > SLOPE_MAX)
-		{
 			for (int y = sy; y != ey + yPace; y += yPace)
-			{
-				
 				image.set(sx, y, blendColor(Color::White, image.get(sx, y), 1.0));
-			}
-		}
 		else
 		{
-			
 			for (int x = sx; x != ex; x += xPace)
 			{
 				for (int y = (int)(sy + perspL.k * (x - sx - 1)) - 2 * yPace;
@@ -274,6 +270,8 @@ namespace EQX
 					y += yPace)
 					// only traverse pixels that will possibly be rendered
 				{
+					if (x >= this->width || y >= this->height)
+						continue;
 					Vector2 center(x + xPace / 2.0f, y + yPace / 2.0f);
 					float coeff = PixelAmp(perspL, center);
 					image.set(x, y, blendColor(Color::White, image.get(x, y), coeff));
@@ -282,137 +280,87 @@ namespace EQX
 		}
 	}
 	
-	void Renderer::RenderFaceSingle(Image& image, Face f, const Image& ZBuffer)
+	void Renderer::RenderFaceSingle(EQX_OUT Image& image, const Face& fOriginal, Face& fTransformed, const Image& ZBuffer) const
 	{
-		// TODO (GPU) Change into edge function (cross product)
-		Face original = f;
-		f.l = TransformVertexPos(projection, f.l);
-		f.m = TransformVertexPos(projection, f.m);
-		f.r = TransformVertexPos(projection, f.r);
-		f.ValidateSeq();
+		TransformFace(fTransformed, ssTransform);
 
-		if (std::abs(f.kLM) > SLOPE_MAX)
+		if (std::abs(fTransformed.kLM) > SLOPE_MAX)
 		{
 			int xpos, ypos;
-			for (xpos = f.l.pos.x; xpos < f.r.pos.x; ++xpos)
-			{
-				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLR;
-					ypos <= f.m.pos.y + (xpos - f.l.pos.x) * f.kMR; ++ypos)
-				{
-					UpdateFragColor(xpos, ypos, f, original, image, ZBuffer);
-				}
-			}
+			for (xpos = fTransformed.l.pos.x; xpos < fTransformed.r.pos.x; ++xpos)
+				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR;
+					ypos <= fTransformed.m.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kMR; ++ypos)
+					UpdateFragColor(xpos, ypos, fTransformed, fOriginal, image, ZBuffer);
 		}
-		else if (f.kLM > f.kLR)
+		else if (fTransformed.kLM > fTransformed.kLR)
 		{
 			int xpos, ypos;
-			for (xpos = f.l.pos.x; xpos < floor(f.m.pos.x); ++xpos)
-			{
-				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLR - 1;
-					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLM + 1; ++ypos)
-				{
-					UpdateFragColor(xpos, ypos, f, original, image, ZBuffer);
-				}
-			}
-			for (xpos = f.m.pos.x; xpos <= f.r.pos.x; ++xpos)
-			{
-				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLR - 1;
-					ypos <= f.m.pos.y + (xpos - f.m.pos.x) * f.kMR + 1; ++ypos)
-				{
-					UpdateFragColor(xpos, ypos, f, original, image, ZBuffer);
-				}
-			}
+			for (xpos = fTransformed.l.pos.x; xpos < floor(fTransformed.m.pos.x); ++xpos)
+				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR - 1;
+					ypos <= fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLM + 1; ++ypos)
+					UpdateFragColor(xpos, ypos, fTransformed, fOriginal, image, ZBuffer);
+			for (xpos = fTransformed.m.pos.x; xpos <= fTransformed.r.pos.x; ++xpos)
+				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR - 1;
+					ypos <= fTransformed.m.pos.y + (xpos - fTransformed.m.pos.x) * fTransformed.kMR + 1; ++ypos)
+					UpdateFragColor(xpos, ypos, fTransformed, fOriginal, image, ZBuffer);
 		}
 		else
 		{
 			int xpos, ypos;
-			for (xpos = f.l.pos.x; xpos < floor(f.m.pos.x); ++xpos)
-			{
-				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLM - 1;
-					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLR + 1; ++ypos)
-				{
-					UpdateFragColor(xpos, ypos, f, original, image, ZBuffer);
-				}
-			}
-			for (xpos = f.m.pos.x; xpos <= f.r.pos.x; ++xpos)
-			{
-				for (ypos = f.m.pos.y + (xpos - f.m.pos.x) * f.kMR - 1;
-					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLR + 1; ++ypos)
-				{
-					UpdateFragColor(xpos, ypos, f, original, image, ZBuffer);
-				}
-			}
+			for (xpos = fTransformed.l.pos.x; xpos < floor(fTransformed.m.pos.x); ++xpos)
+				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLM - 1;
+					ypos <= fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR + 1; ++ypos)
+					UpdateFragColor(xpos, ypos, fTransformed, fOriginal, image, ZBuffer);
+			for (xpos = fTransformed.m.pos.x; xpos <= fTransformed.r.pos.x; ++xpos)
+				for (ypos = fTransformed.m.pos.y + (xpos - fTransformed.m.pos.x) * fTransformed.kMR - 1;
+					ypos <= fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR + 1; ++ypos)
+					UpdateFragColor(xpos, ypos, fTransformed, fOriginal, image, ZBuffer);
 		}
-
-		
 	}
 
-	void Renderer::RenderFaceZBuf(ImageGrey& image, Face f)
+	void Renderer::RenderFaceZBuf(EQX_OUT ImageGrey& image, const Face& fTransformed) const
 	{
-		f.l = TransformVertexPos(projection, f.l);
-		f.m = TransformVertexPos(projection, f.m);
-		f.r = TransformVertexPos(projection, f.r);
-		f.ValidateSeq();
-
-		if (std::abs(f.kLM) > SLOPE_MAX)
+		if (std::abs(fTransformed.kLM) > SLOPE_MAX)
 		{
 			int xpos, ypos;
-			for (xpos = f.l.pos.x; xpos < f.r.pos.x; ++xpos)
-			{
-				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLR;
-					ypos <= f.m.pos.y + (xpos - f.l.pos.x) * f.kMR; ++ypos)
-				{
-					UpdateZBufColor(xpos, ypos, f, image);
-				}
-			}
+			for (xpos = fTransformed.l.pos.x; xpos < fTransformed.r.pos.x; ++xpos)
+				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR;
+					ypos <= fTransformed.m.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kMR; ++ypos)
+					UpdateZBufColor(xpos, ypos, fTransformed, image);
 		}
-		else if (f.kLM > f.kLR)
+		else if (fTransformed.kLM > fTransformed.kLR)
 		{
 			int xpos, ypos;
-			for (xpos = f.l.pos.x; xpos <= f.m.pos.x; ++xpos)
-			{
-				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLR;
-					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLM; ++ypos)
-				{
-					UpdateZBufColor(xpos, ypos, f, image);
-				}
-			}
-			for (xpos = f.m.pos.x; xpos <= f.r.pos.x; ++xpos)
-			{
-				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLR;
-					ypos <= f.m.pos.y + (xpos - f.m.pos.x) * f.kMR; ++ypos)
-				{
-					UpdateZBufColor(xpos, ypos, f, image);
-				}
-			}
+			for (xpos = fTransformed.l.pos.x; xpos <= fTransformed.m.pos.x; ++xpos)
+				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR;
+					ypos <= fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLM; ++ypos)
+					UpdateZBufColor(xpos, ypos, fTransformed, image);
+			for (xpos = fTransformed.m.pos.x; xpos <= fTransformed.r.pos.x; ++xpos)
+				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR;
+					ypos <= fTransformed.m.pos.y + (xpos - fTransformed.m.pos.x) * fTransformed.kMR; ++ypos)
+					UpdateZBufColor(xpos, ypos, fTransformed, image);
 		}
 		else
 		{
 			int xpos, ypos;
-			for (xpos = f.l.pos.x; xpos <= f.m.pos.x; ++xpos)
+			for (xpos = fTransformed.l.pos.x; xpos <= fTransformed.m.pos.x; ++xpos)
 			{
-				for (ypos = f.l.pos.y + (xpos - f.l.pos.x) * f.kLM;
-					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLR; ++ypos)
-				{
-					UpdateZBufColor(xpos, ypos, f, image);
-				}
+				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLM;
+					ypos <= fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR; ++ypos)
+					UpdateZBufColor(xpos, ypos, fTransformed, image);
 			}
-			for (xpos = f.m.pos.x; xpos <= f.r.pos.x; ++xpos)
-			{
-				for (ypos = f.m.pos.y + (xpos - f.m.pos.x) * f.kMR;
-					ypos <= f.l.pos.y + (xpos - f.l.pos.x) * f.kLR; ++ypos)
-				{
-					UpdateZBufColor(xpos, ypos, f, image);
-				}
-			}
+			for (xpos = fTransformed.m.pos.x; xpos <= fTransformed.r.pos.x; ++xpos)
+				for (ypos = fTransformed.m.pos.y + (xpos - fTransformed.m.pos.x) * fTransformed.kMR;
+					ypos <= fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR; ++ypos)
+					UpdateZBufColor(xpos, ypos, fTransformed, image);
 		}
 	}
 
-	void Renderer::UpdateZBufColor(float x, float y, const Face& f, ImageGrey& ZBuf)
+	void Renderer::UpdateZBufColor(float x, float y, const Face& f, EQX_OUT ImageGrey& ZBuf) const
 	{
 		int curGreyScale = ZBuf.get(x, y).r;
 
-		float zpos = f.ZatXYFace(Vec2(x, y));
+		float zpos = f.ZAtXYFace(Vec2(x, y));
 		int newGreyScale = (zpos == 1) ? 0 : 128 - 127.f * zpos;
 
 		if (newGreyScale > 255 || newGreyScale < 0)
@@ -423,7 +371,7 @@ namespace EQX
 	}
 
 	
-	void Renderer::UpdateFragColor(float xpos, float ypos, const Face& f, const Face& fOriginal, Image& image, const Image& ZBuffer)
+	void Renderer::UpdateFragColor(float xpos, float ypos, const Face& f, const Face& fOriginal, EQX_OUT Image& image, const Image& ZBuffer) const
 	{
 		// If camera disabled, only render white pixels
 		if (!this->cameraEnabled)
@@ -439,13 +387,13 @@ namespace EQX
 
 		if (this->renderAAConfig == RenderAAConfig::ANTIALIAS_OFF)
 		{
-			if (!IsPointInTriangle(Vec2(xpos, ypos), f))
+			if (!IsPointInTriangleZ(Vec2(xpos, ypos), f))
 				return;
 
 			// Set z to -Z_MAX if point is outside the triangle
-			float zpos = f.ZatXYFace(Vec2(xpos, ypos));
+			float zpos = f.ZAtXYFace(Vec2(xpos, ypos));
 			Vec3 curPos = Vec3(xpos, ypos, zpos);
-			Vec3 originalPos = inverseProjection * (curPos.ToVec4());
+			Vec3 originalPos = inverseTransform * (curPos.ToVec4());
 			Vec3 baryCoord = fOriginal.baryCoord(originalPos.x, originalPos.y);
 			Vec3 fragNormal = baryCoord[0] * fOriginal.l.normal +
 				baryCoord[1] * fOriginal.m.normal + baryCoord[2] * fOriginal.r.normal;
@@ -478,9 +426,9 @@ namespace EQX
 		else if (this->renderAAConfig == RenderAAConfig::MSAA)
 		{
 			// Obtains z value presuming that the point is in the triangle
-			float zpos = f.ZatXYPlane(Vec2(xpos, ypos));
+			float zpos = f.ZAtXYPlane(Vec2(xpos, ypos));
 			Vec3 curPos = Vec3(xpos, ypos, zpos);
-			Vec3 originalPos = inverseProjection * (curPos.ToVec4());
+			Vec3 originalPos = inverseTransform * (curPos.ToVec4());
 			Vec3 baryCoord = fOriginal.baryCoord(originalPos.x, originalPos.y);
 			Vec3 fragNormal = baryCoord[0] * fOriginal.l.normal +
 			baryCoord[1] * fOriginal.m.normal + baryCoord[2] * fOriginal.r.normal;
@@ -506,13 +454,13 @@ namespace EQX
 					Vec2 curPos = Vec2(xpos - 0.5f + float(i) * step, ypos - 0.5f + float(j) * step);
 
 					/*  Occlusion Test  */
-					float z = face.ZatXYFace(curPos.x, curPos.y);
+					float z = face.ZAtXYFace(curPos.x, curPos.y);
 					float newGreyScale = (z == 1) ? 0 : 128 - 127.f * z;
 					if (newGreyScale >= curGreyScale + 2)
 						continue;
 
 					/*  Coverage Test  */
-					if (IsPointInTriangle(curPos, face))
+					if (IsPointInTriangleZ(curPos, face))
 						++validSamplerCnt;
 				}
 			}

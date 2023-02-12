@@ -13,7 +13,6 @@ namespace EQX {
 
 	Face::Face(std::array<Vertex, 3>& vertices)
 	{
-		// TODO simplify
 		this->l = vertices[0];
 		this->m = vertices[1];
 		this->r = vertices[2];
@@ -25,6 +24,39 @@ namespace EQX {
 
 	Face::Face(const Face& f) : 
 		l(f.l), m(f.m), r(f.r), kLM(f.kLM), kLR(f.kLR), kMR(f.kMR)  {	}
+
+	Face& Face::operator=(const Face& f)
+	{
+		this->l = f.l;
+		this->m = f.m;
+		this->r = f.r;
+		this->ValidateSeq();
+		return *this;
+	}
+
+	Vertex& Face::operator[](size_t index)
+	{
+		if (index == 0)
+			return this->l;
+		else if (index == 1)
+			return this->m;
+		else if (index == 2)
+			return this->r;
+		else
+			return this->l;
+	}
+
+	const Vertex& Face::operator[](size_t index) const
+	{
+		if (index == 0)
+			return this->l;
+		else if (index == 1)
+			return this->m;
+		else if (index == 2)
+			return this->r;
+		else
+			return this->l;
+	}
 
 	Vector3 Face::baryCoord(Vector2 xy) const
 	{
@@ -44,7 +76,7 @@ namespace EQX {
 		return baryCoord(Vec2(x, y));
 	}
 
-	float Face::ZatXYFace(Vector2 xy) const
+	float Face::ZAtXYFace(Vector2 xy) const
 	{
 		Vec3 baryCoord = this->baryCoord(xy);
 		 if (baryCoord[0] < 0 || baryCoord[1] < 0 || baryCoord[2] < 0)
@@ -52,20 +84,20 @@ namespace EQX {
 		return baryCoord[0] * l.pos.z + baryCoord[1] * m.pos.z + baryCoord[2] * r.pos.z;
 	}
 
-	float Face::ZatXYFace(float x, float y) const
+	float Face::ZAtXYFace(float x, float y) const
 	{
-		return this->ZatXYFace(Vec2(x, y));
+		return this->ZAtXYFace(Vec2(x, y));
 	}
 
-	float Face::ZatXYPlane(Vector2 xy) const
+	float Face::ZAtXYPlane(Vector2 xy) const
 	{
 		Vec3 baryCoord = this->baryCoord(xy);
 		return baryCoord[0] * l.pos.z + baryCoord[1] * m.pos.z + baryCoord[2] * r.pos.z;
 	}
 
-	float Face::ZatXYPlane(float x, float y) const
+	float Face::ZAtXYPlane(float x, float y) const
 	{
-		return this->ZatXYPlane(Vec2(x, y));
+		return this->ZAtXYPlane(Vec2(x, y));
 	}
 
 	void Face::ValidateSeq()
@@ -78,19 +110,29 @@ namespace EQX {
 		this->kLM = GetSlope(l, m);
 		this->kLR = GetSlope(l, r);
 		this->kMR = GetSlope(m, r);
-		if (std::abs(kLM) > SLOPE_MAX)
+		if (std::abs(kLM) > SLOPE_MAX && std::abs(kMR) > SLOPE_MAX)
+		{
+			std::sort(vertices.begin(), vertices.end(), LowerVertex);
+			this->l = vertices[0];
+			this->m = vertices[1];
+			this->r = vertices[2];
+			this->kLM = GetSlope(l, m);
+			this->kLR = GetSlope(l, r);
+			this->kMR = GetSlope(m, r);
+		}
+		else if (std::abs(kLM) > SLOPE_MAX)
 		{
 			l = std::min(l, m, LowerVertex);
 			m = std::max(l, m, LowerVertex);
 		}
-		if (std::abs(kMR) > SLOPE_MAX)
+		else if (std::abs(kMR) > SLOPE_MAX)
 		{
 			m = std::min(r, m, LowerVertex);
 			r = std::max(r, m, LowerVertex);
 		}
 	}
 
-	bool IsPointInTriangle(Vertex v, Face f)
+	bool IsPointInTriangleZ(Vertex v, Face f)
 	{
 		f.l.pos.z = 0;
 		f.m.pos.z = 0;
@@ -101,5 +143,29 @@ namespace EQX {
 		Vec3 dir3 = (Cross(f.r.pos - v.pos, f.l.pos - f.r.pos));
 		// Need to verify three because of the presence of sgn() = 0: consider (1, 0, -1)
 		return sgn(dir1.z) * sgn(dir2.z) >= 0 && sgn(dir1.z) * sgn(dir3.z) >= 0 && sgn(dir2.z) * sgn(dir3.z) >= 0;
+	}
+
+	void CompleteAttribInFace(EQX_OUT Vertex& v, const Face& f)
+	{
+		Vec3 baryCoordAtV = f.baryCoord(v.pos.x, v.pos.y);
+		v.normal = baryCoordAtV[0] * f.l.normal + baryCoordAtV[1] * f.m.normal + baryCoordAtV[2] * f.r.normal;
+		v.uv = baryCoordAtV[0] * f.l.uv + baryCoordAtV[1] * f.m.uv + baryCoordAtV[2] * f.r.uv;
+	}
+
+	bool FaceIntersectiWithLine(const Face& p, const Line& l, EQX_OUT Vec3& pos)
+	{
+		Vec3 originalPos = pos;
+		Plane facePlane = Plane(p.l.pos, p.m.pos, p.r.pos);
+		if (PlaneIntersectWithLine(facePlane, l, pos))
+		{
+			if (IsPointInTriangleZ(pos, p))
+				return true;
+			else
+			{
+				pos = originalPos;
+				return false;
+			}
+		}
+		return false;
 	}
 }

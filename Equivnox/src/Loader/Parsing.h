@@ -2,7 +2,7 @@
 
 #include "eqxpch.h"
 
-#include "Renderer/Shapes/Shapes.h"
+#include "Renderer/Geometry/Geometry.h"
 
 namespace EQX {
 

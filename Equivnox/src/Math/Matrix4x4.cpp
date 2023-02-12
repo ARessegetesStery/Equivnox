@@ -4,7 +4,7 @@
 
 namespace EQX {
 
-	const Matrix4x4 Matrix4x4::IDENTITY = Matrix4x4(
+	const Matrix4x4 Matrix4x4::Identity = Matrix4x4(
 		Vector4(1, 0, 0, 0),
 		Vector4(0, 1, 0, 0),
 		Vector4(0, 0, 1, 0),
@@ -238,7 +238,21 @@ namespace EQX {
 		return this->Concatenate(r);
 	}
 
-	Matrix4x4 makeView(Vector4 CameraPos, Vector4 LookAt, Vector4 UpDir)
+	float& Matrix4x4::operator[](size_t index)
+	{
+		if (index > 15)
+			index = 0;
+		return this->Mat[index / 4][index % 4];
+	}
+
+	const float Matrix4x4::operator[](size_t index) const
+	{
+		if (index > 15)
+			index = 0;
+		return this->Mat[index / 4][index % 4];
+	}
+
+	Matrix4x4 MakeView(Vector4 CameraPos, Vector4 LookAt, Vector4 UpDir)
 	{
 		Vector3 look = LookAt.ToVec3();
 		Vector3 up = UpDir.ToVec3();
@@ -261,7 +275,7 @@ namespace EQX {
 		return rotation * trans;
 	}
 
-	Matrix4x4 makeView(Vector4 CameraPos, Vector4 LookAt)
+	Matrix4x4 MakeView(Vector4 CameraPos, Vector4 LookAt)
 	{
 		Vector3 Updir3;
 		Vector3 look = LookAt.ToVec3();
@@ -277,7 +291,7 @@ namespace EQX {
 		}
 		Updir3 = Updir3.Normalize();
 		Vector4 Updir(Updir3);
-		return makeView(CameraPos, LookAt, Updir);
+		return MakeView(CameraPos, LookAt, Updir);
 	}
 
 	Matrix4x4 makeOrtho(float NearWidth, float NearHeight,
@@ -296,7 +310,7 @@ namespace EQX {
 		return scale * trans;
 	}
 
-	Matrix4x4 makePersp(float NearWidth, float NearHeight,
+	Matrix4x4 MakePersp(float NearWidth, float NearHeight,
 		float NearClip, float FarClip)
 	{
 		Matrix4x4 Ortho = makeOrtho(NearWidth, NearHeight, NearClip, FarClip);
@@ -308,7 +322,7 @@ namespace EQX {
 		return Ortho * Persp;
 	}
 
-	Matrix4x4 makeScreenSpace(float Width, float Height)
+	Matrix4x4 MakeScreenSpace(float Width, float Height)
 	{
 		return Matrix4x4(
 			Vector4(Width / 2.0f, 0            , 0, Width / 2.0f),

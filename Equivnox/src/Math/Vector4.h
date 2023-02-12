@@ -20,7 +20,7 @@ namespace EQX {
 
 	public:
 		Vector4();
-		Vector4(float, float, float, float w = 1.0);
+		Vector4(const float, const float, const float, const float w = 1.0);
 		Vector4(const Vector3&);
 		Vector4(const Vector4&);
 		Vector4(Vector4&&) noexcept;
@@ -46,7 +46,6 @@ namespace EQX {
 		static const Vector4 ZERO;
 	};
 
-	float Dot(const Vector4&, const Vector4&);
 	Vector4 Cross(const Vector4&, const Vector4&);
 
 	bool operator== (const Vector4&, const Vector4&);

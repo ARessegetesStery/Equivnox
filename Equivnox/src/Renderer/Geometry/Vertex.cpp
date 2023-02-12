@@ -37,4 +37,17 @@ namespace EQX
 		return l.pos.y < u.pos.y;
 	}
 
+	bool LefterLowerBehindVertex(const Vertex& l, const Vertex& r)
+	{
+		if (l.pos.x != r.pos.x)
+			return l.pos.x < r.pos.x;
+		else
+		{
+			if (l.pos.y != r.pos.y)
+				return l.pos.y < r.pos.y;
+			else
+				return l.pos.z < r.pos.z;
+		}
+	}
+
 }

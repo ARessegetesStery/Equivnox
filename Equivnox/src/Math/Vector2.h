@@ -11,7 +11,7 @@ namespace EQX {
 		float y;
 	public:
 		Vector2();
-		Vector2(float, float);
+		Vector2(const float, const float);
 		Vector2(const Vector2&);
 		Vector2(Vector2&&) noexcept;
 
@@ -31,7 +31,8 @@ namespace EQX {
 		static const Vector2 ZERO;
 	};
 
-	float Dot(const Vector2&, const Vector2&);
+	Vector2 operator* (const float, const Vector2&);
+	Vector2 operator* (const Vector2&, const float);
 
 	bool operator== (const Vector2&, const Vector2&);
 	

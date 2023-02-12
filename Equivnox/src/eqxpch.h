@@ -21,7 +21,6 @@
 /**
  * Convention:
  * * Float instead of Double is used.
- * 
  */
 
 #ifdef EQX_DEBUG
@@ -29,5 +28,4 @@ using std::cout, std::endl;
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-
-
+#define EQX_OUT
