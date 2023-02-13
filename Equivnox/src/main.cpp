@@ -32,14 +32,14 @@ int main(int argc, char** argv) {
 
 	std::array<EQX::Vertex, 3> vertices{ EQX::Vector2(10, 80), EQX::Vector2(40, 90), EQX::Vector2(40, 140) };
 	EQX::Face f(v1, v2, v3);
-	m.Shift(EQX::Vector3(0, 0, 0.4));
+	m.Shift(EQX::Vector3(0, 0, 1.4));
 	// m.AddLine(v1, v3);
 	// m.AddFace(f);
 
 	coreRenderer.BindMesh(&m);
 	coreRenderer.SetPass(EQX::RenderPass::FULL);
 	coreRenderer.SetFill(EQX::RenderFill::FILL);
-	coreRenderer.SetAA(EQX::RenderAAConfig::MSAA);
+	coreRenderer.SetAA(EQX::RenderAAConfig::ANTIALIAS_OFF);
 	coreRenderer.SetOutputType(EQX::ImageType::TGA);
 	coreRenderer.SetLight(EQX::RenderLightConfig::PHONG);
 
@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
 	coreRenderer.camera.upDir = EQX::Vec3(0, 1, 0);
 	// coreRenderer.DisableCamera();
 
-	coreRenderer.addLight(EQX::Light(coreRenderer.camera.pos, EQX::Color::White, 1.f, EQX::LightType::Point));
+	coreRenderer.addLight(EQX::Light(coreRenderer.camera.pos, EQX::Color::White, 0.5f, EQX::LightType::Point));
 
 	coreRenderer.Render();
 }

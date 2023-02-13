@@ -40,6 +40,7 @@ namespace EQX
 	extern Vec3 Lerp(const Vec3 v1, const Vec3 v2, float z, Axis axis);
 
 	// returns 0 if there exists no or infinite solutions
+	// returns {alpha}: {vector-with-x} = {alpha} * v1 + (1 - {alpha}) * v2
 	extern float LerpCoeffX(const Vec3 v1, const Vec3 v2, float x);
 	extern float LerpCoeffY(const Vec3 v1, const Vec3 v2, float y);
 	extern float LerpCoeffZ(const Vec3 v1, const Vec3 v2, float z);

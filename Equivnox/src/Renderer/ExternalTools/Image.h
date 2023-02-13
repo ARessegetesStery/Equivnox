@@ -126,6 +126,11 @@ namespace EQX {
 		void clear();
 		void write(ImageType type = ImageType::TGA, std::string filename = "output");
 
+		inline bool IsPointOnCanvas(float x, float y) 
+		{ 
+			return 0 <= x && x < this->width && 0 <= y && y <= this->height; 
+		}
+
 		const unsigned char* GetCanvas() const { return this->canvas; };
 
 		inline unsigned int getWidth() const { return width; }

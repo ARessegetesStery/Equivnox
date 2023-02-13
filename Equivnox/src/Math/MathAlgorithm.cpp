@@ -32,6 +32,10 @@ namespace EQX
 
 	Vec3 XLerp(const Vec3 v1, const Vec3 v2, float x)
 	{
+		float coeff = LerpCoeffX(v1, v2, x);
+		return coeff * v1 + (1 - coeff) * v2;
+
+		/*
 		if (v1.x == v2.x)
 			return v1;
 		else
@@ -46,11 +50,15 @@ namespace EQX
 			else
 				z = (v2.z - v1.z) * (x - v1.x) / (v2.x - v1.x);
 			return Vec3	(x, y, z);
-		}
+		}*/
 	}
 
 	Vec3 YLerp(const Vec3 v1, const Vec3 v2, float y)
 	{
+		float coeff = LerpCoeffY(v1, v2, y);
+		return coeff * v1 + (1 - coeff) * v2;
+
+		/*
 		if (v1.y == v2.y)
 			return v1;
 		else
@@ -65,11 +73,15 @@ namespace EQX
 			else
 				z = (v2.z - v1.z) * (y - v1.y) / (v2.y - v1.y);
 			return Vec3(x, y, z);
-		}
+		}*/
 	}
 
 	Vec3 ZLerp(const Vec3 v1, const Vec3 v2, float z)
 	{
+		float coeff = LerpCoeffZ(v1, v2, z);
+		return coeff * v1 + (1 - coeff) * v2;
+
+		/*
 		if (v1.z == v2.z)
 			return v1;
 		else
@@ -84,7 +96,7 @@ namespace EQX
 			else
 				y = (v2.y - v1.y) * (z - v1.z) / (v2.z - v1.z);
 			return Vec3(x, y, z);
-		}
+		}*/
 	}
 
 	Vec3 Lerp(const Vec3 v1, const Vec3 v2, float a, Axis axis)
@@ -94,9 +106,9 @@ namespace EQX
 		case Axis::AXIS_X:
 			return XLerp(v1, v2, a);
 		case Axis::AXIS_Y:
-			return XLerp(v1, v2, a);
+			return YLerp(v1, v2, a);
 		case Axis::AXIS_Z:
-			return XLerp(v1, v2, a);
+			return ZLerp(v1, v2, a);
 		default:
 			return XLerp(v1, v2, a);
 		}
@@ -113,7 +125,7 @@ namespace EQX
 		if (v1.x == v2.x)
 			return 0.f;
 		else
-			return (x - v1.x) / (v2.x - v1.x);
+			return (x - v2.x) / (v1.x - v2.x);
 	}
 
 	float LerpCoeffY(const Vec3 v1, const Vec3 v2, float y)
@@ -121,7 +133,7 @@ namespace EQX
 		if (v1.y == v2.y)
 			return 0.f;
 		else
-			return (y - v1.y) / (v2.y - v1.y);
+			return (y - v2.y) / (v1.y - v2.y);
 	}
 
 	float LerpCoeffZ(const Vec3 v1, const Vec3 v2, float z)
@@ -129,7 +141,7 @@ namespace EQX
 		if (v1.z == v2.z)
 			return 0.f;
 		else
-			return (z - v1.z) / (v2.z - v1.z);
+			return (z - v2.z) / (v1.z - v2.z);
 	}
 
 	float LerpCoeff(const Vec3 v1, const Vec3 v2, float a, Axis axis)

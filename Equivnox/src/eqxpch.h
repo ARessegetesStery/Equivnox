@@ -24,8 +24,13 @@
  */
 
 #ifdef EQX_DEBUG
+/*  Macros for Debug Msg Printing COntrol  */
+#define EQX_PRINT_TRIG_CLIPPING
+
 using std::cout, std::endl;
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
 #define EQX_OUT
+
+

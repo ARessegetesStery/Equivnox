@@ -53,4 +53,7 @@ namespace EQX {
 	Vector4 operator* (const Vector4&, const float);
 	Vector4 operator* (const float, const Vector4&);
 
+#ifdef EQX_DEBUG
+	void Print(const Vector4&);
+#endif
 }

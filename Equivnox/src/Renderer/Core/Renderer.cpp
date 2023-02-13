@@ -70,7 +70,7 @@ namespace EQX
 			for (int y = 0; y < this->height; ++y)
 				image.set(x, y, Color::Black);
 
-		/*  Setup Transform Matrix  */
+		/*  Setup Transformation Matrix  */
 		Mat4 ssMat = MakeScreenSpace(this->width, this->height);
 		Mat4 perspMat = MakePersp(camera.width, camera.height) * MakeView(camera.pos, camera.lookAt, camera.upDir);
 		if (this->cameraEnabled)
@@ -334,11 +334,13 @@ namespace EQX
 			for (xpos = fTransformed.l.pos.x; xpos <= fTransformed.m.pos.x; ++xpos)
 				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR;
 					ypos <= fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLM; ++ypos)
-					UpdateZBufColor(xpos, ypos, fTransformed, image);
+					if (image.IsPointOnCanvas(xpos, ypos))
+						UpdateZBufColor(xpos, ypos, fTransformed, image);
 			for (xpos = fTransformed.m.pos.x; xpos <= fTransformed.r.pos.x; ++xpos)
 				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR;
 					ypos <= fTransformed.m.pos.y + (xpos - fTransformed.m.pos.x) * fTransformed.kMR; ++ypos)
-					UpdateZBufColor(xpos, ypos, fTransformed, image);
+					if (image.IsPointOnCanvas(xpos, ypos))
+						UpdateZBufColor(xpos, ypos, fTransformed, image);
 		}
 		else
 		{
@@ -347,12 +349,14 @@ namespace EQX
 			{
 				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLM;
 					ypos <= fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR; ++ypos)
-					UpdateZBufColor(xpos, ypos, fTransformed, image);
+					if (image.IsPointOnCanvas(xpos, ypos))
+						UpdateZBufColor(xpos, ypos, fTransformed, image);
 			}
 			for (xpos = fTransformed.m.pos.x; xpos <= fTransformed.r.pos.x; ++xpos)
 				for (ypos = fTransformed.m.pos.y + (xpos - fTransformed.m.pos.x) * fTransformed.kMR;
 					ypos <= fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR; ++ypos)
-					UpdateZBufColor(xpos, ypos, fTransformed, image);
+					if (image.IsPointOnCanvas(xpos, ypos))
+						UpdateZBufColor(xpos, ypos, fTransformed, image);
 		}
 	}
 
