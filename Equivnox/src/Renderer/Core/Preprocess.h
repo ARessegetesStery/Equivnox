@@ -5,6 +5,8 @@
 #include "Math/MathHeader.h"
 #include "Renderer/Geometry/Geometry.h"
 
+// #undef EQX_PRINT_TRIG_CLIPPING
+
 namespace EQX {
 
 	void floorVertexXYPos(Vertex& v);
@@ -37,4 +39,5 @@ namespace EQX {
 	 * @param trigs - [OUT] the resulting parsed triangles
 	 */
 	void TriangularizeHull(std::vector<Vertex>& vertices, EQX_OUT std::vector<Face>& trigs);
+
 }

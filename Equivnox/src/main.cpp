@@ -32,14 +32,18 @@ int main(int argc, char** argv) {
 
 	std::array<EQX::Vertex, 3> vertices{ EQX::Vector2(10, 80), EQX::Vector2(40, 90), EQX::Vector2(40, 140) };
 	EQX::Face f(v1, v2, v3);
-	m.Shift(EQX::Vector3(0, 0, 1.4));
+	// EQX::Face f2(EQX::Vector3(0.797989, 0.579465, -0.617538), 
+	// 	EQX::Vector3(1, -0.782006, -0.414091),
+	// 	EQX::Vector3(1, -1, -0.371059));
+	// Print(f2);
+	m.Shift(EQX::Vector3(0, 0, 1.40));
 	// m.AddLine(v1, v3);
 	// m.AddFace(f);
 
 	coreRenderer.BindMesh(&m);
 	coreRenderer.SetPass(EQX::RenderPass::FULL);
 	coreRenderer.SetFill(EQX::RenderFill::FILL);
-	coreRenderer.SetAA(EQX::RenderAAConfig::ANTIALIAS_OFF);
+	coreRenderer.SetAA(EQX::RenderAAConfig::MSAA);
 	coreRenderer.SetOutputType(EQX::ImageType::TGA);
 	coreRenderer.SetLight(EQX::RenderLightConfig::PHONG);
 

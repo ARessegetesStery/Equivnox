@@ -141,6 +141,11 @@ namespace EQX
 			v1.x * v2.y - v1.y * v2.x);
 	}
 
+	float Distance(const Vector3& v1, const Vector3& v2)
+	{
+		return (v1 - v2).Norm();
+	}
+
 	Vector3 operator* (const float k, const Vector3& v)
 	{
 		return Vec3(k * v.x, k * v.y, k * v.z);

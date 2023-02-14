@@ -6,6 +6,7 @@
 #include <cstring>
 #include <ctime>
 #include <cmath>
+#include <cassert>
 #include <algorithm>
 #include <memory>
 

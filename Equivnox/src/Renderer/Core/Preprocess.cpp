@@ -67,7 +67,7 @@ namespace EQX {
 						{
 							bool repFound = false;
 							for (const auto& i : UnitBoxIntersection)
-								if (i.pos.ToVec3() == interpPos)
+								if (Distance(i.pos, interpPos) <= 1e-5)
 									repFound = true;
 							if (!repFound)
 								UnitBoxIntersection.emplace_back(interpPos);
@@ -80,7 +80,7 @@ namespace EQX {
 						{
 							bool repFound = false;
 							for (const auto& i : UnitBoxIntersection)
-								if (i.pos.ToVec3() == interpPos)
+								if (Distance(i.pos, interpPos) <= 1e-5)
 									repFound = true;
 							if (!repFound)
 								UnitBoxIntersection.emplace_back(interpPos);
@@ -106,8 +106,16 @@ namespace EQX {
 		Vec3 intersection = Vec3::ZERO;
 		Line potEdge;
 		if (CornerEdge(UnitBoxIntersection, EQX_OUT potEdge))
-			if (FaceIntersectiWithLine(inFace, potEdge, EQX_OUT intersection))
+		{
+			if (FaceIntersectWithLine(inFace, potEdge, EQX_OUT intersection))
+			{
 				UnitBoxIntersection.push_back(intersection);
+#ifdef EQX_PRINT_TRIG_CLIPPING
+				cout << ">> Edge Intersection:" << endl;
+				Print(intersection);
+#endif
+			}
+		}
 
 		/*  Complete attributes for the vertices  */
 		for (auto& v : UnitBoxIntersection)
@@ -214,7 +222,7 @@ namespace EQX {
 		std::vector<Vertex> aboveVerts, belowVerts;
 		for (auto& i : vertices)
 		{
-			if (i == lowerEnd || i == upperEnd)
+			if (i.pos == lowerEnd.pos || i.pos == upperEnd.pos)
 				continue;
 			if (BinormalMeasure(i) >= 0)
 				aboveVerts.push_back(i);
@@ -225,28 +233,54 @@ namespace EQX {
 		std::sort(aboveVerts.begin(), aboveVerts.end(), LessAlongTan);
 		std::sort(belowVerts.begin(), belowVerts.end(), LessAlongTan);
 
+#ifdef EQX_PRINT_TRIG_CLIPPING
+		cout << ">> Low End:" << endl;
+		Print(lowerEnd.pos);
+		cout << ">> High End:" << endl;
+		Print(upperEnd.pos);
+		cout << ">> Vertices Above:" << endl;
+		for (const auto& i : aboveVerts)
+			Print(i.pos);
+		cout << ">> Vertices Below:" << endl;
+		for (const auto& i : belowVerts)
+			Print(i.pos);
+#endif
+
 		/*  Construct triangle chain (Clockwise)  */
 		if (aboveVerts.size() == 1)
-			trigs.push_back(Face(lowerEnd, upperEnd, aboveVerts[0]));
+			trigs.emplace_back(Face(lowerEnd, upperEnd, aboveVerts[0]));
 		else if (aboveVerts.size() >= 2)
 		{
 			for (auto iter = aboveVerts.begin(); iter != aboveVerts.cend() - 1; ++iter)
 			{
-				trigs.push_back(Face(lowerEnd, *iter, *(iter + 1)));
+				Vertex cur = *iter;
+				Vertex next = *(iter + 1);
+				cout << "--------------" << endl;
+				Print(cur.pos);
+				Print(next.pos);
+				trigs.emplace_back(Face(lowerEnd, *iter, *(iter + 1)));
 				if (iter == aboveVerts.cend() - 2)
-					trigs.push_back(Face(lowerEnd, upperEnd, *(iter + 1)));
+					trigs.emplace_back(Face(lowerEnd, upperEnd, *(iter + 1)));
 			}
 		}
 		if (belowVerts.size() == 1)
-			trigs.push_back(Face(lowerEnd, upperEnd, belowVerts[0]));
+			trigs.emplace_back(Face(lowerEnd, upperEnd, belowVerts[0]));
 		else if (belowVerts.size() >= 2)
 		{
 			for (auto iter = belowVerts.begin(); iter != belowVerts.cend() - 1; ++iter)
 			{
-				trigs.push_back(Face(lowerEnd, *iter, *(iter + 1)));
+				cout << "--------------" << endl;
+				Print(iter->pos);
+				trigs.emplace_back(Face(lowerEnd, *iter, *(iter + 1)));
 				if (iter == belowVerts.cend() - 2)
-					trigs.push_back(Face(lowerEnd, upperEnd, *(iter + 1)));
+					trigs.emplace_back(Face(lowerEnd, upperEnd, *(iter + 1)));
 			}
 		}
+
+#ifdef EQX_PRINT_TRIG_CLIPPING
+		for (const auto& trig : trigs)
+			Print(trig);
+#endif
+
 	}
 }

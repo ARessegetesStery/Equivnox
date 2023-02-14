@@ -391,7 +391,7 @@ namespace EQX
 
 		if (this->renderAAConfig == RenderAAConfig::ANTIALIAS_OFF)
 		{
-			if (!IsPointInTriangleZ(Vec2(xpos, ypos), f))
+			if (!IsPointInTriangle(Vec2(xpos, ypos), f))
 				return;
 
 			// Set z to -Z_MAX if point is outside the triangle
@@ -464,7 +464,7 @@ namespace EQX
 						continue;
 
 					/*  Coverage Test  */
-					if (IsPointInTriangleZ(curPos, face))
+					if (IsPointInTriangle(curPos, face))
 						++validSamplerCnt;
 				}
 			}

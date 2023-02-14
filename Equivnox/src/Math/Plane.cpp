@@ -72,16 +72,4 @@ namespace EQX {
 	{
 		return Dot(alpha.GetNormal(), p) == 0;
 	}
-
-	bool PlaneIntersectWithLine(const Plane& p, const Line& l, EQX_OUT Vector3& pos)
-	{
-		if (Dot(p.GetNormal(), l.GetDirection()) == 0)
-			return false;
-
-		float dirMult = (Dot(p.GetNormal(), p.GetPoint()) - Dot(p.GetNormal(), l.GetPoint())) /
-			(Dot(p.GetNormal(), l.GetDirection()));
-		pos = l.GetPoint() + dirMult * l.GetDirection();
-		return true;
-	}
-
 }

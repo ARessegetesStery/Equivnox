@@ -122,17 +122,20 @@ namespace EQX {
 		}
 		else if (std::abs(kLM) > SLOPE_MAX)
 		{
-			l = std::min(l, m, LowerVertex);
-			m = std::max(l, m, LowerVertex);
+			const Vertex lMem = l;
+			l = std::min(lMem, m, LowerVertex);
+			m = std::max(lMem, m, LowerVertex);
 		}
 		else if (std::abs(kMR) > SLOPE_MAX)
 		{
-			m = std::min(r, m, LowerVertex);
-			r = std::max(r, m, LowerVertex);
+			const Vertex mMem = m;
+			m = std::min(r, mMem, LowerVertex);
+			r = std::max(r, mMem, LowerVertex);
 		}
+		assert(!(l == r || m == r || l == m));
 	}
 
-	bool IsPointInTriangleZ(Vertex v, Face f)
+	bool IsPointInTriangle(Vertex v, Face f)
 	{
 		f.l.pos.z = 0;
 		f.m.pos.z = 0;
@@ -142,7 +145,8 @@ namespace EQX {
 		Vec3 dir2 = (Cross(f.m.pos - v.pos, f.r.pos - f.m.pos));
 		Vec3 dir3 = (Cross(f.r.pos - v.pos, f.l.pos - f.r.pos));
 		// Need to verify three because of the presence of sgn() = 0: consider (1, 0, -1)
-		return sgn(dir1.z) * sgn(dir2.z) >= 0 && sgn(dir1.z) * sgn(dir3.z) >= 0 && sgn(dir2.z) * sgn(dir3.z) >= 0;
+		return Dot(dir1, dir2) >= 0 && Dot(dir3, dir2) >= 0 && Dot(dir1, dir3) >= 0;
+		// return sgn(dir1.z) * sgn(dir2.z) >= 0 && sgn(dir1.z) * sgn(dir3.z) >= 0 && sgn(dir2.z) * sgn(dir3.z) >= 0;
 	}
 
 	void CompleteAttribInFace(EQX_OUT Vertex& v, const Face& f)
@@ -152,13 +156,14 @@ namespace EQX {
 		v.uv = baryCoordAtV[0] * f.l.uv + baryCoordAtV[1] * f.m.uv + baryCoordAtV[2] * f.r.uv;
 	}
 
-	bool FaceIntersectiWithLine(const Face& p, const Line& l, EQX_OUT Vec3& pos)
+	bool FaceIntersectWithLine(const Face& p, const Line& l, EQX_OUT Vec3& pos)
 	{
 		Vec3 originalPos = pos;
 		Plane facePlane = Plane(p.l.pos, p.m.pos, p.r.pos);
-		if (PlaneIntersectWithLine(facePlane, l, pos))
+		if (PlaneIntersectWithLine(facePlane, l, EQX_OUT pos))
 		{
-			if (IsPointInTriangleZ(pos, p))
+			cout << "################" << endl;
+			if (IsInInterval(-1, 1, pos.x) && IsInInterval(-1, 1, pos.y) && IsInInterval(-1, 1, pos.z))
 				return true;
 			else
 			{
@@ -167,5 +172,27 @@ namespace EQX {
 			}
 		}
 		return false;
+	}
+
+	bool PlaneIntersectWithLine(const Plane& p, const Line& l, EQX_OUT Vector3& pos)
+	{
+		if (Dot(p.GetNormal(), l.GetDirection()) == 0)
+			return false;
+
+		float dirMult = (Dot(p.GetNormal(), p.GetPoint()) - Dot(p.GetNormal(), l.GetPoint())) /
+			(Dot(p.GetNormal(), l.GetDirection()));
+		pos = l.GetPoint() + dirMult * l.GetDirection();
+		return true;
+	}
+
+	void Print(const Face& f)
+	{
+		cout << "| Face:" << endl;
+		cout << "| Vertex 1: ";
+		Print(f.l.pos);
+		cout << "| Vertex 2: ";
+		Print(f.m.pos);
+		cout << "|_Vertex 3: ";
+		Print(f.r.pos);
 	}
 }

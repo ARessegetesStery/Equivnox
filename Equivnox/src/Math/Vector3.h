@@ -47,8 +47,9 @@ namespace EQX {
 	float Dot(const Vector3&, const Vector3&);
 	Vector3 Cross(const Vector3&, const Vector3&);
 
-	bool operator== (const Vector3&, const Vector3&);
+	float Distance(const Vector3&, const Vector3&);
 
+	bool operator== (const Vector3&, const Vector3&);
 	Vector3 operator* (const float, const Vector3&);
 	Vector3 operator* (const Vector3&, const float);
 	

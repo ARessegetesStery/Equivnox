@@ -54,5 +54,5 @@ namespace EQX
 	 * @param x - variable to be evaluated
 	 * @return true if is in the interval; false otherwise
 	 */
-	inline bool IsInInterval(float a, float b, float x) {	return (a <= x && x <= b) || (a >= x && x >= b); }
+	inline bool IsInInterval(float a, float b, float x) { return (a <= x && x <= b) || (a >= x && x >= b); }
 }

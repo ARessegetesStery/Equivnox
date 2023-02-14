@@ -34,69 +34,18 @@ namespace EQX
 	{
 		float coeff = LerpCoeffX(v1, v2, x);
 		return coeff * v1 + (1 - coeff) * v2;
-
-		/*
-		if (v1.x == v2.x)
-			return v1;
-		else
-		{
-			float y, z;
-			if (v1.y == v2.y)
-				y = v1.y;
-			else
-				y = (v2.y - v1.y) * (x - v1.x) / (v2.x - v1.x);
-			if (v1.z == v2.z)
-				z = v1.z;
-			else
-				z = (v2.z - v1.z) * (x - v1.x) / (v2.x - v1.x);
-			return Vec3	(x, y, z);
-		}*/
 	}
 
 	Vec3 YLerp(const Vec3 v1, const Vec3 v2, float y)
 	{
 		float coeff = LerpCoeffY(v1, v2, y);
 		return coeff * v1 + (1 - coeff) * v2;
-
-		/*
-		if (v1.y == v2.y)
-			return v1;
-		else
-		{
-			float x, z;
-			if (v1.x == v2.x)
-				x = v1.x;
-			else
-				x = (v2.x - v1.x) * (y - v1.y) / (v2.y - v1.y);
-			if (v1.z == v2.z)
-				z = v1.z;
-			else
-				z = (v2.z - v1.z) * (y - v1.y) / (v2.y - v1.y);
-			return Vec3(x, y, z);
-		}*/
 	}
 
 	Vec3 ZLerp(const Vec3 v1, const Vec3 v2, float z)
 	{
 		float coeff = LerpCoeffZ(v1, v2, z);
 		return coeff * v1 + (1 - coeff) * v2;
-
-		/*
-		if (v1.z == v2.z)
-			return v1;
-		else
-		{
-			float x, y;
-			if (v1.x == v2.x)
-				x = v1.x;
-			else
-				x = (v2.x - v1.x) * (z - v1.z) / (v2.z - v1.z);
-			if (v1.y == v2.y)
-				y = v1.y;
-			else
-				y = (v2.y - v1.y) * (z - v1.z) / (v2.z - v1.z);
-			return Vec3(x, y, z);
-		}*/
 	}
 
 	Vec3 Lerp(const Vec3 v1, const Vec3 v2, float a, Axis axis)

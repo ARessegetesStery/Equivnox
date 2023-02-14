@@ -53,7 +53,7 @@ namespace EQX {
 	 * If a point is on the edge or at the vertex, return true.
 	 * Only works for 2D case: the z info of vertex and face is discarded
 	 */
-	bool IsPointInTriangleZ(Vertex, Face);
+	bool IsPointInTriangle(Vertex, Face);
 
 	void CompleteAttribInFace(EQX_OUT Vertex& v, const Face& f);
 
@@ -63,6 +63,17 @@ namespace EQX {
 	 * @param pos - [OUT]the point of intersection; does not change value if no intersection detected
 	 * @return true if has intersection; false if parallel, i.e. no intersection
 	 */
-	bool FaceIntersectiWithLine(const Face& p, const Line& l, EQX_OUT Vec3& pos);
+	bool FaceIntersectWithLine(const Face& p, const Line& l, EQX_OUT Vec3& pos);
 
+	/**
+	 * @param p - the plane
+	 * @param l - the line
+	 * @param pos - [OUT]the point of intersection; does not change value if no intersection detected
+	 * @return true if has intersection; false if parallel, i.e. no intersection
+	 */
+	bool PlaneIntersectWithLine(const Plane& p, const Line& l, EQX_OUT Vector3& pos);
+
+#ifdef EQX_DEBUG
+	void Print(const Face&);
+#endif
 }

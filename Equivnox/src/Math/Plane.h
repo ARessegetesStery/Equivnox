@@ -37,13 +37,5 @@ namespace EQX {
 	};
 
 	bool IsPointOnPlane(const Vector3&, const Plane&);
-
-	/**
-	 * @param p - the plane
-	 * @param l - the line
-	 * @param pos - [OUT]the point of intersection; does not change value if no intersection detected
-	 * @return true if has intersection; false if parallel, i.e. no intersection
-	 */
-	bool PlaneIntersectWithLine(const Plane& p, const Line& l,Vector3& pos);
 }
 
