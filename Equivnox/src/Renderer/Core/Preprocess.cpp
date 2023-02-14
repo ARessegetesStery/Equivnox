@@ -104,16 +104,19 @@ namespace EQX {
 
 		/*  Include corner points  */
 		Vec3 intersection = Vec3::ZERO;
-		Line potEdge;
-		if (CornerEdge(UnitBoxIntersection, EQX_OUT potEdge))
+		std::vector<Line> potEdges;
+		if (CornerEdge(UnitBoxIntersection, EQX_OUT potEdges))
 		{
-			if (FaceIntersectWithLine(inFace, potEdge, EQX_OUT intersection))
+			for (const Line& l : potEdges)
 			{
-				UnitBoxIntersection.push_back(intersection);
+				if (FaceIntersectWithLine(inFace, l, EQX_OUT intersection))
+				{
+					UnitBoxIntersection.push_back(intersection);
 #ifdef EQX_PRINT_TRIG_CLIPPING
-				cout << ">> Edge Intersection:" << endl;
-				Print(intersection);
+					cout << ">> Edge Intersection:" << endl;
+					Print(intersection);
 #endif
+				}
 			}
 		}
 
@@ -148,7 +151,7 @@ namespace EQX {
 		return false;
 	}
 
-	bool CornerEdge(const std::vector<Vertex>& intersections, EQX_OUT Line& l)
+	bool CornerEdge(const std::vector<Vertex>& intersections, EQX_OUT std::vector<Line>& lines)
 	{
 		bool up = false, down = false, left = false, right = false, front = false, behind = false;
 		for (const auto& i : intersections)
@@ -169,30 +172,31 @@ namespace EQX {
 
 		bool exists = true;
 		if (left && up)
-			l = Line(Vec3(-1, 1, 1), Vec3(0, 0, 1));
-		else if (right && up)
-			l = Line(Vec3(1, 1, 1), Vec3(0, 0, 1));
-		else if (front && up)
-			l = Line(Vec3(1, 1, 1), Vec3(1, 0, 0));
-		else if (behind && up)
-			l = Line(Vec3(-1, 1, -1), Vec3(1, 0, 0));
-		else if (front && left)
-			l = Line(Vec3(-1, 1, 1), Vec3(0, 1, 0));
-		else if (front && right)
-			l = Line(Vec3(1, 1, 1), Vec3(0, 1, 0));
-		else if (right && behind)
-			l = Line(Vec3(1, 1, -1), Vec3(0, 1, 0));
-		else if (left && behind)
-			l = Line(Vec3(-1, -1, -1), Vec3(0, 1, 0));
-		else if (front && down)
-			l = Line(Vec3(1, -1, 1), Vec3(1, 0, 0));
-		else if (right && down)
-			l = Line(Vec3(1, -1, 1), Vec3(0, 0, 1));
-		else if (left && down)
-			l = Line(Vec3(-1, -1, -1), Vec3(0, 0, 1));
-		else if (down && behind)
-			l = Line(Vec3(-1, -1, -1), Vec3(1, 0, 0));
-		else exists = false;
+			lines.emplace_back(Line(Vec3(-1, 1, 1), Vec3(0, 0, 1)));
+		if (right && up)
+			lines.emplace_back(Line(Vec3(1, 1, 1), Vec3(0, 0, 1)));
+		if (front && up)
+			lines.emplace_back(Line(Vec3(1, 1, 1), Vec3(1, 0, 0)));
+		if (behind && up)
+			lines.emplace_back(Line(Vec3(-1, 1, -1), Vec3(1, 0, 0)));
+		if (front && left)
+			lines.emplace_back(Line(Vec3(-1, 1, 1), Vec3(0, 1, 0)));
+		if (front && right)
+			lines.emplace_back(Line(Vec3(1, 1, 1), Vec3(0, 1, 0)));
+		if (right && behind)
+			lines.emplace_back(Line(Vec3(1, 1, -1), Vec3(0, 1, 0)));
+		if (left && behind)
+			lines.emplace_back(Line(Vec3(-1, -1, -1), Vec3(0, 1, 0)));
+		if (front && down)
+			lines.emplace_back(Line(Vec3(1, -1, 1), Vec3(1, 0, 0)));
+		if (right && down)
+			lines.emplace_back(Line(Vec3(1, -1, 1), Vec3(0, 0, 1)));
+		if (left && down)
+			lines.emplace_back(Line(Vec3(-1, -1, -1), Vec3(0, 0, 1)));
+		if (down && behind)
+			lines.emplace_back(Line(Vec3(-1, -1, -1), Vec3(1, 0, 0)));
+		if (lines.empty())
+			exists = false;
 
 		return exists;
 	}
@@ -253,11 +257,6 @@ namespace EQX {
 		{
 			for (auto iter = aboveVerts.begin(); iter != aboveVerts.cend() - 1; ++iter)
 			{
-				Vertex cur = *iter;
-				Vertex next = *(iter + 1);
-				cout << "--------------" << endl;
-				Print(cur.pos);
-				Print(next.pos);
 				trigs.emplace_back(Face(lowerEnd, *iter, *(iter + 1)));
 				if (iter == aboveVerts.cend() - 2)
 					trigs.emplace_back(Face(lowerEnd, upperEnd, *(iter + 1)));
@@ -269,8 +268,6 @@ namespace EQX {
 		{
 			for (auto iter = belowVerts.begin(); iter != belowVerts.cend() - 1; ++iter)
 			{
-				cout << "--------------" << endl;
-				Print(iter->pos);
 				trigs.emplace_back(Face(lowerEnd, *iter, *(iter + 1)));
 				if (iter == belowVerts.cend() - 2)
 					trigs.emplace_back(Face(lowerEnd, upperEnd, *(iter + 1)));

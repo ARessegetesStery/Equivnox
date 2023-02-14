@@ -63,7 +63,7 @@ namespace EQX {
 	 * @param pos - [OUT]the point of intersection; does not change value if no intersection detected
 	 * @return true if has intersection; false if parallel, i.e. no intersection
 	 */
-	bool FaceIntersectWithLine(const Face& p, const Line& l, EQX_OUT Vec3& pos);
+	bool FaceIntersectWithLine(const Face& f, const Line& l, EQX_OUT Vec3& pos);
 
 	/**
 	 * @param p - the plane

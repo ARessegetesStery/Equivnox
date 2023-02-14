@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
 	// 	EQX::Vector3(1, -0.782006, -0.414091),
 	// 	EQX::Vector3(1, -1, -0.371059));
 	// Print(f2);
-	m.Shift(EQX::Vector3(0, 0, 1.40));
+	m.Shift(EQX::Vector3(0, 0, 1.49));
 	// m.AddLine(v1, v3);
 	// m.AddFace(f);
 

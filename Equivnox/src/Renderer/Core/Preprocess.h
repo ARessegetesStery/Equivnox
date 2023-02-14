@@ -29,7 +29,7 @@ namespace EQX {
 	 * @param l - [OUT]expression for corner edge
 	 * @returns the expression for the edge to be tested
 	 */
-	bool CornerEdge(const std::vector<Vertex>& intersections, EQX_OUT Line& l);
+	bool CornerEdge(const std::vector<Vertex>& intersections, EQX_OUT std::vector<Line>& l);
 
 	/**
 	 * Requires that all the vertices are on the same plane

@@ -156,14 +156,13 @@ namespace EQX {
 		v.uv = baryCoordAtV[0] * f.l.uv + baryCoordAtV[1] * f.m.uv + baryCoordAtV[2] * f.r.uv;
 	}
 
-	bool FaceIntersectWithLine(const Face& p, const Line& l, EQX_OUT Vec3& pos)
+	bool FaceIntersectWithLine(const Face& f, const Line& l, EQX_OUT Vec3& pos)
 	{
 		Vec3 originalPos = pos;
-		Plane facePlane = Plane(p.l.pos, p.m.pos, p.r.pos);
+		Plane facePlane = Plane(f.l.pos, f.m.pos, f.r.pos);
 		if (PlaneIntersectWithLine(facePlane, l, EQX_OUT pos))
 		{
-			cout << "################" << endl;
-			if (IsInInterval(-1, 1, pos.x) && IsInInterval(-1, 1, pos.y) && IsInInterval(-1, 1, pos.z))
+			if (IsPointInTriangle(pos, f))
 				return true;
 			else
 			{
