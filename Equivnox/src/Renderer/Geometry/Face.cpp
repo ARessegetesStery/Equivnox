@@ -125,14 +125,19 @@ namespace EQX {
 			const Vertex lMem = l;
 			l = std::min(lMem, m, LowerVertex);
 			m = std::max(lMem, m, LowerVertex);
+			this->kLM = GetSlope(l, m);
+			this->kLR = GetSlope(l, r);
+			this->kMR = GetSlope(m, r);
 		}
 		else if (std::abs(kMR) > SLOPE_MAX)
 		{
 			const Vertex mMem = m;
 			m = std::min(r, mMem, LowerVertex);
 			r = std::max(r, mMem, LowerVertex);
+			this->kLM = GetSlope(l, m);
+			this->kLR = GetSlope(l, r);
+			this->kMR = GetSlope(m, r);
 		}
-		assert(!(l == r || m == r || l == m));
 	}
 
 	bool IsPointInTriangle(Vertex v, Face f)

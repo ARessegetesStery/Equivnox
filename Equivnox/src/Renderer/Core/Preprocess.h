@@ -5,7 +5,9 @@
 #include "Math/MathHeader.h"
 #include "Renderer/Geometry/Geometry.h"
 
-// #undef EQX_PRINT_TRIG_CLIPPING
+// To see the logs, comment the line below. 
+// Note that logging significantly slows the rendering process
+#undef EQX_PRINT_TRIG_CLIPPING
 
 namespace EQX {
 

@@ -325,10 +325,10 @@ namespace EQX {
 	Matrix4x4 MakeScreenSpace(float Width, float Height)
 	{
 		return Matrix4x4(
-			Vector4(Width / 2.0f, 0            , 0, Width / 2.0f),
-			Vector4(0           , Height / 2.0f, 0, Height / 2.0f),
-			Vector4(0           , 0            , 1, 0), 
-			Vector4(0           , 0            , 0, 1));
+			Vector4((Width - 1) / 2.0f, 0                  , 0, (Width - 1) / 2.0f),
+			Vector4(0				  , (Height - 1) / 2.0f, 0, (Height - 1) / 2.0f),
+			Vector4(0				  , 0                  , 1, 0), 
+			Vector4(0				  , 0                  , 0, 1));
 	}
 
 }

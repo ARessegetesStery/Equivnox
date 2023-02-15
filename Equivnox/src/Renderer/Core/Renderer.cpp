@@ -149,6 +149,7 @@ namespace EQX
 
 	void Renderer::RenderFaces(EQX_OUT Image& image) const
 	{
+		// TODO refactor so that the clipping results could be used in both ZBuf and final result
 		ImageGrey ZBuf(this->width, this->height);
 
 		// Background of ZBuf should be white
@@ -280,41 +281,56 @@ namespace EQX
 		}
 	}
 	
-	void Renderer::RenderFaceSingle(EQX_OUT Image& image, const Face& fOriginal, Face& fTransformed, const Image& ZBuffer) const
+	void Renderer::RenderFaceSingle(EQX_OUT Image& image, const Face& fOriginal, Face& fTrans, const Image& ZBuffer) const
 	{
-		TransformFace(fTransformed, ssTransform);
+		TransformFace(fTrans, ssTransform);
 
-		if (std::abs(fTransformed.kLM) > SLOPE_MAX)
+		if (std::abs(fTrans.kLM) > SLOPE_MAX)
 		{
 			int xpos, ypos;
-			for (xpos = fTransformed.l.pos.x; xpos < fTransformed.r.pos.x; ++xpos)
-				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR;
-					ypos <= fTransformed.m.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kMR; ++ypos)
-					UpdateFragColor(xpos, ypos, fTransformed, fOriginal, image, ZBuffer);
+			for (xpos = fTrans.l.pos.x; xpos <= fTrans.r.pos.x; ++xpos)
+				for (ypos = fTrans.l.pos.y + (xpos - fTrans.l.pos.x - sgn(fTrans.kLR)) * fTrans.kLR;
+					ypos <= fTrans.m.pos.y + (xpos - fTrans.l.pos.x + sgn(fTrans.kMR)) * fTrans.kMR;
+					++ypos)
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
 		}
-		else if (fTransformed.kLM > fTransformed.kLR)
+		else if (std::abs(fTrans.kMR) > SLOPE_MAX)
 		{
 			int xpos, ypos;
-			for (xpos = fTransformed.l.pos.x; xpos < floor(fTransformed.m.pos.x); ++xpos)
-				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR - 1;
-					ypos <= fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLM + 1; ++ypos)
-					UpdateFragColor(xpos, ypos, fTransformed, fOriginal, image, ZBuffer);
-			for (xpos = fTransformed.m.pos.x; xpos <= fTransformed.r.pos.x; ++xpos)
-				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR - 1;
-					ypos <= fTransformed.m.pos.y + (xpos - fTransformed.m.pos.x) * fTransformed.kMR + 1; ++ypos)
-					UpdateFragColor(xpos, ypos, fTransformed, fOriginal, image, ZBuffer);
+			for (xpos = fTrans.l.pos.x; xpos <= fTrans.r.pos.x; ++xpos)
+				for (ypos = fTrans.l.pos.y + (xpos - fTrans.l.pos.x - sgn(fTrans.kLM)) * fTrans.kLM;
+					ypos <= fTrans.l.pos.y + (xpos - fTrans.l.pos.x + sgn(fTrans.kLR)) * fTrans.kLR;
+					++ypos)
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
+		}
+		else if (fTrans.kLM > fTrans.kLR)
+		// m lies above the line segment connecting l and r
+		{
+			int xpos, ypos;
+			for (xpos = fTrans.l.pos.x; xpos < floor(fTrans.m.pos.x); ++xpos)
+				for (ypos = fTrans.l.pos.y + (xpos - fTrans.l.pos.x - sgn(fTrans.kLR)) * fTrans.kLR;
+					ypos <= fTrans.l.pos.y + (xpos - fTrans.l.pos.x + sgn(fTrans.kLM)) * fTrans.kLM; 
+					++ypos)
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
+			for (xpos = fTrans.m.pos.x; xpos <= fTrans.r.pos.x; ++xpos)
+				for (ypos = fTrans.l.pos.y + (xpos - fTrans.l.pos.x - sgn(fTrans.kLR)) * fTrans.kLR;
+					ypos <= fTrans.m.pos.y + (xpos - fTrans.m.pos.x + sgn(fTrans.kMR)) * fTrans.kMR; 
+					++ypos)
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
 		}
 		else
 		{
 			int xpos, ypos;
-			for (xpos = fTransformed.l.pos.x; xpos < floor(fTransformed.m.pos.x); ++xpos)
-				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLM - 1;
-					ypos <= fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR + 1; ++ypos)
-					UpdateFragColor(xpos, ypos, fTransformed, fOriginal, image, ZBuffer);
-			for (xpos = fTransformed.m.pos.x; xpos <= fTransformed.r.pos.x; ++xpos)
-				for (ypos = fTransformed.m.pos.y + (xpos - fTransformed.m.pos.x) * fTransformed.kMR - 1;
-					ypos <= fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR + 1; ++ypos)
-					UpdateFragColor(xpos, ypos, fTransformed, fOriginal, image, ZBuffer);
+			for (xpos = fTrans.l.pos.x; xpos < floor(fTrans.m.pos.x); ++xpos)
+				for (ypos = fTrans.l.pos.y + (xpos - fTrans.l.pos.x - sgn(fTrans.kLM)) * fTrans.kLM;
+					ypos <= fTrans.l.pos.y + (xpos - fTrans.l.pos.x + sgn(fTrans.kLR)) * fTrans.kLR; 
+					++ypos)
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
+			for (xpos = fTrans.m.pos.x; xpos <= fTrans.r.pos.x; ++xpos)
+				for (ypos = fTrans.m.pos.y + (xpos - fTrans.m.pos.x - sgn(fTrans.kMR)) * fTrans.kMR;
+					ypos <= fTrans.l.pos.y + (xpos - fTrans.l.pos.x + sgn(fTrans.kLR)) * fTrans.kLR; 
+					++ypos)
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
 		}
 	}
 
@@ -323,7 +339,7 @@ namespace EQX
 		if (std::abs(fTransformed.kLM) > SLOPE_MAX)
 		{
 			int xpos, ypos;
-			for (xpos = fTransformed.l.pos.x; xpos < fTransformed.r.pos.x; ++xpos)
+			for (xpos = fTransformed.l.pos.x; xpos <= fTransformed.r.pos.x; ++xpos)
 				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR;
 					ypos <= fTransformed.m.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kMR; ++ypos)
 					UpdateZBufColor(xpos, ypos, fTransformed, image);
@@ -470,6 +486,7 @@ namespace EQX
 			}
 			resultColor = resultColor * validSamplerCnt / samplerCnt;
 			resultColor = resultColor + originalColor;
+
 			image.set(xpos, ypos, resultColor);
 		}
 	}
