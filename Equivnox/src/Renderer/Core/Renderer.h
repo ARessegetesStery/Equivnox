@@ -36,7 +36,13 @@ namespace EQX
 		inline void SetCanvasWidth(unsigned int w) { this->width = w; };
 		void SetMSAAMult(unsigned int);
 
-		inline void DisableCamera() { this->cameraEnabled = false; }		// Accept pixel info and render as it is
+		// Accept pixel info and render as it is
+		inline void DisableCamera() 
+		{ 
+			this->cameraEnabled = false;
+			// cannot render ZBuffer when camera is disabled
+			this->renderPass = RenderPass::FULL;
+		}		
 		inline void EnableCamera() { this->cameraEnabled = true; }			// Enable rendering with perspective
 
 		void addLight(Light);
@@ -59,7 +65,7 @@ namespace EQX
 		void RenderLineRaw(EQX_OUT Image& image, LineSeg, const Mat4&) const;
 		void RenderLineSmooth(EQX_OUT Image& image, LineSeg, const Mat4&) const;
 
-		void RenderFaceSingle(EQX_OUT Image& image, const Face& fOriginal, Face& fTransformed, const Image& ZBuffer) const;
+		void RenderFaceSingle(EQX_OUT Image& image, const Face& fOriginal, const Face& fTransformed, const Image& ZBuffer) const;
 		void RenderFaceZBuf(EQX_OUT ImageGrey& image, const Face& fTransformed) const;
 
 		/*  Render Configs  */

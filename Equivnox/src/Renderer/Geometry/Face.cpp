@@ -34,18 +34,6 @@ namespace EQX {
 		return *this;
 	}
 
-	Vertex& Face::operator[](size_t index)
-	{
-		if (index == 0)
-			return this->l;
-		else if (index == 1)
-			return this->m;
-		else if (index == 2)
-			return this->r;
-		else
-			return this->l;
-	}
-
 	const Vertex& Face::operator[](size_t index) const
 	{
 		if (index == 0)

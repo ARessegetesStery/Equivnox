@@ -20,7 +20,7 @@ namespace EQX {
 	 * @param faces - [OUT]the faces that need to be rendered
 	 * @return true if triangle needs to be rendered, false if triangle does not intersect with any fragment
 	 */
-	bool FrustumClipping(const Face& inFace, EQX_OUT std::vector<Face>& faces);
+	void FrustumClipping(const Face& inFace, EQX_OUT std::vector<Face>& faces);
 
 	/**
 	 * @param intersections - {UnitBoxIntersection} in {FrustumClipping}

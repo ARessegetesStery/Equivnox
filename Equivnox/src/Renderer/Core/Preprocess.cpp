@@ -10,9 +10,8 @@ namespace EQX {
 		v.pos.y = floor(v.pos.y);
 	}
 
-	bool FrustumClipping(const Face& inFace, EQX_OUT std::vector<Face>& outFaces)
+	void FrustumClipping(const Face& inFace, EQX_OUT std::vector<Face>& outFaces)
 	{
-		outFaces.clear();
 		auto IsCanonic = [=](float x) -> bool { return x >= -1.f && x <= 1.f; };
 		auto IsVec4InCanonic = [=](const Vec3 v) -> bool { return IsCanonic(v.x) && IsCanonic(v.y) && IsCanonic(v.z); };
 
@@ -26,7 +25,7 @@ namespace EQX {
 			Print(inFace.M().pos);
 			Print(inFace.R().pos);
 #endif
-			return true;
+			return;
 		}
 
 		/*  Detect intersection with unit box  */
@@ -114,27 +113,22 @@ namespace EQX {
 
 		/*  Add appropriate faces for substitution  */
 		if (UnitBoxIntersection.size() == 0)
-			return false;
+			return;
 
 		if (UnitBoxInside.size() == 0)
-		{
 			TriangularizeHull(UnitBoxIntersection, outFaces);
-			return true;
-		}
+
 		else if (UnitBoxInside.size() == 1)
 		{
 			UnitBoxIntersection.push_back(UnitBoxInside[0]);
 			TriangularizeHull(UnitBoxIntersection, outFaces);
-			return true;
 		}
 		else if (UnitBoxInside.size() == 2)
 		{
 			UnitBoxIntersection.push_back(UnitBoxInside[0]);
 			UnitBoxIntersection.push_back(UnitBoxInside[1]);
 			TriangularizeHull(UnitBoxIntersection, outFaces);
-			return true;
 		}
-		return false;
 	}
 
 	bool CornerEdge(const std::vector<Vertex>& intersections, EQX_OUT std::vector<Line>& lines)

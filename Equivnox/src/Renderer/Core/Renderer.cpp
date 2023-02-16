@@ -149,7 +149,19 @@ namespace EQX
 
 	void Renderer::RenderFaces(EQX_OUT Image& image) const
 	{
-		// TODO refactor so that the clipping results could be used in both ZBuf and final result
+		/*  Frustum Clipping  */
+		std::vector<Face> fsClipped;
+		for (auto iter = curMesh->faceIndices.begin();
+			iter != curMesh->faceIndices.cend(); ++iter)
+		{
+			std::array<Vertex, 3> vertices{ curMesh->vertices[(*iter)[0]],
+				curMesh->vertices[(*iter)[1]] , curMesh->vertices[(*iter)[2]] };
+			Face f(vertices);
+			f.Transform(this->perspTransform);
+			FrustumClipping(f, fsClipped);
+		}
+
+		/*  Z-Buffer Rendering  */
 		ImageGrey ZBuf(this->width, this->height);
 
 		// Background of ZBuf should be white
@@ -157,21 +169,18 @@ namespace EQX
 			for (int y = 0; y < this->height; ++y)
 				ZBuf.set(x, y, Color::White);
 
-		for (auto iter = curMesh->faceIndices.begin();
-			iter != curMesh->faceIndices.cend(); ++iter)
+		// If camera disabled, no need to render ZBuffer
+		if (this->cameraEnabled)
 		{
-			std::array<Vertex, 3> vertices{ curMesh->vertices[(*iter)[0]],
-				curMesh->vertices[(*iter)[1]] , curMesh->vertices[(*iter)[2]] };
-			Face fOriginal(vertices);
-			Face fTransformed(fOriginal);
-			fTransformed.Transform(this->transform);
-
-			// If camera disabled, no need to render ZBuffer
-			if (this->cameraEnabled)
+			for (const auto& f : fsClipped)
+			{
+				Face fTransformed(f);
+				fTransformed.Transform(this->ssTransform);
 				RenderFaceZBuf(ZBuf, fTransformed);
+			}
 		}
 
-		/*  Rendering Only ZBuffer  */
+		/*  Rendering Only Z-Buffer  */
 		if (this->renderPass == RenderPass::ZBUFFER_ONLY)
 		{
 			image = ZBuf;
@@ -179,24 +188,17 @@ namespace EQX
 		}
 
 		/*  Rendering Full Image  */
-		for (auto iter = curMesh->faceIndices.begin();
-			iter != curMesh->faceIndices.cend(); ++iter)
+		for (auto fTransformed : fsClipped)
 		{
-			std::array<Vertex, 3> vertices{ curMesh->vertices[(*iter)[0]], 
-				curMesh->vertices[(*iter)[1]] , curMesh->vertices[(*iter)[2]] };
-			Face fOriginal(vertices);
-			Face fTransformed(fOriginal);
-			fTransformed.Transform(perspTransform);
-
 			/*  Back-Surface Culling  */
-			if (vertices[0].normal.z < 0 && vertices[1].normal.z < 0 && vertices[2].normal.z < 0)
+			if (fTransformed[0].normal.z < 0 && fTransformed[1].normal.z < 0 && fTransformed[2].normal.z < 0)
 				continue;
 
-			/*  Render Each Fragment with Clipping  */
-			std::vector<Face> fsClipped;
-			if (FrustumClipping(fTransformed, fsClipped))
-				for (auto& fClipped : fsClipped)
-					RenderFaceSingle(image, fOriginal, fClipped, ZBuf);
+			/*  Render Each Fragment  */
+			fTransformed.Transform(ssTransform);
+			Face fOriginal(fTransformed);
+			fOriginal.Transform(inverseTransform);
+			RenderFaceSingle(image, fOriginal, fTransformed, ZBuf);
 		}
 	}
 
@@ -281,10 +283,9 @@ namespace EQX
 		}
 	}
 	
-	void Renderer::RenderFaceSingle(EQX_OUT Image& image, const Face& fOriginal, Face& fTrans, const Image& ZBuffer) const
+	void Renderer::RenderFaceSingle(EQX_OUT Image& image, const Face& fOriginal, 
+		const Face& fTrans, const Image& ZBuffer) const
 	{
-		fTrans.Transform(ssTransform);
-
 		if (std::abs(fTrans.SlopeLM()) > SLOPE_MAX)
 		{
 			int xpos, ypos;

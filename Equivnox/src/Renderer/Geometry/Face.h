@@ -8,8 +8,6 @@
 
 namespace EQX {
 
-	// TODO Encapsulate
-
 	/* l.x <= m.x <= r.x
 	 * if any of the equality is satisfied, the inequality transfers to y direction
 	 */
@@ -37,7 +35,6 @@ namespace EQX {
 		inline const float SlopeMR() const { return this->kMR; }
 
 		Face& operator= (const Face& f);
-		Vertex& operator[] (size_t index);
 		const Vertex& operator[] (size_t index) const;
 
 		/**
