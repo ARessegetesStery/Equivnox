@@ -15,7 +15,7 @@ namespace EQX {
 	 */
 	class Face
 	{
-	public:
+	private:
 		Vertex l, m, r;
 		float kLM, kLR, kMR;
 
@@ -26,6 +26,15 @@ namespace EQX {
 		Face(LineSeg&, LineSeg&, LineSeg&);		// make sure the line segments connects each other
 		Face(const Face&);
 		Face(Face&&) = default;
+
+		void ValidateSeq();
+
+		inline const Vertex& L() const { return this->l; }
+		inline const Vertex& M() const { return this->m; }
+		inline const Vertex& R() const { return this->r; }
+		inline const float SlopeLM() const { return this->kLM; }
+		inline const float SlopeLR() const { return this->kLR; }
+		inline const float SlopeMR() const { return this->kMR; }
 
 		Face& operator= (const Face& f);
 		Vertex& operator[] (size_t index);
@@ -46,7 +55,8 @@ namespace EQX {
 		float ZAtXYPlane(Vector2) const;
 		float ZAtXYPlane(float, float) const;
 
-		void ValidateSeq();
+		void Transform(const Mat4& projection);
+		void DiscardZ();
 	};
 
 	/**

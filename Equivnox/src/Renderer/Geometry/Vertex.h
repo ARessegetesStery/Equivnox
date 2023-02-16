@@ -29,6 +29,8 @@ namespace EQX
 			Vector3 normal = Vector3::UNIT_Z, Vector2 uv = Vector2::ZERO);
 		Vertex(Vector3 pos, Vector3 normal = Vector3::UNIT_Z, Vector2 uv = Vector2::ZERO);
 		Vertex(Vector2 pos,	Vector3 normal = Vector3::UNIT_Z, Vector2 uv = Vector2::ZERO);
+
+		void Transform(const Mat4& projection);
 	};
 
 	bool operator== (Vertex&, Vertex&);

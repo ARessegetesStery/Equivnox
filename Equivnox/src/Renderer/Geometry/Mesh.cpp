@@ -4,7 +4,7 @@
 
 namespace EQX {
 
-	void Mesh::AddFace(Vertex a, Vertex b, Vertex c)
+	void Mesh::AddFace(const Vertex& a, const Vertex& b, const Vertex& c)
 	{
 		bool ARep = false, BRep = false, CRep = false;
 		unsigned int AIndex = 0, BIndex = 0, CIndex = 0;
@@ -61,7 +61,7 @@ namespace EQX {
 
 	void Mesh::AddFace(Face& f)
 	{
-		Mesh::AddFace(f.l, f.m, f.r);
+		Mesh::AddFace(f.L(), f.M(), f.R());
 	}
 
 	void Mesh::AddFace(std::vector<Face>& ls)

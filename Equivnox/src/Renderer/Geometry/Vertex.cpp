@@ -27,6 +27,12 @@ namespace EQX
 			&& (v1.normal == v2.color) && (v1.pos == v2.pos);
 	}
 
+	void Vertex::Transform(const Mat4& projection)
+	{
+		this->pos = projection * this->pos;
+		this->pos.Normalize();
+	}
+
 	bool LefterVertex(const Vertex& l, const Vertex& r)
 	{
 		return l.pos.x < r.pos.x;
@@ -49,5 +55,4 @@ namespace EQX
 				return l.pos.z < r.pos.z;
 		}
 	}
-
 }

@@ -100,6 +100,22 @@ namespace EQX {
 		return this->ZAtXYPlane(Vec2(x, y));
 	}
 
+	void Face::Transform(const Mat4& projection)
+	{
+		this->l.Transform(projection);
+		this->m.Transform(projection);
+		this->r.Transform(projection);
+		this->ValidateSeq();
+	}
+
+	// Set the Z field of all vertices in the face to 0
+	void Face::DiscardZ()
+	{
+		this->l.pos.z = 0;
+		this->m.pos.z = 0;
+		this->r.pos.z = 0;
+	}
+
 	void Face::ValidateSeq()
 	{
 		std::array<Vertex, 3> vertices = { l, m, r };
@@ -142,13 +158,11 @@ namespace EQX {
 
 	bool IsPointInTriangle(Vertex v, Face f)
 	{
-		f.l.pos.z = 0;
-		f.m.pos.z = 0;
-		f.r.pos.z = 0;
+		f.DiscardZ();
 		v.pos.z = 0;
-		Vec3 dir1 = (Cross(f.l.pos - v.pos, f.m.pos - f.l.pos));
-		Vec3 dir2 = (Cross(f.m.pos - v.pos, f.r.pos - f.m.pos));
-		Vec3 dir3 = (Cross(f.r.pos - v.pos, f.l.pos - f.r.pos));
+		Vec3 dir1 = (Cross(f.L().pos - v.pos, f.M().pos - f.L().pos));
+		Vec3 dir2 = (Cross(f.M().pos - v.pos, f.R().pos - f.M().pos));
+		Vec3 dir3 = (Cross(f.R().pos - v.pos, f.L().pos - f.R().pos));
 		// Need to verify three because of the presence of sgn() = 0: consider (1, 0, -1)
 		return Dot(dir1, dir2) >= 0 && Dot(dir3, dir2) >= 0 && Dot(dir1, dir3) >= 0;
 		// return sgn(dir1.z) * sgn(dir2.z) >= 0 && sgn(dir1.z) * sgn(dir3.z) >= 0 && sgn(dir2.z) * sgn(dir3.z) >= 0;
@@ -157,14 +171,14 @@ namespace EQX {
 	void CompleteAttribInFace(EQX_OUT Vertex& v, const Face& f)
 	{
 		Vec3 baryCoordAtV = f.baryCoord(v.pos.x, v.pos.y);
-		v.normal = baryCoordAtV[0] * f.l.normal + baryCoordAtV[1] * f.m.normal + baryCoordAtV[2] * f.r.normal;
-		v.uv = baryCoordAtV[0] * f.l.uv + baryCoordAtV[1] * f.m.uv + baryCoordAtV[2] * f.r.uv;
+		v.normal = baryCoordAtV[0] * f.L().normal + baryCoordAtV[1] * f.M().normal + baryCoordAtV[2] * f.R().normal;
+		v.uv = baryCoordAtV[0] * f.L().uv + baryCoordAtV[1] * f.M().uv + baryCoordAtV[2] * f.R().uv;
 	}
 
 	bool FaceIntersectWithLine(const Face& f, const Line& l, EQX_OUT Vec3& pos)
 	{
 		Vec3 originalPos = pos;
-		Plane facePlane = Plane(f.l.pos, f.m.pos, f.r.pos);
+		Plane facePlane = Plane(f.L().pos, f.M().pos, f.R().pos);
 		if (PlaneIntersectWithLine(facePlane, l, EQX_OUT pos))
 		{
 			if (IsPointInTriangle(pos, f))
@@ -193,10 +207,10 @@ namespace EQX {
 	{
 		cout << "| Face:" << endl;
 		cout << "| Vertex 1: ";
-		Print(f.l.pos);
+		Print(f.L().pos);
 		cout << "| Vertex 2: ";
-		Print(f.m.pos);
+		Print(f.M().pos);
 		cout << "|_Vertex 3: ";
-		Print(f.r.pos);
+		Print(f.R().pos);
 	}
 }

@@ -13,10 +13,6 @@ namespace EQX {
 
 	void floorVertexXYPos(Vertex& v);
 
-	void TransformVertexPos(const Mat4& projection, EQX_OUT Vertex& v);
-
-	void TransformFace(EQX_OUT Face& fOriginal, const Mat4 transform);
-
 	/**
 	 * Apply Clipping in Clip Space
 	 *

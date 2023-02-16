@@ -10,20 +10,6 @@ namespace EQX {
 		v.pos.y = floor(v.pos.y);
 	}
 
-	void TransformVertexPos(const Mat4& projection, EQX_OUT Vertex& v)
-	{
-		v.pos = projection * v.pos;
-		v.pos.Normalize();
-	}
-
-	void TransformFace(EQX_OUT Face& fTransform, const Mat4 transform)
-	{
-		TransformVertexPos(transform, fTransform.l);
-		TransformVertexPos(transform, fTransform.m);
-		TransformVertexPos(transform, fTransform.r);
-		fTransform.ValidateSeq();
-	}
-	
 	bool FrustumClipping(const Face& inFace, EQX_OUT std::vector<Face>& outFaces)
 	{
 		outFaces.clear();
@@ -31,14 +17,14 @@ namespace EQX {
 		auto IsVec4InCanonic = [=](const Vec3 v) -> bool { return IsCanonic(v.x) && IsCanonic(v.y) && IsCanonic(v.z); };
 
 		/*  Special Judgement for triangle within cube  */
-		if (IsVec4InCanonic(inFace.l.pos) && IsVec4InCanonic(inFace.m.pos) && IsVec4InCanonic(inFace.r.pos))
+		if (IsVec4InCanonic(inFace.L().pos) && IsVec4InCanonic(inFace.M().pos) && IsVec4InCanonic(inFace.R().pos))
 		{
 			outFaces.push_back(inFace);
 #ifdef EQX_PRINT_TRIG_CLIPPING
 			cout << "-- Face Inside Screen --" << endl;
-			Print(inFace.l.pos);
-			Print(inFace.m.pos);
-			Print(inFace.r.pos);
+			Print(inFace.L().pos);
+			Print(inFace.M().pos);
+			Print(inFace.R().pos);
 #endif
 			return true;
 		}
@@ -203,7 +189,6 @@ namespace EQX {
 
 	void TriangularizeHull(std::vector<Vertex>& vertices, EQX_OUT std::vector<Face>& trigs)
 	{
-		// TODO test
 		if (vertices.size() <= 2)
 			return;
 		Plane trigPlane = Plane(vertices[0].pos, vertices[1].pos, vertices[2].pos);

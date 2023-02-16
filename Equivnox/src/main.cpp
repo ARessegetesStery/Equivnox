@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
 
 	std::array<EQX::Vertex, 3> vertices{ EQX::Vector2(10, 80), EQX::Vector2(40, 90), EQX::Vector2(40, 140) };
 	EQX::Face f(v1, v2, v3);
-	m.Shift(EQX::Vector3(0, 0, 1.4));
+	m.Shift(EQX::Vector3(0, 0, 0.9));
 	// m.AddLine(v1, v3);
 	// m.AddFace(f);
 

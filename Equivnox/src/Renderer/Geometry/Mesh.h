@@ -14,7 +14,7 @@ namespace EQX {
 	public:
 		friend class Renderer;
 
-		void AddFace(Vertex, Vertex, Vertex);
+		void AddFace(const Vertex&, const Vertex&, const Vertex&);
 		void AddFace(Face&);
 		void AddFace(std::vector<Face>&);
 		void AddFace(const std::initializer_list<Face>&);

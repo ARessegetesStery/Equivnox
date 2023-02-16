@@ -164,7 +164,7 @@ namespace EQX
 				curMesh->vertices[(*iter)[1]] , curMesh->vertices[(*iter)[2]] };
 			Face fOriginal(vertices);
 			Face fTransformed(fOriginal);
-			TransformFace(fTransformed, transform);
+			fTransformed.Transform(this->transform);
 
 			// If camera disabled, no need to render ZBuffer
 			if (this->cameraEnabled)
@@ -186,7 +186,7 @@ namespace EQX
 				curMesh->vertices[(*iter)[1]] , curMesh->vertices[(*iter)[2]] };
 			Face fOriginal(vertices);
 			Face fTransformed(fOriginal);
-			TransformFace(fTransformed, perspTransform);
+			fTransformed.Transform(perspTransform);
 
 			/*  Back-Surface Culling  */
 			if (vertices[0].normal.z < 0 && vertices[1].normal.z < 0 && vertices[2].normal.z < 0)
@@ -200,10 +200,10 @@ namespace EQX
 		}
 	}
 
-	void Renderer::RenderLineRaw(EQX_OUT Image& image, LineSeg l, const Mat4& Projection) const
+	void Renderer::RenderLineRaw(EQX_OUT Image& image, LineSeg l, const Mat4& projection) const
 	{
-		TransformVertexPos(Projection, l.start);
-		TransformVertexPos(Projection, l.end);
+		l.start.Transform(projection);
+		l.end.Transform(projection);
 		LineSeg perspL(l.start, l.end);
 
 		int sx = static_cast<int>(perspL.start.pos.x);
@@ -239,10 +239,10 @@ namespace EQX
 		}
 	}
 	 
-	void Renderer::RenderLineSmooth(EQX_OUT Image& image, LineSeg l, const Mat4& Projection) const
+	void Renderer::RenderLineSmooth(EQX_OUT Image& image, LineSeg l, const Mat4& projection) const
 	{
-		TransformVertexPos(Projection, l.start);
-		TransformVertexPos(Projection, l.end);
+		l.start.Transform(projection);
+		l.end.Transform(projection);
 		LineSeg perspL(l.start, l.end);
 
 		int sx = static_cast<int>(perspL.start.pos.x);
@@ -283,96 +283,96 @@ namespace EQX
 	
 	void Renderer::RenderFaceSingle(EQX_OUT Image& image, const Face& fOriginal, Face& fTrans, const Image& ZBuffer) const
 	{
-		TransformFace(fTrans, ssTransform);
+		fTrans.Transform(ssTransform);
 
-		if (std::abs(fTrans.kLM) > SLOPE_MAX)
+		if (std::abs(fTrans.SlopeLM()) > SLOPE_MAX)
 		{
 			int xpos, ypos;
-			for (xpos = fTrans.l.pos.x; xpos <= fTrans.r.pos.x; ++xpos)
-				for (ypos = fTrans.l.pos.y + (xpos - fTrans.l.pos.x - sgn(fTrans.kLR)) * fTrans.kLR;
-					ypos <= fTrans.m.pos.y + (xpos - fTrans.l.pos.x + sgn(fTrans.kMR)) * fTrans.kMR;
+			for (xpos = fTrans.L().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
+				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x - sgn(fTrans.SlopeLR())) * fTrans.SlopeLR();
+					ypos <= fTrans.M().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeMR())) * fTrans.SlopeMR();
 					++ypos)
 					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
 		}
-		else if (std::abs(fTrans.kMR) > SLOPE_MAX)
+		else if (std::abs(fTrans.SlopeMR()) > SLOPE_MAX)
 		{
 			int xpos, ypos;
-			for (xpos = fTrans.l.pos.x; xpos <= fTrans.r.pos.x; ++xpos)
-				for (ypos = fTrans.l.pos.y + (xpos - fTrans.l.pos.x - sgn(fTrans.kLM)) * fTrans.kLM;
-					ypos <= fTrans.l.pos.y + (xpos - fTrans.l.pos.x + sgn(fTrans.kLR)) * fTrans.kLR;
+			for (xpos = fTrans.L().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
+				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x - sgn(fTrans.SlopeLM())) * fTrans.SlopeLM();
+					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeLR())) * fTrans.SlopeLR();
 					++ypos)
 					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
 		}
-		else if (fTrans.kLM > fTrans.kLR)
-		// m lies above the line segment connecting l and r
+		else if (fTrans.SlopeLM() > fTrans.SlopeLR())
+		// GetM() lies above the line segment connecting l and GetR()
 		{
 			int xpos, ypos;
-			for (xpos = fTrans.l.pos.x; xpos < floor(fTrans.m.pos.x); ++xpos)
-				for (ypos = fTrans.l.pos.y + (xpos - fTrans.l.pos.x - sgn(fTrans.kLR)) * fTrans.kLR;
-					ypos <= fTrans.l.pos.y + (xpos - fTrans.l.pos.x + sgn(fTrans.kLM)) * fTrans.kLM; 
+			for (xpos = fTrans.L().pos.x; xpos < floor(fTrans.M().pos.x); ++xpos)
+				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x - sgn(fTrans.SlopeLR())) * fTrans.SlopeLR();
+					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeLM())) * fTrans.SlopeLM(); 
 					++ypos)
 					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
-			for (xpos = fTrans.m.pos.x; xpos <= fTrans.r.pos.x; ++xpos)
-				for (ypos = fTrans.l.pos.y + (xpos - fTrans.l.pos.x - sgn(fTrans.kLR)) * fTrans.kLR;
-					ypos <= fTrans.m.pos.y + (xpos - fTrans.m.pos.x + sgn(fTrans.kMR)) * fTrans.kMR; 
+			for (xpos = fTrans.M().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
+				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x - sgn(fTrans.SlopeLR())) * fTrans.SlopeLR();
+					ypos <= fTrans.M().pos.y + (xpos - fTrans.M().pos.x + sgn(fTrans.SlopeMR())) * fTrans.SlopeMR(); 
 					++ypos)
 					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
 		}
 		else
 		{
 			int xpos, ypos;
-			for (xpos = fTrans.l.pos.x; xpos < floor(fTrans.m.pos.x); ++xpos)
-				for (ypos = fTrans.l.pos.y + (xpos - fTrans.l.pos.x - sgn(fTrans.kLM)) * fTrans.kLM;
-					ypos <= fTrans.l.pos.y + (xpos - fTrans.l.pos.x + sgn(fTrans.kLR)) * fTrans.kLR; 
+			for (xpos = fTrans.L().pos.x; xpos < floor(fTrans.M().pos.x); ++xpos)
+				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x - sgn(fTrans.SlopeLM())) * fTrans.SlopeLM();
+					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeLR())) * fTrans.SlopeLR(); 
 					++ypos)
 					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
-			for (xpos = fTrans.m.pos.x; xpos <= fTrans.r.pos.x; ++xpos)
-				for (ypos = fTrans.m.pos.y + (xpos - fTrans.m.pos.x - sgn(fTrans.kMR)) * fTrans.kMR;
-					ypos <= fTrans.l.pos.y + (xpos - fTrans.l.pos.x + sgn(fTrans.kLR)) * fTrans.kLR; 
+			for (xpos = fTrans.M().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
+				for (ypos = fTrans.M().pos.y + (xpos - fTrans.M().pos.x - sgn(fTrans.SlopeMR())) * fTrans.SlopeMR();
+					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeLR())) * fTrans.SlopeLR(); 
 					++ypos)
 					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
 		}
 	}
 
-	void Renderer::RenderFaceZBuf(EQX_OUT ImageGrey& image, const Face& fTransformed) const
+	void Renderer::RenderFaceZBuf(EQX_OUT ImageGrey& image, const Face& fTrans) const
 	{
-		if (std::abs(fTransformed.kLM) > SLOPE_MAX)
+		if (std::abs(fTrans.SlopeLM()) > SLOPE_MAX)
 		{
 			int xpos, ypos;
-			for (xpos = fTransformed.l.pos.x; xpos <= fTransformed.r.pos.x; ++xpos)
-				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR;
-					ypos <= fTransformed.m.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kMR; ++ypos)
-					UpdateZBufColor(xpos, ypos, fTransformed, image);
+			for (xpos = fTrans.L().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
+				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x) * fTrans.SlopeLR();
+					ypos <= fTrans.M().pos.y + (xpos - fTrans.L().pos.x) * fTrans.SlopeMR(); ++ypos)
+					UpdateZBufColor(xpos, ypos, fTrans, image);
 		}
-		else if (fTransformed.kLM > fTransformed.kLR)
+		else if (fTrans.SlopeLM() > fTrans.SlopeLR())
 		{
 			int xpos, ypos;
-			for (xpos = fTransformed.l.pos.x; xpos <= fTransformed.m.pos.x; ++xpos)
-				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR;
-					ypos <= fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLM; ++ypos)
+			for (xpos = fTrans.L().pos.x; xpos <= fTrans.M().pos.x; ++xpos)
+				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x) * fTrans.SlopeLR();
+					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x) * fTrans.SlopeLM(); ++ypos)
 					if (image.IsPointOnCanvas(xpos, ypos))
-						UpdateZBufColor(xpos, ypos, fTransformed, image);
-			for (xpos = fTransformed.m.pos.x; xpos <= fTransformed.r.pos.x; ++xpos)
-				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR;
-					ypos <= fTransformed.m.pos.y + (xpos - fTransformed.m.pos.x) * fTransformed.kMR; ++ypos)
+						UpdateZBufColor(xpos, ypos, fTrans, image);
+			for (xpos = fTrans.M().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
+				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x) * fTrans.SlopeLR();
+					ypos <= fTrans.M().pos.y + (xpos - fTrans.M().pos.x) * fTrans.SlopeMR(); ++ypos)
 					if (image.IsPointOnCanvas(xpos, ypos))
-						UpdateZBufColor(xpos, ypos, fTransformed, image);
+						UpdateZBufColor(xpos, ypos, fTrans, image);
 		}
 		else
 		{
 			int xpos, ypos;
-			for (xpos = fTransformed.l.pos.x; xpos <= fTransformed.m.pos.x; ++xpos)
+			for (xpos = fTrans.L().pos.x; xpos <= fTrans.M().pos.x; ++xpos)
 			{
-				for (ypos = fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLM;
-					ypos <= fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR; ++ypos)
+				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x) * fTrans.SlopeLM();
+					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x) * fTrans.SlopeLR(); ++ypos)
 					if (image.IsPointOnCanvas(xpos, ypos))
-						UpdateZBufColor(xpos, ypos, fTransformed, image);
+						UpdateZBufColor(xpos, ypos, fTrans, image);
 			}
-			for (xpos = fTransformed.m.pos.x; xpos <= fTransformed.r.pos.x; ++xpos)
-				for (ypos = fTransformed.m.pos.y + (xpos - fTransformed.m.pos.x) * fTransformed.kMR;
-					ypos <= fTransformed.l.pos.y + (xpos - fTransformed.l.pos.x) * fTransformed.kLR; ++ypos)
+			for (xpos = fTrans.M().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
+				for (ypos = fTrans.M().pos.y + (xpos - fTrans.M().pos.x) * fTrans.SlopeMR();
+					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x) * fTrans.SlopeLR(); ++ypos)
 					if (image.IsPointOnCanvas(xpos, ypos))
-						UpdateZBufColor(xpos, ypos, fTransformed, image);
+						UpdateZBufColor(xpos, ypos, fTrans, image);
 		}
 	}
 
@@ -415,8 +415,8 @@ namespace EQX
 			Vec3 curPos = Vec3(xpos, ypos, zpos);
 			Vec3 originalPos = inverseTransform * (curPos.ToVec4());
 			Vec3 baryCoord = fOriginal.baryCoord(originalPos.x, originalPos.y);
-			Vec3 fragNormal = baryCoord[0] * fOriginal.l.normal +
-				baryCoord[1] * fOriginal.m.normal + baryCoord[2] * fOriginal.r.normal;
+			Vec3 fragNormal = baryCoord[0] * fOriginal.L().normal +
+				baryCoord[1] * fOriginal.M().normal + baryCoord[2] * fOriginal.R().normal;
 
 			float newGreyScale = (zpos == 1) ? 0 : 128 - 127.f * zpos;
 			if (newGreyScale > 255 || newGreyScale < 0)
@@ -437,7 +437,6 @@ namespace EQX
 					image.set(xpos, ypos, pixelColor);
 				}
 				else if (this->renderLightConfig == RenderLightConfig::PARTICLE)
-					// TODO GI
 					image.set(xpos, ypos, Color::White);
 				else
 					image.set(xpos, ypos, Color::White);
@@ -450,8 +449,8 @@ namespace EQX
 			Vec3 curPos = Vec3(xpos, ypos, zpos);
 			Vec3 originalPos = inverseTransform * (curPos.ToVec4());
 			Vec3 baryCoord = fOriginal.baryCoord(originalPos.x, originalPos.y);
-			Vec3 fragNormal = baryCoord[0] * fOriginal.l.normal +
-			baryCoord[1] * fOriginal.m.normal + baryCoord[2] * fOriginal.r.normal;
+			Vec3 fragNormal = baryCoord[0] * fOriginal.L().normal +
+			baryCoord[1] * fOriginal.M().normal + baryCoord[2] * fOriginal.R().normal;
 
 			Color originalColor = image.get(xpos, ypos);
 			Color resultColor = Color(0);
