@@ -20,7 +20,13 @@ namespace EQX {
 		Camera(float nearClip, float farClip);
 		Camera(const Camera&);
 
-		void fromFoV(float FoV, float aspect); 
+		/**
+		 * Completes the parameters according to the given Field of View and Aspect Ratio
+		 *
+		 * @param FoV - field of view
+		 * @param aspect - aspect ratio
+		 */
+		void fromFoV(const float FoV, const float aspect); 
 	};
 
 }

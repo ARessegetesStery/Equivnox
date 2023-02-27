@@ -65,7 +65,7 @@ namespace EQX
 		void RenderLineRaw(EQX_OUT Image& image, LineSeg, const Mat4&) const;
 		void RenderLineSmooth(EQX_OUT Image& image, LineSeg, const Mat4&) const;
 
-		void RenderFaceSingle(EQX_OUT Image& image, const Face& fOriginal, const Face& fTransformed, const Image& ZBuffer) const;
+		void RenderFaceSingle(EQX_OUT Image& image, const Face& fOriginal, const Face& fTransformed, const ImageGrey& ZBuffer) const;
 		void RenderFaceZBuf(EQX_OUT ImageGrey& image, const Face& fTransformed) const;
 
 		/*  Render Configs  */
@@ -100,7 +100,7 @@ namespace EQX
 		 * @param image - [OUT]Image to write to
 		 * @param ZBuffer - Precomputed ZBuffer
 		 */
-		void UpdateFragColor(float x, float y, const Face& f, const Face& fOriginal, EQX_OUT Image& image, const Image& ZBuffer) const;
+		void UpdateFragColor(float x, float y, const Face& f, const Face& fOriginal, EQX_OUT Image& image, const ImageGrey& ZBuffer) const;
 
 		Color PhongLighting(Vec3 originalPos, Vec3 fragNormal, Color texColor, const Light& l) const;
 

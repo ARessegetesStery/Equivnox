@@ -59,6 +59,7 @@ namespace EQX {
 	 * @return 4*4 View Matrix
 	 */
 	Matrix4x4 MakeView(Vector4 CameraPos, Vector4 LookAt, Vector4 UpDir);
+	Matrix4x4 MakeView(Vector4 CameraPos, Vector4 LookAt);
 
 	/**
 	 * Creates a matrix for orthogonal projection

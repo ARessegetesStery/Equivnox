@@ -41,8 +41,9 @@ namespace EQX {
 		static Color White;
 		static Color Black;
 	};
-
+#ifdef EQX_DEBUG
 	void Print(const Color&);
+#endif
 
 	_ColorIntermediate operator* (const Color, const float);
 	_ColorIntermediate operator* (const float, const Color);
@@ -110,7 +111,7 @@ namespace EQX {
 	{
 	private:
 		unsigned int width, height;
-		unsigned char* canvas;
+		float* canvas;
 
 	public:
 		ImageGrey();
@@ -120,8 +121,8 @@ namespace EQX {
 
 		ImageGrey& operator= (const ImageGrey&);
 
-		void set(unsigned int, unsigned int, Color);
-		Color get(unsigned int, unsigned int) const;
+		void set(unsigned int, unsigned int, float);
+		float get(unsigned int, unsigned int) const;
 
 		void clear();
 		void write(ImageType type = ImageType::TGA, std::string filename = "output");
@@ -131,7 +132,7 @@ namespace EQX {
 			return 0 <= x && x < this->width && 0 <= y && y <= this->height; 
 		}
 
-		const unsigned char* GetCanvas() const { return this->canvas; };
+		const float* GetCanvas() const { return this->canvas; };
 
 		inline unsigned int getWidth() const { return width; }
 		inline unsigned int getHeight() const { return height; }

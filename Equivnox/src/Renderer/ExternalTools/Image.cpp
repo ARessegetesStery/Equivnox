@@ -214,7 +214,7 @@ namespace EQX {
 	{
 		this->width = image.getWidth();
 		this->height = image.getHeight();
-		const unsigned char* imageCanvas = image.GetCanvas();
+		const float* imageCanvas = image.GetCanvas();
 		this->canvas = new Color[static_cast<size_t>(this->width) * static_cast<size_t>(this->height)];
 		for (size_t i = 0; i != static_cast<size_t>(this->width) * static_cast<size_t>(this->height); ++i)
 			this->canvas[i] = Color(imageCanvas[i]);
@@ -262,7 +262,7 @@ namespace EQX {
 		this->width = image.getWidth();
 		this->height = image.getHeight();
 		this->canvas = new Color[image.getWidth() * image.getHeight()];
-		const unsigned char* imageCanvas = image.GetCanvas();
+		const float* imageCanvas = image.GetCanvas();
 		for (unsigned int i = 0; i != image.getWidth() * image.getHeight(); ++i)
 			this->canvas[i] = Color(imageCanvas[i]);
 
@@ -319,7 +319,7 @@ namespace EQX {
 	{
 		this->width = 100;
 		this->height = 100;
-		this->canvas = new unsigned char[100 * 100];
+		this->canvas = new float[100 * 100];
 		for (unsigned int i = 0; i != 100 * 100; ++i)
 			this->canvas[i] = 0;
 	}
@@ -328,7 +328,7 @@ namespace EQX {
 	{
 		this->width = w;
 		this->height = h;
-		this->canvas = new unsigned char[static_cast<size_t>(w) * static_cast<size_t>(h)];
+		this->canvas = new float[static_cast<size_t>(w) * static_cast<size_t>(h)];
 		for (size_t i = 0; i != static_cast<size_t>(w) * static_cast<size_t>(h); ++i)
 			this->canvas[i] = 0;
 	}
@@ -346,24 +346,24 @@ namespace EQX {
 
 		this->width = image.width;
 		this->height = image.height;
-		this->canvas = new unsigned char[image.width * image.height];
+		this->canvas = new float[image.width * image.height];
 		for (unsigned int i = 0; i != image.width * image.height; ++i)
 			this->canvas[i] = image.canvas[i];
 
 		return *this;
 	}
 
-	void ImageGrey::set(unsigned int w, unsigned int h, Color c)
+	void ImageGrey::set(unsigned int w, unsigned int h, float c)
 	{
 		if (!(!canvas || w >= width || h >= height))
-			this->canvas[(size_t)(h * this->width + w)] = c.r;
+			this->canvas[(size_t)(h * this->width + w)] = c;
 	}
 
-	Color ImageGrey::get(unsigned int w, unsigned int h) const
+	float ImageGrey::get(unsigned int w, unsigned int h) const
 	{
 		if (!(!canvas || w >= width || h >= height))
-			return Color(this->canvas[(size_t)(h * this->width + w)]);
-		return Color::Black;
+			return this->canvas[(size_t)(h * this->width + w)];
+		return 0.0f;
 	}
 
 	void ImageGrey::clear()

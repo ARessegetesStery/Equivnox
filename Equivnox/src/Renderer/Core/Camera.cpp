@@ -13,7 +13,7 @@ namespace EQX {
 	Camera::Camera(const Camera& c) : pos(c.pos), lookAt(c.lookAt), upDir(c.upDir),
 		width(c.width), height(c.height), nearClip(c.nearClip), farClip(c.farClip)	{	}
 
-	void Camera::fromFoV(float FoV, float aspect)
+	void Camera::fromFoV(const float FoV, const float aspect)
 	{
 		this->height = 2 * tan(FoV * EQXPI / 180.f) * nearClip;
 		this->width = aspect * height;

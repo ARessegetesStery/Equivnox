@@ -16,7 +16,7 @@ namespace EQX
 	{
 	public:
 		LightType lightType;
-		Vec3 Position;
+		Vec3 pos;
 		Vec3 Direction;
 		float intensity;
 		Color lightColor;

@@ -254,11 +254,9 @@ namespace EQX {
 
 	Matrix4x4 MakeView(Vector4 CameraPos, Vector4 LookAt, Vector4 UpDir)
 	{
-		Vector3 look = LookAt.ToVec3();
-		Vector3 up = UpDir.ToVec3();
+		Vector3 look = LookAt.ToVec3().Normalize();
+		Vector3 up = UpDir.ToVec3().Normalize();
 		Vector3 binormal = Cross(look, up).Normalize();
-		look.Normalize();
-		up.Normalize();
 		look = look.Neg();
 
 		Matrix4x4 rotation(
@@ -277,20 +275,19 @@ namespace EQX {
 
 	Matrix4x4 MakeView(Vector4 CameraPos, Vector4 LookAt)
 	{
-		Vector3 Updir3;
+		Vector3 Updir;
 		Vector3 look = LookAt.ToVec3();
 		if (look.x == 0 && look.z == 0)
 		{
-			Updir3 = Vector3(look.y, 0, 0);
+			Updir = Vector3(look.y, 0, 0);
 		}
 		else
 		{
 			float xzLength = (look - Vector3(0, look.y, 0)).Norm();
-			Updir3 = (look - Vector3(0, look.y, 0)) * (-look.y / xzLength) +
+			Updir = (look - Vector3(0, look.y, 0)) * (-look.y / xzLength) +
 				Vector3(0, xzLength, 0);
 		}
-		Updir3 = Updir3.Normalize();
-		Vector4 Updir(Updir3);
+		Updir = Updir.Normalize();
 		return MakeView(CameraPos, LookAt, Updir);
 	}
 

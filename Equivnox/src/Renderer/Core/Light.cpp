@@ -11,12 +11,12 @@ namespace EQX
 		if (type == LightType::Point)
 		{
 			this->Direction = _LightPlaceHolder;
-			this->Position = pos_or_dir;
+			this->pos = pos_or_dir;
 		}
 		else if (type == LightType::Direction)
 		{
 			this->Direction = pos_or_dir;
-			this->Position = _LightPlaceHolder;
+			this->pos = _LightPlaceHolder;
 		}
 	}
 }
