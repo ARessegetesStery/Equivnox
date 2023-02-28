@@ -18,6 +18,11 @@ namespace EQX {
 		PNG		// Relies on stb libraries
 	};
 
+	enum class RescaleFunc
+	{
+
+	};
+
 	class Color
 	{
 		friend class _ColorIntermediate;

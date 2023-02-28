@@ -1,3 +1,5 @@
+#include "eqxpch.h"
+
 #include "Face.h"
 
 namespace EQX {
@@ -189,16 +191,5 @@ namespace EQX {
 			(Dot(p.GetNormal(), l.GetDirection()));
 		pos = l.GetPoint() + dirMult * l.GetDirection();
 		return true;
-	}
-
-	void Print(const Face& f)
-	{
-		cout << "| Face:" << endl;
-		cout << "| Vertex 1: ";
-		Print(f.L().pos);
-		cout << "| Vertex 2: ";
-		Print(f.M().pos);
-		cout << "|_Vertex 3: ";
-		Print(f.R().pos);
 	}
 }

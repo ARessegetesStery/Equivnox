@@ -1,7 +1,5 @@
 #pragma once
 
-#include "eqxpch.h"
-
 #include "Math.h"
 
 namespace EQX {
@@ -31,6 +29,10 @@ namespace EQX {
 		float& operator[] (std::size_t n);
 		const float& operator[] (std::size_t n) const;
 
+		/**
+		 * @return a vector that is orthogonal to the original one.
+		 */
+		Vector3 Binormal() const;
 		Vector3 Neg() const;
 		Vector3 Normalize() const;
 		Vector4 ToVec4() const;
@@ -53,7 +55,4 @@ namespace EQX {
 	Vector3 operator* (const float, const Vector3&);
 	Vector3 operator* (const Vector3&, const float);
 	
-#ifdef EQX_DEBUG
-	void Print(const Vector3&);
-#endif
 }

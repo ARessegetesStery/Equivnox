@@ -1,6 +1,6 @@
 #pragma once
 
-#include "eqxpch.h"
+#include <float.h>
 
 namespace EQX
 {

@@ -18,6 +18,9 @@ project "Equivnox"
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
+    pchheader "eqxpch.h"
+    pchsource "%{prj.name}/src/eqxpch.cpp"
+
     files
     {
         "%{prj.name}/**.h",
@@ -26,9 +29,7 @@ project "Equivnox"
 
     includedirs
     {
-        "%{prj.name}",
         "%{prj.name}/src",
-        "%{prj.name}/vendor",
     }
 
     filter "system:Windows"
@@ -39,11 +40,6 @@ project "Equivnox"
     filter "configurations:Debug"
         defines "EQX_DEBUG"
         symbols "On"
-
-        defines
-        {
-            "EQX_DEBUG_ON"
-        }
 
     filter "configurations:Release"
         defines "EQX_RELEASE"

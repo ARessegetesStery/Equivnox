@@ -1,5 +1,7 @@
 #pragma once
 
+#include "eqxpch.h"
+
 namespace EQX 
 {
 	/**    

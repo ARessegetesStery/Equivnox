@@ -6,7 +6,8 @@ namespace EQX {
 
 	struct Camera
 	{
-	public:
+		friend class Renderer;
+	private:
 		Vector4 pos;
 		Vector4 lookAt;
 		Vector4 upDir;
@@ -27,6 +28,15 @@ namespace EQX {
 		 * @param aspect - aspect ratio
 		 */
 		void fromFoV(const float FoV, const float aspect); 
+
+		inline void SetPos(Vec4 pos) { this->pos = pos; }
+		inline void SetPos(Vec3 pos) { this->pos = pos.ToVec4(); }
+
+		// Make camera look at the designated position
+		inline void LookAt(Vec3 pos) { this->lookAt = (this->pos + pos.Neg()).Neg(); }
+		inline void LookAt(Vec4 pos) { this->LookAt(pos.ToVec3()); }
+
+		inline Vec3 GetPos() { return this->pos; }
 	};
 
 }

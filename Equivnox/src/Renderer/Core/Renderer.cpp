@@ -72,7 +72,11 @@ namespace EQX
 
 		/*  Setup Transformation Matrix  */
 		Mat4 ssMat = MakeScreenSpace(this->width, this->height);
-		Mat4 perspMat = MakePersp(camera.width, camera.height) * MakeView(camera.pos, camera.lookAt, camera.upDir);
+		Mat4 perspMat = Mat4::Identity;
+		if (this->camera.upDir == Vec4::ZERO)
+			perspMat = MakePersp(camera.width, camera.height) * MakeView(camera.pos, camera.lookAt);
+		else
+			perspMat = MakePersp(camera.width, camera.height) * MakeView(camera.pos, camera.lookAt, camera.upDir);
 		if (this->cameraEnabled)
 		{
 			this->ssTransform = ssMat;
@@ -100,7 +104,7 @@ namespace EQX
 	void Renderer::RenderLines(EQX_OUT Image& image) const
 	{
 		Mat4 PerspMat = Mat4::Identity;
-		if (this->camera.upDir == Vec4::ZERO)
+		if (this->camera.upDir == Vec4::ZERO || Dot(this->camera.upDir, this->camera.lookAt) != 0)
 			PerspMat = MakeScreenSpace(this->width, this->height) *
 				MakePersp(camera.width, camera.height, -camera.nearClip, -camera.farClip) *
 				MakeView(camera.pos, camera.lookAt);
@@ -261,7 +265,6 @@ namespace EQX
 		int sy = static_cast<int>(perspL.start.pos.y);
 		int ex = static_cast<int>(perspL.end.pos.x);
 		int ey = static_cast<int>(perspL.end.pos.y);
-		cout << sx << " " << sy << " " << ex << " " << ey << endl;
 
 		int xPace = 1;
 		int yPace = 1;

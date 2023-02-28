@@ -1,6 +1,6 @@
 #pragma once
 
-#include "eqxpch.h"
+#include "Math.h"
 
 namespace EQX {
 
@@ -23,8 +23,8 @@ namespace EQX {
 		Vector2& operator*= (float s);
 
 		// index operator returns x if the index exceeds 1
-		float& operator[] (std::size_t n);
-		const float& operator[] (std::size_t n) const;
+		float& operator[] (size_t n);
+		const float& operator[] (size_t n) const;
 
 		Vector2 Neg() const;
 

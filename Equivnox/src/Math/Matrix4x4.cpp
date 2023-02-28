@@ -275,20 +275,18 @@ namespace EQX {
 
 	Matrix4x4 MakeView(Vector4 CameraPos, Vector4 LookAt)
 	{
-		Vector3 Updir;
+		Vector3 UpDir;
 		Vector3 look = LookAt.ToVec3();
-		if (look.x == 0 && look.z == 0)
-		{
-			Updir = Vector3(look.y, 0, 0);
-		}
+		if (look.y == 0)
+			UpDir = Vec3(look.x, 1.0f, look.z);
 		else
 		{
-			float xzLength = (look - Vector3(0, look.y, 0)).Norm();
-			Updir = (look - Vector3(0, look.y, 0)) * (-look.y / xzLength) +
-				Vector3(0, xzLength, 0);
+			float upYDisp = 0;
+			upYDisp = -(look.x * look.x + look.z * look.z) / look.y;
+			UpDir = Vec3(look.x, upYDisp, look.z);
 		}
-		Updir = Updir.Normalize();
-		return MakeView(CameraPos, LookAt, Updir);
+		UpDir = UpDir.Normalize();
+		return MakeView(CameraPos, LookAt, UpDir.ToVec4());
 	}
 
 	Matrix4x4 makeOrtho(float NearWidth, float NearHeight,

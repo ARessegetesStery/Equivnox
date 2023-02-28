@@ -2,10 +2,7 @@
 
 #include "eqxpch.h"
 
-#include "Renderer/Core/RenderConfig.h"
-#include "LineSeg.h"
 #include "Face.h"
-#include "Vertex.h"
 
 namespace EQX {
 

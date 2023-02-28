@@ -259,26 +259,4 @@ namespace EQX {
 #endif
 
 	}
-
-#ifdef EQX_DEBUG
-	void Print(std::string msg)
-	{
-		cout << msg << endl;
-	}
-
-	void Print(int num)
-	{
-		cout << num << endl;
-	}
-
-	void Print(float num)
-	{
-		cout << num << endl;
-	}
-
-	void Print(double num)
-	{
-		cout << num << endl;
-	}
-#endif
 }

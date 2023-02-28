@@ -1,5 +1,6 @@
 #include "eqxpch.h"
 
+#include "Debug/Log/Log.h"
 #include "Renderer/Core/Core.h"
 #include "Renderer/Geometry/Geometry.h"
 #include "Loader/Loader.h"
@@ -29,23 +30,23 @@ int main(int argc, char** argv) {
 	// m.AddLine(v1, v3);
 	// m.AddFace(f);
 
+	EQX::Print("Welcome to Equivnox!");
+
 	coreRenderer.BindMesh(&m);
 	coreRenderer.SetPass(EQX::RenderPass::FULL);
 	coreRenderer.SetFill(EQX::RenderFill::FILL);
-	coreRenderer.SetAA(EQX::RenderAAConfig::ANTIALIAS_OFF);
+	coreRenderer.SetAA(EQX::RenderAAConfig::MSAA);
 	coreRenderer.SetMSAAMult(4);
 	coreRenderer.SetOutputType(EQX::ImageType::TGA);
 	coreRenderer.SetLight(EQX::RenderLightConfig::PHONG);
 
 	coreRenderer.EnableCamera();
-	coreRenderer.camera.pos = EQX::Vec3(1, 1, 1);
-	coreRenderer.camera.lookAt = EQX::Vec3(-1, -1, -1);
+	coreRenderer.camera.SetPos(EQX::Vec3(1, 1, 1));
+	coreRenderer.camera.LookAt(EQX::Vec3::ZERO);
 	coreRenderer.camera.fromFoV(45, 1.0);
-	cout << coreRenderer.camera.width << " " << coreRenderer.camera.height << endl;
-	coreRenderer.camera.upDir = EQX::Vec3(-1, -1, 2);
 	// coreRenderer.DisableCamera();
 
-	coreRenderer.addLight(EQX::Light(coreRenderer.camera.pos, EQX::Color::White, .5f, EQX::LightType::Point));
+	coreRenderer.addLight(EQX::Light(coreRenderer.camera.GetPos(), EQX::Color::White, .5f, EQX::LightType::Point));
 
 	coreRenderer.Render();
 }

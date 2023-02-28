@@ -1,3 +1,5 @@
+#include "eqxpch.h"
+
 #include "Light.h"
 
 namespace EQX

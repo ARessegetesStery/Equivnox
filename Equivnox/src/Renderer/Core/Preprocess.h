@@ -37,11 +37,4 @@ namespace EQX {
 	 * @param trigs - [OUT] the resulting parsed triangles
 	 */
 	void TriangularizeHull(std::vector<Vertex>& vertices, EQX_OUT std::vector<Face>& trigs);
-
-#ifdef EQX_DEBUG
-	void Print(std::string msg);
-	void Print(int num);
-	void Print(float num);
-	void Print(double num);
-#endif
 }

@@ -2,9 +2,7 @@
 
 #include "eqxpch.h"
 
-#include "Math/Line.h"
 #include "LineSeg.h"
-#include "Vertex.h"
 
 namespace EQX {
 
@@ -79,8 +77,4 @@ namespace EQX {
 	 * @return true if has intersection; false if parallel, i.e. no intersection
 	 */
 	bool PlaneIntersectWithLine(const Plane& p, const Line& l, EQX_OUT Vector3& pos);
-
-#ifdef EQX_DEBUG
-	void Print(const Face&);
-#endif
 }

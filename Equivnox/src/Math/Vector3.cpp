@@ -103,6 +103,14 @@ namespace EQX
 		return (v1.x == v2.x) && (v1.y == v2.y) && (v1.z == v2.z);
 	}
 
+	Vector3 Vector3::Binormal() const
+	{
+		if (this->z == 0)
+			return Vector3(this->y, -this->x, 0);
+		else
+			return Vector3(this->y, this->z, -(this->x * this->y + this->y * this->z) / this->z);
+	}
+
 	Vector3 Vector3::Neg() const
 	{
 		return Vector3(-x, -y, -z);
@@ -155,11 +163,4 @@ namespace EQX
 	{
 		return Vec3(k * v.x, k * v.y, k * v.z);
 	}
-
-#ifdef EQX_DEBUG
-	void Print(const Vector3& vec)
-	{
-		cout << vec.x << " " << vec.y << " " << vec.z << " " << endl;
-	}
-#endif
 }

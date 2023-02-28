@@ -161,11 +161,4 @@ namespace EQX
 		return Vector4(ans3);
 	}
 
-#ifdef EQX_DEBUG
-	void Print(const Vector4& vec)
-	{
-		cout << vec.x << " " << vec.y << " " << vec.z << " " << endl;
-	}
-#endif
-
 }

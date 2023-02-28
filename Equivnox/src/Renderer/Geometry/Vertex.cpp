@@ -1,5 +1,3 @@
-#pragma once
-
 #include "eqxpch.h"
 
 #include "Vertex.h"
