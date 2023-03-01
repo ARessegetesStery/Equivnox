@@ -26,12 +26,18 @@ namespace EQX
 
 	Renderer& Renderer::Init()
 	{
+#ifdef EQX_PRINT_STATUS
+		EQX::Print("Welcome to Equivnox!");
+#endif
 		static Renderer _renderer;
 		return _renderer;
 	}
 
 	void Renderer::BindMesh(Mesh* m)
 	{
+#ifdef EQX_PRINT_STATUS
+		Print("Loading Mesh..");
+#endif
 		this->curMesh = m;
 	}
 
@@ -65,15 +71,19 @@ namespace EQX
 	{
 		Image image(this->width, this->height);
 
+#ifdef EQX_PRINT_STATUS
+		Print("Rendering Faces..");
+#endif
+
 		/*  Initializing the background color to be black  */
 		for (int x = 0; x < this->width; ++x)
 			for (int y = 0; y < this->height; ++y)
-				image.set(x, y, Color::Black);
+				image.Set(x, y, Color::Black);
 
 		/*  Setup Transformation Matrix  */
 		Mat4 ssMat = MakeScreenSpace(this->width, this->height);
 		Mat4 perspMat = Mat4::Identity;
-		if (this->camera.upDir == Vec4::ZERO)
+		if (this->camera.upDir == Vec4::Zero)
 			perspMat = MakePersp(camera.width, camera.height) * MakeView(camera.pos, camera.lookAt);
 		else
 			perspMat = MakePersp(camera.width, camera.height) * MakeView(camera.pos, camera.lookAt, camera.upDir);
@@ -98,13 +108,18 @@ namespace EQX
 			break;
 		}
 
-		image.write(this->imageType, this->outputPath);
+		image.Rescale(200, 200);
+
+#ifdef EQX_PRINT_STATUS
+		Print("Writing into output file..");
+#endif
+		image.Write(this->imageType, this->outputPath);
 	}
 
 	void Renderer::RenderLines(EQX_OUT Image& image) const
 	{
 		Mat4 PerspMat = Mat4::Identity;
-		if (this->camera.upDir == Vec4::ZERO || Dot(this->camera.upDir, this->camera.lookAt) != 0)
+		if (this->camera.upDir == Vec4::Zero || Dot(this->camera.upDir, this->camera.lookAt) != 0)
 			PerspMat = MakeScreenSpace(this->width, this->height) *
 				MakePersp(camera.width, camera.height, -camera.nearClip, -camera.farClip) *
 				MakeView(camera.pos, camera.lookAt);
@@ -179,7 +194,7 @@ namespace EQX
 		// Background of ZBuf should be white
 		for (int x = 0; x < this->width; ++x)
 			for (int y = 0; y < this->height; ++y)
-				ZBuf.set(x, y, 255.0f);
+				ZBuf.Set(x, y, 255.0f);
 
 		// If camera disabled, no need to render ZBuffer
 		if (this->cameraEnabled)
@@ -245,12 +260,12 @@ namespace EQX
 			if (transpose)
 			{
 				int y = std::roundf(1 / perspL.k * (x - sx)) + sy;
-				image.set(y, x, Color::White);
+				image.Set(y, x, Color::White);
 			}
 			else
 			{
 				int y = std::roundf(perspL.k * (x - sx)) + sy;
-				image.set(x, y, Color::White);
+				image.Set(x, y, Color::White);
 			}
 		}
 	}
@@ -273,10 +288,10 @@ namespace EQX
 
 		if (sy == ey)
 			for (int x = sx; x != ex + xPace; x += xPace)
-				image.set(x, sy, blendColor(Color::White, image.get(x, sy), 1.0));
+				image.Set(x, sy, blendColor(Color::White, image.Get(x, sy), 1.0));
 		else if (abs(perspL.k) > SLOPE_MAX)
 			for (int y = sy; y != ey + yPace; y += yPace)
-				image.set(sx, y, blendColor(Color::White, image.get(sx, y), 1.0));
+				image.Set(sx, y, blendColor(Color::White, image.Get(sx, y), 1.0));
 		else
 		{
 			for (int x = sx; x != ex; x += xPace)
@@ -290,7 +305,7 @@ namespace EQX
 						continue;
 					Vector2 center(x + xPace / 2.0f, y + yPace / 2.0f);
 					float coeff = PixelAmp(perspL, center);
-					image.set(x, y, blendColor(Color::White, image.get(x, y), coeff));
+					image.Set(x, y, blendColor(Color::White, image.Get(x, y), coeff));
 				}
 			}
 		}
@@ -392,7 +407,7 @@ namespace EQX
 
 	void Renderer::UpdateZBufColor(float x, float y, const Face& f, EQX_OUT ImageGrey& ZBuf) const
 	{
-		float curGreyScale = ZBuf.get(x, y);
+		float curGreyScale = ZBuf.Get(x, y);
 
 		float zpos = f.ZAtXYFace(Vec2(x, y));
 		float newGreyScale = (zpos == 1) ? 0 : 128 - 127.f * zpos;
@@ -401,7 +416,7 @@ namespace EQX
 			return;
 
 		if (newGreyScale < curGreyScale)
-			ZBuf.set(x, y, newGreyScale);
+			ZBuf.Set(x, y, newGreyScale);
 	}
 
 	
@@ -410,12 +425,12 @@ namespace EQX
 		// If camera disabled, only render white pixels
 		if (!this->cameraEnabled)
 		{
-			image.set(xpos, ypos, Color::White);
+			image.Set(xpos, ypos, Color::White);
 			return;
 		}
 
 		/*  Full Pixel Processing  */
-		float curGreyScale = ZBuffer.get(xpos, ypos);
+		float curGreyScale = ZBuffer.Get(xpos, ypos);
 		Color pixelColor = Color(0);
 		Color texColor = Color(200); // TODO Texture Reading
 
@@ -448,12 +463,12 @@ namespace EQX
 							pixelColor = pixelColor + resultColor;
 						}
 					}
-					image.set(xpos, ypos, pixelColor);
+					image.Set(xpos, ypos, pixelColor);
 				}
 				else if (this->renderLightConfig == RenderLightConfig::PARTICLE)
-					image.set(xpos, ypos, Color::White);
+					image.Set(xpos, ypos, Color::White);
 				else
-					image.set(xpos, ypos, Color::White);
+					image.Set(xpos, ypos, Color::White);
 			}
 		}
 		else if (this->renderAAConfig == RenderAAConfig::MSAA)
@@ -467,7 +482,7 @@ namespace EQX
 			Vec3 fragNormal = baryCoord[0] * fOriginal.L().normal +
 			baryCoord[1] * fOriginal.M().normal + baryCoord[2] * fOriginal.R().normal;
 
-			Color originalColor = image.get(xpos, ypos);
+			Color originalColor = image.Get(xpos, ypos);
 			Color resultColor = Color(0);
 			Face face(f);
 
@@ -501,7 +516,7 @@ namespace EQX
 			resultColor = resultColor * validSamplerCnt / samplerCnt;
 			resultColor = resultColor + originalColor;
 
-			image.set(xpos, ypos, resultColor);
+			image.Set(xpos, ypos, resultColor);
 		}
 	}
 

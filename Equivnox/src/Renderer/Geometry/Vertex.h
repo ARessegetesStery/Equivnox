@@ -27,10 +27,10 @@ namespace EQX
 		Vector3 color;		// Default set to be white; each comp 0~255
 
 	public:
-		Vertex(Vector4 pos = Vector4::ZERO, 
-			Vector3 normal = Vector3::UNIT_Z, Vector2 uv = Vector2::ZERO);
-		Vertex(Vector3 pos, Vector3 normal = Vector3::UNIT_Z, Vector2 uv = Vector2::ZERO);
-		Vertex(Vector2 pos,	Vector3 normal = Vector3::UNIT_Z, Vector2 uv = Vector2::ZERO);
+		Vertex(Vector4 pos = Vector4::Zero, 
+			Vector3 normal = Vector3::UnitZ, Vector2 uv = Vector2::Zero);
+		Vertex(Vector3 pos, Vector3 normal = Vector3::UnitZ, Vector2 uv = Vector2::Zero);
+		Vertex(Vector2 pos,	Vector3 normal = Vector3::UnitZ, Vector2 uv = Vector2::Zero);
 
 		void Transform(const Mat4& projection);
 	};

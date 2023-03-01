@@ -4,7 +4,7 @@
 
 namespace EQX
 {
-	const Vector4 Vector4::ZERO(0, 0, 0, 1);
+	const Vector4 Vector4::Zero(0, 0, 0, 1);
 
 	Vector4::Vector4() : x(0), y(0), z(0), w(1) {  }
 

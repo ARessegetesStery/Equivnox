@@ -20,7 +20,15 @@ namespace EQX {
 
 	enum class RescaleFunc
 	{
+		GAUSSIAN,
+		B_SPLINE_CUBIC,
+		CR_CUBIC
+	};
 
+	enum class RescaleDepth
+	{
+		THIN,		// vertices of the square box
+		THICK		// square of width 4
 	};
 
 	class Color
@@ -40,6 +48,8 @@ namespace EQX {
 
 		Color& operator= (const Color&);
 		Color& operator+= (const Color&);
+		bool operator== (const Color&);
+		bool operator!= (const Color&);
 		unsigned char& operator[] (size_t index);
 		const unsigned char& operator[] (size_t index) const;
 
@@ -99,16 +109,18 @@ namespace EQX {
 		Image& operator= (const Image&);
 		Image& operator= (const ImageGrey&);
 
-		void set(unsigned int, unsigned int, Color);
-		Color get(unsigned int, unsigned int) const;
+		void Set(unsigned int, unsigned int, Color);
+		Color Get(unsigned int, unsigned int) const;
 
-		void clear();
-		void write(ImageType type = ImageType::TGA, std::string filename = "output");
+		void Clear();
+		void Write(ImageType type = ImageType::TGA, std::string filename = "output");
+
+		void Rescale(unsigned int, unsigned int, RescaleFunc func = RescaleFunc::GAUSSIAN);
 
 		inline const Color* GetCanvas() const { return this->canvas; };
 
-		inline unsigned int getWidth() const { return width; }
-		inline unsigned int getHeight() const { return height; }
+		inline unsigned int GetWidth() const { return width; }
+		inline unsigned int GetHeight() const { return height; }
 	};
 
 	// Mono-channel image
@@ -126,11 +138,11 @@ namespace EQX {
 
 		ImageGrey& operator= (const ImageGrey&);
 
-		void set(unsigned int, unsigned int, float);
-		float get(unsigned int, unsigned int) const;
+		void Set(unsigned int, unsigned int, float);
+		float Get(unsigned int, unsigned int) const;
 
-		void clear();
-		void write(ImageType type = ImageType::TGA, std::string filename = "output");
+		void Clear();
+		void Write(ImageType type = ImageType::TGA, std::string filename = "output");
 
 		inline bool IsPointOnCanvas(float x, float y) 
 		{ 
@@ -139,8 +151,8 @@ namespace EQX {
 
 		const float* GetCanvas() const { return this->canvas; };
 
-		inline unsigned int getWidth() const { return width; }
-		inline unsigned int getHeight() const { return height; }
+		inline unsigned int GetWidth() const { return width; }
+		inline unsigned int GetHeight() const { return height; }
 	};
 
 	Color blendColor(Color fore, Color back, float coeff);

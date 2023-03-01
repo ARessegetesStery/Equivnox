@@ -30,8 +30,6 @@ int main(int argc, char** argv) {
 	// m.AddLine(v1, v3);
 	// m.AddFace(f);
 
-	EQX::Print("Welcome to Equivnox!");
-
 	coreRenderer.BindMesh(&m);
 	coreRenderer.SetPass(EQX::RenderPass::FULL);
 	coreRenderer.SetFill(EQX::RenderFill::FILL);
@@ -42,7 +40,7 @@ int main(int argc, char** argv) {
 
 	coreRenderer.EnableCamera();
 	coreRenderer.camera.SetPos(EQX::Vec3(1, 1, 1));
-	coreRenderer.camera.LookAt(EQX::Vec3::ZERO);
+	coreRenderer.camera.LookAt(EQX::Vec3::Zero);
 	coreRenderer.camera.fromFoV(45, 1.0);
 	// coreRenderer.DisableCamera();
 

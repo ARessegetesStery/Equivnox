@@ -27,8 +27,9 @@ namespace EQX {
 		const float& operator[] (size_t n) const;
 
 		Vector2 Neg() const;
+		float Norm() const;
 
-		static const Vector2 ZERO;
+		static const Vector2 Zero;
 	};
 
 	Vector2 operator* (const float, const Vector2&);

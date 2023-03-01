@@ -11,7 +11,7 @@ namespace EQX {
 		Vector4(0, 0, 0, 1)
 	);
 
-	const Matrix4x4 Matrix4x4::ZEROS = Matrix4x4(
+	const Matrix4x4 Matrix4x4::Zeros = Matrix4x4(
 		Vector4(0, 0, 0, 0),
 		Vector4(0, 0, 0, 0),
 		Vector4(0, 0, 0, 0),
@@ -160,7 +160,7 @@ namespace EQX {
 		float det = (t00 * m00 + t10 * m01 + t20 * m02 + t30 * m03);
 
 		if (det == 0)
-			return Mat4::ZEROS;
+			return Mat4::Zeros;
 
 		float invDet = 1 / det;
 

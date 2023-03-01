@@ -4,7 +4,7 @@
 
 namespace EQX
 {
-	const Vec3 Light::_LightPlaceHolder = Vec3::ZERO;
+	const Vec3 Light::_LightPlaceHolder = Vec3::Zero;
 	Light::Light(Vector3 pos_or_dir, Color color, float intensity, LightType type)
 	{
 		this->lightType = type;

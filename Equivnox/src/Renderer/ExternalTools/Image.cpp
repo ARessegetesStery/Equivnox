@@ -105,6 +105,16 @@ namespace EQX {
 		return *this;
 	}
 
+	bool Color::operator==(const Color& c)
+	{
+		return (c.r == this->r && c.g == this->g && c.b == this->b && c.a == this->a);
+	}
+
+	bool Color::operator!=(const Color& c)
+	{
+		return !(*this == c);
+	}
+
 	Color LitColor(const Color c1, const Color c2)
 	{
 		_ColorIntermediate ans(c1);
@@ -212,8 +222,8 @@ namespace EQX {
 
 	Image::Image(const ImageGrey& image)
 	{
-		this->width = image.getWidth();
-		this->height = image.getHeight();
+		this->width = image.GetWidth();
+		this->height = image.GetHeight();
 		const float* imageCanvas = image.GetCanvas();
 		this->canvas = new Color[static_cast<size_t>(this->width) * static_cast<size_t>(this->height)];
 		for (size_t i = 0; i != static_cast<size_t>(this->width) * static_cast<size_t>(this->height); ++i)
@@ -222,6 +232,10 @@ namespace EQX {
 
 	Image::Image(unsigned int w, unsigned int h)
 	{
+		if (w > 2000)
+			w = 2000;
+		if (h > 2000)
+			h = 2000;
 		this->width = w;
 		this->height = h;
 		this->canvas = new Color[static_cast<size_t>(w) * static_cast<size_t>(h)];
@@ -259,37 +273,37 @@ namespace EQX {
 		if (this->canvas)
 			delete[] canvas;
 
-		this->width = image.getWidth();
-		this->height = image.getHeight();
-		this->canvas = new Color[image.getWidth() * image.getHeight()];
+		this->width = image.GetWidth();
+		this->height = image.GetHeight();
+		this->canvas = new Color[image.GetWidth() * image.GetHeight()];
 		const float* imageCanvas = image.GetCanvas();
-		for (unsigned int i = 0; i != image.getWidth() * image.getHeight(); ++i)
+		for (unsigned int i = 0; i != image.GetWidth() * image.GetHeight(); ++i)
 			this->canvas[i] = Color(imageCanvas[i]);
 
 		return *this;
 	}
 
 	// INSP change "h * this->width + w" to "h * w + w" for interesting results
-	void Image::set(unsigned int w, unsigned int h, Color c)
+	void Image::Set(unsigned int w, unsigned int h, Color c)
 	{
 		if (!(!canvas || w >= width || h >= height))
 			this->canvas[(size_t)(h * this->width + w)] = c;
 	}
 
-	Color Image::get(unsigned int w, unsigned int h) const
+	Color Image::Get(unsigned int w, unsigned int h) const
 	{
 		if (!(!canvas || w >= width || h >= height))
 			return this->canvas[(size_t)(h * this->width + w)];
 		return Color::Black;
 	}
 
-	void Image::clear()
+	void Image::Clear()
 	{
 		for (unsigned int i = 0; i != this->width * this->height; ++i)
 			this->canvas[i] = Color::Black;
 	}
 
-	void Image::write(ImageType type, std::string filename)
+	void Image::Write(ImageType type, std::string filename)
 	{
 		if (type == ImageType::TGA)
 		{
@@ -299,7 +313,7 @@ namespace EQX {
 			{
 				w = i % width;
 				h = i / width;
-				image.set(w, h, toTGAColor(canvas[i]));
+				image.Set(w, h, toTGAColor(canvas[i]));
 			}
 			image.flip_vertically(); // Ensure x horizontal, y vertical, origin lower-left corner
 			image.write_tga_file((filename + ".tga").c_str());
@@ -313,6 +327,52 @@ namespace EQX {
 			if (!info)
 				cout << "Writing to " << filename << ".png failed." << endl;
 		}
+	}
+
+	void Image::Rescale(unsigned int w, unsigned int h, RescaleFunc func)
+	{
+		float pixelLength = 1.0f / w * this->width;
+		float pixelHeight = 1.0f / h * this->height;
+		int wStartIndex, wEndIndex, hStartIndex, hEndIndex;
+		Image res(w, h);
+		for (int xpos = 0; xpos != w; ++xpos)
+		{
+			for (int ypos = 0; ypos != h; ++ypos)
+			{
+				Vec2 curPos = Vec2((xpos + 1 / 2) * pixelLength, (ypos + 1 / 2) * pixelHeight);
+				wStartIndex = std::floor(curPos.x - 0.5) - 1;
+				hStartIndex = std::floor(curPos.y - 0.5) - 1;
+				wEndIndex = wStartIndex + 3;
+				hEndIndex = hStartIndex + 3;
+				if (wStartIndex < 0)
+					wStartIndex = 0;
+				if (hStartIndex < 0)
+					hStartIndex = 0;
+				if (wEndIndex >= this->width)
+					wEndIndex = this->width - 1;
+				if (hEndIndex >= this->height)
+					hEndIndex = this->height - 1;
+				float distance = 0;
+				Color resultColor = Color::Black;
+				Color pixelColor = Color::Black;
+				for (int x = wStartIndex; x <= wEndIndex; ++x)
+				{
+					for (int y = hStartIndex; y <= hEndIndex; ++y)
+					{
+						pixelColor = this->Get(x, y);
+						Vec2 sampledPos = Vec2(x + 0.5, y + 0.5);
+						Vec2 disp = sampledPos + curPos.Neg();
+						distance = disp.Norm();
+						if (std::abs(disp.x) <= 1 && std::abs(disp.y) <= 1)
+							resultColor += 0.299 * pixelColor;
+						else
+							resultColor += EvalBSplineCubic(distance) / 1.33 * pixelColor;
+					}
+				}
+				res.Set(xpos, ypos, resultColor);
+			}
+		}
+		*this = res;
 	}
 
 	ImageGrey::ImageGrey()
@@ -353,26 +413,26 @@ namespace EQX {
 		return *this;
 	}
 
-	void ImageGrey::set(unsigned int w, unsigned int h, float c)
+	void ImageGrey::Set(unsigned int w, unsigned int h, float c)
 	{
 		if (!(!canvas || w >= width || h >= height))
 			this->canvas[(size_t)(h * this->width + w)] = c;
 	}
 
-	float ImageGrey::get(unsigned int w, unsigned int h) const
+	float ImageGrey::Get(unsigned int w, unsigned int h) const
 	{
 		if (!(!canvas || w >= width || h >= height))
 			return this->canvas[(size_t)(h * this->width + w)];
 		return 0.0f;
 	}
 
-	void ImageGrey::clear()
+	void ImageGrey::Clear()
 	{
 		for (unsigned int i = 0; i != this->width * this->height; ++i)
 			this->canvas[i] = 0;
 	}
 
-	void ImageGrey::write(ImageType type, std::string filename)
+	void ImageGrey::Write(ImageType type, std::string filename)
 	{
 		if (type == ImageType::TGA)
 		{
@@ -382,7 +442,7 @@ namespace EQX {
 			{
 				w = i % width;
 				h = i / width;
-				image.set(w, h, toTGAColor(Color(canvas[i])));
+				image.Set(w, h, toTGAColor(Color(canvas[i])));
 			}
 			image.flip_vertically(); // Ensure x horizontal, y vertical, origin lower-left corner
 			image.write_tga_file((filename + ".tga").c_str());

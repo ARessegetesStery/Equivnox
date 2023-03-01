@@ -6,15 +6,15 @@ namespace EQX {
 
 	Plane::Plane()
 	{
-		point = Vector3::ZERO;
-		normal = Vector3::UNIT_Z;
+		point = Vector3::Zero;
+		normal = Vector3::UnitZ;
 	}
 
 	Plane::Plane(Vector3 point, Vector3 normal)
 	{
 		this->point = point;
-		if (normal == Vector3::ZERO)
-			normal = Vector3::UNIT_Z;
+		if (normal == Vector3::Zero)
+			normal = Vector3::UnitZ;
 		this->normal = normal.Normalize();
 	}
 
@@ -28,8 +28,8 @@ namespace EQX {
 	{
 		if (coeffs[0] == 0 && coeffs[1] == 0 && coeffs[2] == 0)
 		{
-			point = Vector3::ZERO;
-			normal = Vector3::UNIT_Z;
+			point = Vector3::Zero;
+			normal = Vector3::UnitZ;
 		}
 		else
 		{

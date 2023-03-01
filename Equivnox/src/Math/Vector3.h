@@ -40,10 +40,10 @@ namespace EQX {
 		float NormSquare() const;
 		float Norm() const;
 
-		static const Vector3 ZERO;
-		static const Vector3 UNIT_X;
-		static const Vector3 UNIT_Y;
-		static const Vector3 UNIT_Z;
+		static const Vector3 Zero;
+		static const Vector3 UnitX;
+		static const Vector3 UnitY;
+		static const Vector3 UnitZ;
 	};
 
 	float Dot(const Vector3&, const Vector3&);

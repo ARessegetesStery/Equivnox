@@ -9,7 +9,7 @@ namespace EQX
 	class Vector4;
 	class Matrix4x4;
 
-	const float EQXPI = 3.1415892653589793f;
+	const float EQX_PI = 3.1415892653589793f;
 
 	using Vec2 = Vector2;
 	using Vec3 = Vector3;
@@ -45,6 +45,10 @@ namespace EQX
 	extern float LerpCoeffY(const Vec3 v1, const Vec3 v2, float y);
 	extern float LerpCoeffZ(const Vec3 v1, const Vec3 v2, float z);
 	extern float LerpCoeff(const Vec3 v1, const Vec3 v2, float z, Axis axis);
+
+	extern float EvalGaussian(float x);
+	extern float EvalBSplineCubic(float x);
+	extern float EvalCRCubic(float x);
 
 	/*  Simple inline function  */
 	inline int BoolToInt(bool b) { return b ? 1 : 0; }

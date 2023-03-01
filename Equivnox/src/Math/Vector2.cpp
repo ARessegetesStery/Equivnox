@@ -4,7 +4,7 @@
 
 namespace EQX
 {
-	const Vector2 Vector2::ZERO(0, 0);
+	const Vector2 Vector2::Zero(0, 0);
 
 	Vector2::Vector2() : x(0), y(0) {  }
 
@@ -79,6 +79,11 @@ namespace EQX
 	Vector2 Vector2::Neg() const
 	{
 		return Vector2(-x, -y);
+	}
+
+	float Vector2::Norm() const
+	{
+		return std::sqrt(this->x * this->x + this->y * this->y);
 	}
 
 	bool operator== (const Vector2& v1, const Vector2& v2)

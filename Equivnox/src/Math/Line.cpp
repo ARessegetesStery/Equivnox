@@ -6,15 +6,15 @@ namespace EQX {
 
     Line::Line()
     {
-        point = Vec3::ZERO;
-        direction = Vec3::UNIT_Z;
+        point = Vec3::Zero;
+        direction = Vec3::UnitZ;
     }
 
     Line::Line(Vec3 point, Vec3 direction)
     {
         this->point = point;
-        if (direction == Vec3::ZERO)
-            direction = Vec3::UNIT_Z;
+        if (direction == Vec3::Zero)
+            direction = Vec3::UnitZ;
         this->direction = direction.Normalize();
     }
 

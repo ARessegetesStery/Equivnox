@@ -4,10 +4,10 @@
 
 namespace EQX
 {
-	const Vector3 Vector3::ZERO(0, 0, 0);
-	const Vector3 Vector3::UNIT_X(1, 0, 0);
-	const Vector3 Vector3::UNIT_Y(0, 1, 0);
-	const Vector3 Vector3::UNIT_Z(0, 0, 1);
+	const Vector3 Vector3::Zero(0, 0, 0);
+	const Vector3 Vector3::UnitX(1, 0, 0);
+	const Vector3 Vector3::UnitY(0, 1, 0);
+	const Vector3 Vector3::UnitZ(0, 0, 1);
 
 	Vector3::Vector3() : x(0), y(0), z(0) {  }
 

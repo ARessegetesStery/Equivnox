@@ -88,7 +88,7 @@ namespace EQX {
 #endif
 
 		/*  Include corner points  */
-		Vec3 intersection = Vec3::ZERO;
+		Vec3 intersection = Vec3::Zero;
 		std::vector<Line> potEdges;
 		if (CornerEdge(UnitBoxIntersection, EQX_OUT potEdges))
 		{

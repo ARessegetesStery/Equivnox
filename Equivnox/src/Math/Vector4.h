@@ -41,7 +41,7 @@ namespace EQX {
 		void Normalize();
 		Vector4 Neg() const;
 
-		static const Vector4 ZERO;
+		static const Vector4 Zero;
 	};
 
 	Vector4 Cross(const Vector4&, const Vector4&);

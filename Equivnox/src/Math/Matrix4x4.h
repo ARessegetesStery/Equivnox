@@ -46,7 +46,7 @@ namespace EQX {
 		const float operator[] (size_t index) const;
 
 		static const Matrix4x4 Identity;
-		static const Matrix4x4 ZEROS;
+		static const Matrix4x4 Zeros;
 	};
 
 	/**

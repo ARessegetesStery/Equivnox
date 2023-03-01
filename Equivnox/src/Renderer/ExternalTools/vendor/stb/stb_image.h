@@ -6615,25 +6615,25 @@ static stbi_uc *stbi__process_gif_raster(stbi__context *s, stbi__gif *g)
    stbi_uc lzw_cs;
    stbi__int32 len, init_code;
    stbi__uint32 first;
-   stbi__int32 codesize, codemask, avail, oldcode, bits, valid_bits, clear;
+   stbi__int32 codesize, codemask, avail, oldcode, bits, valid_bits, Clear;
    stbi__gif_lzw *p;
 
    lzw_cs = stbi__get8(s);
    if (lzw_cs > 12) return NULL;
-   clear = 1 << lzw_cs;
+   Clear = 1 << lzw_cs;
    first = 1;
    codesize = lzw_cs + 1;
    codemask = (1 << codesize) - 1;
    bits = 0;
    valid_bits = 0;
-   for (init_code = 0; init_code < clear; init_code++) {
+   for (init_code = 0; init_code < Clear; init_code++) {
       g->codes[init_code].prefix = -1;
       g->codes[init_code].first = (stbi_uc) init_code;
       g->codes[init_code].suffix = (stbi_uc) init_code;
    }
 
    // support no starting clear code
-   avail = clear+2;
+   avail = Clear+2;
    oldcode = -1;
 
    len = 0;
@@ -6652,13 +6652,13 @@ static stbi_uc *stbi__process_gif_raster(stbi__context *s, stbi__gif *g)
          bits >>= codesize;
          valid_bits -= codesize;
          // @OPTIMIZE: is there some way we can accelerate the non-clear path?
-         if (code == clear) {  // clear code
+         if (code == Clear) {  // clear code
             codesize = lzw_cs + 1;
             codemask = (1 << codesize) - 1;
-            avail = clear + 2;
+            avail = Clear + 2;
             oldcode = -1;
             first = 0;
-         } else if (code == clear + 1) { // end of stream code
+         } else if (code == Clear + 1) { // end of stream code
             stbi__skip(s, len);
             while ((len = stbi__get8(s)) > 0)
                stbi__skip(s,len);

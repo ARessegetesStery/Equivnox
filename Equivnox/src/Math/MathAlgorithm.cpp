@@ -108,4 +108,33 @@ namespace EQX
 		}
 	}
 
+	float EvalGaussian(float x)
+	{
+		return 1 / sqrt(2 * EQX_PI) * std::exp(-1 / 2 * x * x);
+	}
+
+	float EvalBSplineCubic(float x)
+	{
+		if (x < 0)
+			x = -x;
+		if (x >= 2)
+			return 0;
+		else if (x <= 1)
+			return 1.f / 6 * (-3 * std::pow(1 - x, 3) + 3 * std::pow(1 - x, 2) + 3 * (1 - x) + 1);
+		else
+			return 1.f / 6 * std::pow(2 - x, 3);
+	}
+
+	float EvalCRCubic(float x)
+	{
+		if (x < 0)
+			x = -x;
+		if (x >= 2)
+			return 0;
+		if (x <= 1)
+			return 1.f / 2 * (-3 * std::pow(1 - x, 3) + 4 * std::pow(1 - x, 2) + (1 - x));
+		else
+			return 1.f / 2 * (std::pow(2 - x, 3) - std::pow(2 - x, 2));
+	}
+
 }

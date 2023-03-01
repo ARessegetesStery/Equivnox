@@ -82,15 +82,15 @@ public:
 	bool flip_horizontally();
 	bool flip_vertically();
 	bool scale(int w, int h);
-	TGAColor get(int x, int y);
-	bool set(int x, int y, TGAColor c);
+	TGAColor Get(int x, int y);
+	bool Set(int x, int y, TGAColor c);
 	~TGAImage();
 	TGAImage & operator =(const TGAImage &img);
 	int get_width();
 	int get_height();
 	int get_bytespp();
 	unsigned char *buffer();
-	void clear();
+	void Clear();
 };
 
 #endif //__IMAGE_H__
