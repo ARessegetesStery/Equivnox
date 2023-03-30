@@ -27,9 +27,9 @@ namespace EQX {
 		UNIFORM, VERTEX, TEXTURE
 	};
 
-	enum class RenderLightConfig
+	enum class ShadingMode
 	{
-		PHONG, PARTICLE
+		RASTERIZE, RAYTRACING
 	};
 
 #ifdef EQX_DEBUG

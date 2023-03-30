@@ -2,12 +2,11 @@
 
 #include "eqxpch.h"
 
+#include "Preprocess.h"
+#include "RenderConfig.h"
 #include "Renderer/ExternalTools/ExternalTools.h"
 #include "Renderer/Geometry/Geometry.h"
-#include "RenderConfig.h"
-#include "Preprocess.h"
-#include "Camera.h"
-#include "Light.h"
+#include "Renderer/Landscape/Landscape.h"
 
 namespace EQX
 {
@@ -23,17 +22,21 @@ namespace EQX
 		void UnbindMesh();
 
 		void Render();
+		void Rasterize();
+		void Raytrace();
 
 		inline void SetFill(RenderFill f) { this->renderFill = f; }
 		inline void SetPass(RenderPass p) { this->renderPass = p; }
 		inline void SetAA(RenderAAConfig t) { this->renderAAConfig = t; }
-		inline void SetLight(RenderLightConfig t) { this->renderLightConfig = t; }
+		inline void SetLight(ShadingMode t) { this->renderLightConfig = t; }
 		inline void SetOutputType(ImageType t) { this->imageType = t; }
 		inline void SetOutputPath(std::string s) { this->outputPath = s; }
 		
 		inline void SetCanvas(unsigned int w, unsigned int h) { this->width = w; this->height = h; }
-		inline void SetCanvasHeight(unsigned int h) { this->height = h; }
 		inline void SetCanvasWidth(unsigned int w) { this->width = w; };
+		inline void SetCanvasHeight(unsigned int h) { this->height = h; }
+		inline void SetWidthScale(float w) { this->wScale = w; }
+		inline void SetHeightScale(float h) { this->hScale = h; }
 		void SetMSAAMult(unsigned int);
 
 		// Accept pixel info and render as it is
@@ -73,10 +76,11 @@ namespace EQX
 		RenderFill renderFill;
 		RenderPass renderPass;
 		RenderAAConfig renderAAConfig;
-		RenderLightConfig renderLightConfig;
+		ShadingMode renderLightConfig;
 		unsigned int MSAAMult;			// the rate of sampling in MSAA, 2^x
 
 		unsigned int width, height;
+		float wScale, hScale;
 		ImageType imageType;
 		std::string outputPath;
 

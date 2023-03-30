@@ -5,7 +5,6 @@
 #include "vendor/TGA/tgaimage.h"
 
 namespace EQX {
-	// TODO create compact image for ZBuf; create RGBA ZBuf for higher precision depth info
 
 	class Color;
 	class _ColorIntermediate;

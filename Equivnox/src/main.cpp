@@ -4,6 +4,7 @@
 #include "Renderer/Core/Core.h"
 #include "Renderer/Geometry/Geometry.h"
 #include "Loader/Loader.h"
+#include "Renderer/Landscape/Landscape.h"
 #include "Renderer/ExternalTools/Image.h"
 #include "Math/MathHeader.h"
 
@@ -36,13 +37,18 @@ int main(int argc, char** argv) {
 	coreRenderer.SetAA(EQX::RenderAAConfig::MSAA);
 	coreRenderer.SetMSAAMult(4);
 	coreRenderer.SetOutputType(EQX::ImageType::TGA);
-	coreRenderer.SetLight(EQX::RenderLightConfig::PHONG);
+	coreRenderer.SetLight(EQX::ShadingMode::RASTERIZE);
 
 	coreRenderer.EnableCamera();
 	coreRenderer.camera.SetPos(EQX::Vec3(1, 1, 1));
 	coreRenderer.camera.LookAt(EQX::Vec3::Zero);
 	coreRenderer.camera.fromFoV(45, 1.0);
+
+	coreRenderer.SetWidthScale(2.5);
+	coreRenderer.SetHeightScale(2.5);
 	// coreRenderer.DisableCamera();
+
+	// TODO refactor scene
 
 	coreRenderer.addLight(EQX::Light(coreRenderer.camera.GetPos(), EQX::Color::White, .5f, EQX::LightType::Point));
 

@@ -313,7 +313,7 @@ namespace EQX {
 			{
 				w = i % width;
 				h = i / width;
-				image.Set(w, h, toTGAColor(canvas[i]));
+				image.set(w, h, toTGAColor(canvas[i]));
 			}
 			image.flip_vertically(); // Ensure x horizontal, y vertical, origin lower-left corner
 			image.write_tga_file((filename + ".tga").c_str());
@@ -331,19 +331,21 @@ namespace EQX {
 
 	void Image::Rescale(unsigned int w, unsigned int h, RescaleFunc func)
 	{
+		// TODO fix magnification
 		float pixelLength = 1.0f / w * this->width;
 		float pixelHeight = 1.0f / h * this->height;
 		int wStartIndex, wEndIndex, hStartIndex, hEndIndex;
+		bool magnify = this->width > w && this->height > h;
 		Image res(w, h);
+		EQX_LOG(w)
 		for (int xpos = 0; xpos != w; ++xpos)
-		{
 			for (int ypos = 0; ypos != h; ++ypos)
 			{
 				Vec2 curPos = Vec2((xpos + 1 / 2) * pixelLength, (ypos + 1 / 2) * pixelHeight);
-				wStartIndex = std::floor(curPos.x - 0.5) - 1;
-				hStartIndex = std::floor(curPos.y - 0.5) - 1;
-				wEndIndex = wStartIndex + 3;
-				hEndIndex = hStartIndex + 3;
+				wStartIndex = std::floor(curPos.x - 0.5) - 2;
+				hStartIndex = std::floor(curPos.y - 0.5) - 2;
+				wEndIndex = wStartIndex + 5;
+				hEndIndex = hStartIndex + 5;
 				if (wStartIndex < 0)
 					wStartIndex = 0;
 				if (hStartIndex < 0)
@@ -363,15 +365,19 @@ namespace EQX {
 						Vec2 sampledPos = Vec2(x + 0.5, y + 0.5);
 						Vec2 disp = sampledPos + curPos.Neg();
 						distance = disp.Norm();
-						if (std::abs(disp.x) <= 1 && std::abs(disp.y) <= 1)
-							resultColor += 0.299 * pixelColor;
+						if (magnify)
+						{
+							if (std::abs(disp.x) <= 1 && std::abs(disp.y) <= 1)
+								resultColor += 0.3 * pixelColor;
+							else
+								resultColor += EvalBSplineCubic(distance) / 1.33 * pixelColor;
+						}
 						else
-							resultColor += EvalBSplineCubic(distance) / 1.33 * pixelColor;
+							resultColor += EvalBSplineCubic(distance) * pixelColor;
 					}
 				}
 				res.Set(xpos, ypos, resultColor);
 			}
-		}
 		*this = res;
 	}
 
@@ -442,7 +448,7 @@ namespace EQX {
 			{
 				w = i % width;
 				h = i / width;
-				image.Set(w, h, toTGAColor(Color(canvas[i])));
+				image.set(w, h, toTGAColor(Color(canvas[i])));
 			}
 			image.flip_vertically(); // Ensure x horizontal, y vertical, origin lower-left corner
 			image.write_tga_file((filename + ".tga").c_str());

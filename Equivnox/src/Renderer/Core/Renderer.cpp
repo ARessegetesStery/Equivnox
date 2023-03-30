@@ -12,7 +12,7 @@ namespace EQX
 		this->renderFill = RenderFill::WIREFRAME;
 		this->renderPass = RenderPass::FULL;
 		this->renderAAConfig = RenderAAConfig::ANTIALIAS_OFF;
-		this->renderLightConfig = RenderLightConfig::PHONG;
+		this->renderLightConfig = ShadingMode::RASTERIZE;
 		this->imageType = ImageType::TGA;
 		this->outputPath = "output";
 		this->ssTransform = Mat4::Identity;
@@ -21,6 +21,8 @@ namespace EQX
 		this->inverseTransform = Mat4::Identity;
 		this->width = 400;
 		this->height = 400;
+		this->wScale = 1.0f;
+		this->hScale = 1.0f;
 		this->MSAAMult = 4;
 	}
 
@@ -69,10 +71,23 @@ namespace EQX
 
 	void Renderer::Render()
 	{
+		if (this->renderLightConfig == ShadingMode::RASTERIZE)
+			this->Rasterize();
+		else if (this->renderLightConfig == ShadingMode::RAYTRACING)
+			this->Raytrace();
+	}
+
+	void Renderer::Raytrace()
+	{
+
+	}
+
+	void Renderer::Rasterize()
+	{
 		Image image(this->width, this->height);
 
 #ifdef EQX_PRINT_STATUS
-		Print("Rendering Faces..");
+		Print("Rendering Faces [Mode: Rasterizer]..");
 #endif
 
 		/*  Initializing the background color to be black  */
@@ -108,7 +123,8 @@ namespace EQX
 			break;
 		}
 
-		image.Rescale(200, 200);
+		if (this->wScale != 1.0f || this->hScale != 1.0f)
+			image.Rescale(wScale * this->width, hScale * this->height);
 
 #ifdef EQX_PRINT_STATUS
 		Print("Writing into output file..");
@@ -453,22 +469,15 @@ namespace EQX
 
 			if (newGreyScale < curGreyScale + 0.05)
 			{
-				if (this->renderLightConfig == RenderLightConfig::PHONG)
+				for (const auto& l : this->lights)
 				{
-					for (const auto& l : this->lights)
+					if (l.lightType == LightType::Point)
 					{
-						if (l.lightType == LightType::Point)
-						{
-							Color resultColor = PhongLighting(originalPos, fragNormal, texColor, l);
-							pixelColor = pixelColor + resultColor;
-						}
+						Color resultColor = PhongLighting(originalPos, fragNormal, texColor, l);
+						pixelColor = pixelColor + resultColor;
 					}
-					image.Set(xpos, ypos, pixelColor);
 				}
-				else if (this->renderLightConfig == RenderLightConfig::PARTICLE)
-					image.Set(xpos, ypos, Color::White);
-				else
-					image.Set(xpos, ypos, Color::White);
+				image.Set(xpos, ypos, pixelColor);
 			}
 		}
 		else if (this->renderAAConfig == RenderAAConfig::MSAA)
@@ -487,7 +496,7 @@ namespace EQX
 			Face face(f);
 
 			/*  Shading  */
-			if (this->renderLightConfig == RenderLightConfig::PHONG)
+			if (this->renderLightConfig == ShadingMode::RASTERIZE)
 				for (const auto& l : this->lights)
 					if (l.lightType == LightType::Point)
 						resultColor += PhongLighting(originalPos, fragNormal, texColor, l);
