@@ -8,6 +8,7 @@ namespace EQX
 	class Vector3;
 	class Vector4;
 	class Matrix4x4;
+	class Quaternion;
 
 	const float EQX_PI = 3.1415892653589793f;
 
@@ -15,6 +16,7 @@ namespace EQX
 	using Vec3 = Vector3;
 	using Vec4 = Vector4;
 	using Mat4 = Matrix4x4;
+	using Quat = Quaternion;
 
 	const float FLOAT_PREC = FLT_EPSILON;
 	const float FLOAT_MAX = FLT_MAX;
