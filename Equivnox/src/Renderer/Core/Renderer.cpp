@@ -7,7 +7,8 @@ namespace EQX
 	Renderer::Renderer()
 	{
 		/*  Configurations  */
-		this->curMesh = nullptr;
+		this->curScene = nullptr;
+		this->finalScene = FScene();
 		this->cameraEnabled = true;
 		this->renderFill = RenderFill::WIREFRAME;
 		this->renderPass = RenderPass::FULL;
@@ -35,17 +36,17 @@ namespace EQX
 		return _renderer;
 	}
 
-	void Renderer::BindMesh(Mesh* m)
+	void Renderer::BindScene(Scene* scene)
 	{
 #ifdef EQX_PRINT_STATUS
-		Print("Loading Mesh..");
+		Print("Loading Scene..");
 #endif
-		this->curMesh = m;
+		this->curScene = scene;
 	}
 
-	void Renderer::UnbindMesh()
+	void Renderer::UnbindScene()
 	{
-		this->curMesh = nullptr;
+		this->curScene = nullptr;
 	}
 
 	void Renderer::SetMSAAMult(unsigned int scale)
@@ -71,6 +72,8 @@ namespace EQX
 
 	void Renderer::Render()
 	{
+		this->finalScene.LoadScene(curScene);
+
 		if (this->renderLightConfig == ShadingMode::RASTERIZE)
 			this->Rasterize();
 		else if (this->renderLightConfig == ShadingMode::RAYTRACING)
@@ -148,102 +151,115 @@ namespace EQX
 		if (this->cameraEnabled)
 			Projection = PerspMat;
 
-		for (auto iter = curMesh->lineIndices.begin();
-			iter != curMesh->lineIndices.cend(); ++iter)
+		for (auto curEntity = finalScene.Renderables()->begin(); 
+			curEntity != finalScene.Renderables()->cend(); ++curEntity)
 		{
-			switch (this->renderAAConfig)
+			const Mesh& curMesh = curEntity->GetMesh();
+
+			for (auto iter = curMesh.lineIndices.begin();
+				iter != curMesh.lineIndices.cend(); ++iter)
 			{
-			case RenderAAConfig::ANTIALIAS_OFF:
-				RenderLineRaw(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[1]]), Projection);
-				break;
-			case RenderAAConfig::MSAA: case RenderAAConfig::SMOOTH:
-				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[1]]), Projection);
-				break;
+				switch (this->renderAAConfig)
+				{
+				case RenderAAConfig::ANTIALIAS_OFF:
+					RenderLineRaw(image, LineSeg(curMesh.vertices[(*iter)[0]],
+						curMesh.vertices[(*iter)[1]]), Projection);
+					break;
+				case RenderAAConfig::MSAA: case RenderAAConfig::SMOOTH:
+					RenderLineSmooth(image, LineSeg(curMesh.vertices[(*iter)[0]],
+						curMesh.vertices[(*iter)[1]]), Projection);
+					break;
+				}
 			}
-		}
-		for (auto iter = curMesh->faceIndices.begin();
-			iter != curMesh->faceIndices.cend(); ++iter)
-		{
-			switch (this->renderAAConfig)
+			for (auto iter = curMesh.faceIndices.begin();
+				iter != curMesh.faceIndices.cend(); ++iter)
 			{
-			case RenderAAConfig::ANTIALIAS_OFF:
-				RenderLineRaw(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[1]]), Projection);
-				RenderLineRaw(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[2]]), Projection);
-				RenderLineRaw(image, LineSeg(curMesh->vertices[(*iter)[2]],
-					curMesh->vertices[(*iter)[1]]), Projection);
-				break;
-			case RenderAAConfig::MSAA: case RenderAAConfig::FXAA:
-				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[1]]), Projection);
-				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[0]],
-					curMesh->vertices[(*iter)[2]]), Projection);
-				RenderLineSmooth(image, LineSeg(curMesh->vertices[(*iter)[1]],
-					curMesh->vertices[(*iter)[2]]), Projection);
-				break;
+				switch (this->renderAAConfig)
+				{
+				case RenderAAConfig::ANTIALIAS_OFF:
+					RenderLineRaw(image, LineSeg(curMesh.vertices[(*iter)[0]],
+						curMesh.vertices[(*iter)[1]]), Projection);
+					RenderLineRaw(image, LineSeg(curMesh.vertices[(*iter)[0]],
+						curMesh.vertices[(*iter)[2]]), Projection);
+					RenderLineRaw(image, LineSeg(curMesh.vertices[(*iter)[2]],
+						curMesh.vertices[(*iter)[1]]), Projection);
+					break;
+				case RenderAAConfig::MSAA: case RenderAAConfig::FXAA:
+					RenderLineSmooth(image, LineSeg(curMesh.vertices[(*iter)[0]],
+						curMesh.vertices[(*iter)[1]]), Projection);
+					RenderLineSmooth(image, LineSeg(curMesh.vertices[(*iter)[0]],
+						curMesh.vertices[(*iter)[2]]), Projection);
+					RenderLineSmooth(image, LineSeg(curMesh.vertices[(*iter)[1]],
+						curMesh.vertices[(*iter)[2]]), Projection);
+					break;
+				}
 			}
 		}
 	}
 
 	void Renderer::RenderFaces(EQX_OUT Image& image) const
 	{
-		/*  Frustum Clipping  */
-		std::vector<Face> fsClipped;
-		constexpr double reserveScale = 1.5;
-		fsClipped.reserve(reserveScale * this->curMesh->faceIndices.size() * 3 * sizeof(Vertex));
-		for (auto iter = curMesh->faceIndices.begin();
-			iter != curMesh->faceIndices.cend(); ++iter)
+		for (auto curEntity = finalScene.Renderables()->begin();
+			curEntity != finalScene.Renderables()->cend(); ++curEntity)
 		{
-			std::array<Vertex, 3> vertices{ curMesh->vertices[(*iter)[0]],
-				curMesh->vertices[(*iter)[1]] , curMesh->vertices[(*iter)[2]] };
-			Face f(vertices);
-			f.Transform(this->perspTransform);
-			FrustumClipping(f, fsClipped);
-		}
+			const Mesh& curMesh = curEntity->GetMesh();
 
-		/*  Z-Buffer Rendering  */
-		ImageGrey ZBuf(this->width, this->height);
-
-		// Background of ZBuf should be white
-		for (int x = 0; x < this->width; ++x)
-			for (int y = 0; y < this->height; ++y)
-				ZBuf.Set(x, y, 255.0f);
-
-		// If camera disabled, no need to render ZBuffer
-		if (this->cameraEnabled)
-		{
-			for (const auto& f : fsClipped)
+			/*  Frustum Clipping  */
+			std::vector<Face> fsClipped;
+			constexpr double reserveScale = 1.5;
+			fsClipped.reserve(reserveScale * curMesh.faceIndices.size() * 3 * sizeof(Vertex));
+			for (auto iter = curMesh.faceIndices.begin();
+				iter != curMesh.faceIndices.cend(); ++iter)
 			{
-				Face fTransformed(f);
-				fTransformed.Transform(this->ssTransform);
-				RenderFaceZBuf(ZBuf, fTransformed);
+				std::array<Vertex, 3> vertices{ curMesh.vertices[(*iter)[0]],
+					curMesh.vertices[(*iter)[1]] , curMesh.vertices[(*iter)[2]] };
+				Face f(vertices);
+				f.Transform(this->perspTransform);
+				FrustumClipping(f, fsClipped);
 			}
-		}
 
-		/*  Rendering Only Z-Buffer  */
-		if (this->renderPass == RenderPass::ZBUFFER_ONLY)
-		{
-			image = ZBuf;
-			return;
-		}
+			/*  Z-Buffer Rendering  */
+			ImageGrey ZBuf(this->width, this->height);
 
-		/*  Rendering Full Image  */
-		for (auto fTransformed : fsClipped)
-		{
-			/*  Back-Surface Culling  */
-			if (Dot(fTransformed[0].normal, this->camera.lookAt) > 0 && 
-				Dot(fTransformed[1].normal, this->camera.lookAt) > 0 && 
-				Dot(fTransformed[2].normal, this->camera.lookAt) > 0)
-				continue;
+			// Background of ZBuf should be white
+			for (int x = 0; x < this->width; ++x)
+				for (int y = 0; y < this->height; ++y)
+					ZBuf.Set(x, y, 255.0f);
 
-			/*  Render Each Fragment  */
-			fTransformed.Transform(ssTransform);
-			Face fOriginal(fTransformed);
-			fOriginal.Transform(inverseTransform);
-			RenderFaceSingle(image, fOriginal, fTransformed, ZBuf);
+			// If camera disabled, no need to render ZBuffer
+			if (this->cameraEnabled)
+			{
+				for (const auto& f : fsClipped)
+				{
+					Face fTransformed(f);
+					fTransformed.Transform(this->ssTransform);
+					RenderFaceZBuf(ZBuf, fTransformed);
+				}
+			}
+
+			/*  Rendering Only Z-Buffer  */
+			if (this->renderPass == RenderPass::ZBUFFER_ONLY)
+			{
+				image = ZBuf;
+				return;
+			}
+
+			/*  Rendering Full Image  */
+			for (auto& fTransformed : fsClipped)
+			{
+				/*  Back-Surface Culling  */
+				if (Dot(fTransformed[0].normal, this->camera.lookAt) > 0 &&
+					Dot(fTransformed[1].normal, this->camera.lookAt) > 0 &&
+					Dot(fTransformed[2].normal, this->camera.lookAt) > 0)
+					continue;
+
+				/*  Render Each Fragment  */
+				fTransformed.Transform(ssTransform);
+				Face fOriginal(fTransformed);
+				fOriginal.Transform(inverseTransform);
+				RenderFaceSingle(image, fOriginal, fTransformed, ZBuf);
+			}
+
 		}
 	}
 

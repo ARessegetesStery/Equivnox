@@ -331,7 +331,6 @@ namespace EQX {
 
 	void Image::Rescale(unsigned int w, unsigned int h, RescaleFunc func)
 	{
-		// TODO fix magnification
 		float pixelLength = 1.0f / w * this->width;
 		float pixelHeight = 1.0f / h * this->height;
 		int wStartIndex, wEndIndex, hStartIndex, hEndIndex;

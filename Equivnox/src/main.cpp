@@ -1,6 +1,6 @@
 #include "eqxpch.h"
 
-#include "Debug/Log/Log.h"
+#include "Util/Log/Log.h"
 #include "Renderer/Core/Core.h"
 #include "Renderer/Geometry/Geometry.h"
 #include "Loader/Loader.h"
@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
 	EQX::ObjParser objParser(&m, "Cube");
 	objParser.Parse();
 	m.Scale(0.3f);
-
+	
 	EQX::Vertex v1(EQX::Vector2(147, 161)), v2(EQX::Vector2(158, 231)), v3(EQX::Vector2(177, 267));
 	std::array<EQX::Vertex, 3> vertices{ EQX::Vector2(10, 80), EQX::Vector2(40, 90), EQX::Vector2(40, 140) };
 	EQX::Face f(v1, v2, v3);
@@ -31,7 +31,13 @@ int main(int argc, char** argv) {
 	// m.AddLine(v1, v3);
 	// m.AddFace(f);
 
-	coreRenderer.BindMesh(&m);
+	EQX::Scene defaultScene;
+	EQX::Entity ent(m);
+
+	// EQX::Print(ent.UID);
+	defaultScene.AddDefaultEntity(ent);
+	coreRenderer.BindScene(&defaultScene);
+
 	coreRenderer.SetPass(EQX::RenderPass::FULL);
 	coreRenderer.SetFill(EQX::RenderFill::FILL);
 	coreRenderer.SetAA(EQX::RenderAAConfig::MSAA);
@@ -44,11 +50,9 @@ int main(int argc, char** argv) {
 	coreRenderer.camera.LookAt(EQX::Vec3::Zero);
 	coreRenderer.camera.fromFoV(45, 1.0);
 
-	coreRenderer.SetWidthScale(2.5);
-	coreRenderer.SetHeightScale(2.5);
+	// coreRenderer.SetWidthScale(2.5);
+	// coreRenderer.SetHeightScale(2.5);
 	// coreRenderer.DisableCamera();
-
-	// TODO refactor scene
 
 	coreRenderer.addLight(EQX::Light(coreRenderer.camera.GetPos(), EQX::Color::White, .5f, EQX::LightType::Point));
 

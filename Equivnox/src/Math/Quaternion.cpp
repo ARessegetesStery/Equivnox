@@ -34,17 +34,17 @@ namespace EQX {
 		this->im = q.im;
 	}
 
-	Quaternion Quaternion::Conjugate()
+	Quaternion Quaternion::Conjugate() const
 	{
 		return Quaternion(this->re, this->im.Neg());
 	}
 
-	float Quaternion::Norm()
+	float Quaternion::Norm() const
 	{
 		return sqrt(re * re + this->im.Norm() * this->im.Norm());
 	}
 
-	Quaternion Quaternion::Inverse()
+	Quaternion Quaternion::Inverse() const
 	{
 		float normSquared = this->Norm() * this->Norm();
 		return this->Conjugate() / normSquared;

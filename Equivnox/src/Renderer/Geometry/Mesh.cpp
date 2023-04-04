@@ -4,6 +4,8 @@
 
 namespace EQX {
 
+	const Mesh Mesh::EmptyMesh;
+
 	void Mesh::AddFace(const Vertex& a, const Vertex& b, const Vertex& c)
 	{
 		bool ARep = false, BRep = false, CRep = false;
@@ -145,11 +147,25 @@ namespace EQX {
 
 	void Mesh::Scale(float s)
 	{
+		this->Scale(Vec3(s, s, s), Vec3::Zero);
+	}
+
+	void Mesh::Scale(float s, Vector3 center)
+	{
+		this->Scale(Vec3(s, s, s),center);
+	}
+
+	void Mesh::Scale(Vector3 s)
+	{
+		this->Scale(s, Vec3::Zero);
+	}
+
+	void Mesh::Scale(Vector3 s, Vector3 center)
+	{
 		for (auto iter = vertices.begin(); iter != vertices.cend(); ++iter)
 		{
-			// cout << iter->pos.z;
-			iter->pos = iter->pos * s;
-			// cout << iter->pos.z << endl;;
+			Vec3 diff = iter->pos - center;
+			iter->pos = center + Vec3(diff.x * s.x, diff.y * s.y, diff.z * s.z);
 		}
 	}
 
@@ -161,11 +177,41 @@ namespace EQX {
 		}
 	}
 
-	/**
-	 * Floor each index in v so that the renderLineSmooth could function normally
-	 * 
-	 * @param v the vertex; Note it will be modified
-	 */
-	
+	void Mesh::Transform(const MeshTransform& transform)
+	{
+		this->Shift(transform.displacement);
+		if (transform.scaleCoeff != Vec3::One)
+			this->Scale(transform.scaleCoeff, transform.scaleRef);
+		// TODO Apply rotation
+	}
+
+	Mesh::Mesh(const Mesh& m)
+	{
+		for (auto iter = m.vertices.begin(); iter != m.vertices.cend(); ++iter)
+			this->vertices.push_back(*iter);
+		for (auto iter = m.faceIndices.begin(); iter != m.faceIndices.cend(); ++iter)
+			this->faceIndices.push_back(*iter);
+		for (auto iter = m.lineIndices.begin(); iter != m.lineIndices.cend(); ++iter)
+			this->lineIndices.push_back(*iter);
+	}
+
+	void Mesh::operator=(const Mesh& m)
+	{
+		for (auto iter = m.vertices.begin(); iter != m.vertices.cend(); ++iter)
+			this->vertices.push_back(*iter);
+		for (auto iter = m.faceIndices.begin(); iter != m.faceIndices.cend(); ++iter)
+			this->faceIndices.push_back(*iter);
+		for (auto iter = m.lineIndices.begin(); iter != m.lineIndices.cend(); ++iter)
+			this->lineIndices.push_back(*iter);
+	}
+
+	MeshTransform::MeshTransform()
+	{
+		this->displacement = Vec3::Zero;
+		this->scaleCoeff = Vec3::One;
+		this->scaleRef = Vec3::Zero;
+		this->rotAxis = Vec3::UnitZ;
+		this->rotAngle = 0.f;
+	}
 
 }

@@ -21,9 +21,9 @@ namespace EQX {
 		explicit Quaternion(const Quaternion&);
 		Quaternion(Quaternion&&) = default;
 
-		Quaternion Conjugate();
-		float Norm();
-		Quaternion Inverse();
+		Quaternion Conjugate() const;
+		float Norm() const;
+		Quaternion Inverse() const;
 	};
 
 	Quaternion operator+ (const Quaternion& q1, const Quaternion& q2);

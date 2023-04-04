@@ -41,6 +41,7 @@ namespace EQX {
 		float Norm() const;
 
 		static const Vector3 Zero;
+		static const Vector3 One;
 		static const Vector3 UnitX;
 		static const Vector3 UnitY;
 		static const Vector3 UnitZ;
@@ -52,6 +53,7 @@ namespace EQX {
 	float Distance(const Vector3&, const Vector3&);
 
 	bool operator== (const Vector3&, const Vector3&);
+	bool operator!= (const Vector3&, const Vector3&);
 	Vector3 operator* (const float, const Vector3&);
 	Vector3 operator* (const Vector3&, const float);
 	

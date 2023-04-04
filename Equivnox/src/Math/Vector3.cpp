@@ -5,6 +5,7 @@
 namespace EQX
 {
 	const Vector3 Vector3::Zero(0, 0, 0);
+	const Vector3 Vector3::One(1, 1, 1);
 	const Vector3 Vector3::UnitX(1, 0, 0);
 	const Vector3 Vector3::UnitY(0, 1, 0);
 	const Vector3 Vector3::UnitZ(0, 0, 1);
@@ -101,6 +102,11 @@ namespace EQX
 	bool operator== (const Vector3& v1, const Vector3& v2)
 	{
 		return (v1.x == v2.x) && (v1.y == v2.y) && (v1.z == v2.z);
+	}
+
+	bool operator!= (const Vector3& v1, const Vector3& v2)
+	{
+		return !(v1 == v2);
 	}
 
 	Vector3 Vector3::Binormal() const

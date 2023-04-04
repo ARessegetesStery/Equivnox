@@ -18,8 +18,8 @@ namespace EQX
 #endif
 		static Renderer& Init();
 
-		void BindMesh(Mesh*);
-		void UnbindMesh();
+		void BindScene(Scene*);
+		void UnbindScene();
 
 		void Render();
 		void Rasterize();
@@ -58,7 +58,8 @@ namespace EQX
 		Renderer(const Renderer& r) = delete;
 		Renderer& operator= (const Renderer& r) = delete;
 
-		Mesh* curMesh;
+		Scene* curScene;
+		FScene finalScene;
 
 		/*  Main Render Processes  */
 		void RenderLines(EQX_OUT Image& image) const;
