@@ -10,7 +10,7 @@ namespace EQX {
 		v.pos.y = floor(v.pos.y);
 	}
 
-	void FrustumClipping(const Face& inFace, EQX_OUT std::vector<Face>& outFaces)
+	void FrustumClipping(const Face& inFace, EQX_OUT FMesh& clippedMesh)
 	{
 		auto IsCanonic = [=](float x) -> bool { return x >= -1.f && x <= 1.f; };
 		auto IsVec4InCanonic = [=](const Vec3 v) -> bool { return IsCanonic(v.x) && IsCanonic(v.y) && IsCanonic(v.z); };
@@ -18,7 +18,7 @@ namespace EQX {
 		/*  Special Judgement for triangle within cube  */
 		if (IsVec4InCanonic(inFace.L().pos) && IsVec4InCanonic(inFace.M().pos) && IsVec4InCanonic(inFace.R().pos))
 		{
-			outFaces.push_back(inFace);
+			clippedMesh.AddFace(inFace);
 #ifdef EQX_PRINT_TRIG_CLIPPING
 			cout << "-- Face Inside Screen --" << endl;
 			Print(inFace.L().pos);
@@ -116,18 +116,18 @@ namespace EQX {
 			return;
 
 		if (UnitBoxInside.size() == 0)
-			TriangularizeHull(UnitBoxIntersection, outFaces);
+			TriangularizeHull(UnitBoxIntersection, clippedMesh);
 
 		else if (UnitBoxInside.size() == 1)
 		{
 			UnitBoxIntersection.push_back(UnitBoxInside[0]);
-			TriangularizeHull(UnitBoxIntersection, outFaces);
+			TriangularizeHull(UnitBoxIntersection, clippedMesh);
 		}
 		else if (UnitBoxInside.size() == 2)
 		{
 			UnitBoxIntersection.push_back(UnitBoxInside[0]);
 			UnitBoxIntersection.push_back(UnitBoxInside[1]);
-			TriangularizeHull(UnitBoxIntersection, outFaces);
+			TriangularizeHull(UnitBoxIntersection, clippedMesh);
 		}
 	}
 
@@ -181,7 +181,7 @@ namespace EQX {
 		return exists;
 	}
 
-	void TriangularizeHull(std::vector<Vertex>& vertices, EQX_OUT std::vector<Face>& trigs)
+	void TriangularizeHull(std::vector<Vertex>& vertices, EQX_OUT FMesh& clippedMesh)
 	{
 		if (vertices.size() <= 2)
 			return;
@@ -231,25 +231,25 @@ namespace EQX {
 
 		/*  Construct triangle chain (Clockwise)  */
 		if (aboveVerts.size() == 1)
-			trigs.emplace_back(Face(lowerEnd, upperEnd, aboveVerts[0]));
+			clippedMesh.AddFace(Face(lowerEnd, upperEnd, aboveVerts[0]));
 		else if (aboveVerts.size() >= 2)
 		{
 			for (auto iter = aboveVerts.begin(); iter != aboveVerts.cend() - 1; ++iter)
 			{
-				trigs.emplace_back(Face(lowerEnd, *iter, *(iter + 1)));
+				clippedMesh.AddFace(Face(lowerEnd, *iter, *(iter + 1)));
 				if (iter == aboveVerts.cend() - 2)
-					trigs.emplace_back(Face(lowerEnd, upperEnd, *(iter + 1)));
+					clippedMesh.AddFace(Face(lowerEnd, upperEnd, *(iter + 1)));
 			}
 		}
 		if (belowVerts.size() == 1)
-			trigs.emplace_back(Face(lowerEnd, upperEnd, belowVerts[0]));
+			clippedMesh.AddFace(Face(lowerEnd, upperEnd, belowVerts[0]));
 		else if (belowVerts.size() >= 2)
 		{
 			for (auto iter = belowVerts.begin(); iter != belowVerts.cend() - 1; ++iter)
 			{
-				trigs.emplace_back(Face(lowerEnd, *iter, *(iter + 1)));
+				clippedMesh.AddFace(Face(lowerEnd, *iter, *(iter + 1)));
 				if (iter == belowVerts.cend() - 2)
-					trigs.emplace_back(Face(lowerEnd, upperEnd, *(iter + 1)));
+					clippedMesh.AddFace(Face(lowerEnd, upperEnd, *(iter + 1)));
 			}
 		}
 

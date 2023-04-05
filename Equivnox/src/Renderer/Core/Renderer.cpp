@@ -199,53 +199,65 @@ namespace EQX
 
 	void Renderer::RenderFaces(EQX_OUT Image& image) const
 	{
+		constexpr double reserveScale = 1.5;	// reserve scale for clipping meshes
+		std::vector<FMesh> clippedMesh; 
+
+		/*  Frustum Clipping  */
 		for (auto curEntity = finalScene.Renderables()->begin();
 			curEntity != finalScene.Renderables()->cend(); ++curEntity)
 		{
 			const Mesh& curMesh = curEntity->GetMesh();
-
-			/*  Frustum Clipping  */
-			std::vector<Face> fsClipped;
-			constexpr double reserveScale = 1.5;
-			fsClipped.reserve(reserveScale * curMesh.faceIndices.size() * 3 * sizeof(Vertex));
+			clippedMesh.emplace_back(FMesh());
+			auto curFMesh = clippedMesh.end() - 1;
+			curFMesh->faces.reserve(reserveScale * curMesh.faceIndices.size() * 3 * sizeof(Vertex));
 			for (auto iter = curMesh.faceIndices.begin();
 				iter != curMesh.faceIndices.cend(); ++iter)
 			{
 				std::array<Vertex, 3> vertices{ curMesh.vertices[(*iter)[0]],
 					curMesh.vertices[(*iter)[1]] , curMesh.vertices[(*iter)[2]] };
 				Face f(vertices);
+				// TODO integrate the transformation in the initialization of FScene to here
 				f.Transform(this->perspTransform);
-				FrustumClipping(f, fsClipped);
+				FrustumClipping(f, *curFMesh);
 			}
+		}
 
-			/*  Z-Buffer Rendering  */
-			ImageGrey ZBuf(this->width, this->height);
+		/*  Z-Buffer Rendering  */
+		ImageGrey ZBuf(this->width, this->height);
 
-			// Background of ZBuf should be white
-			for (int x = 0; x < this->width; ++x)
-				for (int y = 0; y < this->height; ++y)
-					ZBuf.Set(x, y, 255.0f);
+		// Background of ZBuf should be white
+		for (int x = 0; x < this->width; ++x)
+			for (int y = 0; y < this->height; ++y)
+				ZBuf.Set(x, y, 255.0f);
 
-			// If camera disabled, no need to render ZBuffer
+		for (auto curMesh = clippedMesh.begin(); curMesh != clippedMesh.cend(); ++curMesh)
+		{
 			if (this->cameraEnabled)
 			{
-				for (const auto& f : fsClipped)
+				for (const auto& mesh : clippedMesh)
 				{
-					Face fTransformed(f);
-					fTransformed.Transform(this->ssTransform);
-					RenderFaceZBuf(ZBuf, fTransformed);
+					for (const auto& f : mesh.faces)
+					{
+						Face fTransformed(f);
+						fTransformed.Transform(this->ssTransform);
+						RenderFaceZBuf(ZBuf, fTransformed);
+					}
 				}
 			}
+		}
 
-			/*  Rendering Only Z-Buffer  */
-			if (this->renderPass == RenderPass::ZBUFFER_ONLY)
-			{
-				image = ZBuf;
-				return;
-			}
+		/*  Rendering Only Z-Buffer  */
+		if (this->renderPass == RenderPass::ZBUFFER_ONLY)
+		{
+			image = ZBuf;
+			return;
+		}
 
-			/*  Rendering Full Image  */
-			for (auto& fTransformed : fsClipped)
+		/*  Rendering Full Image  */
+		ImageMask<char, 0> MSAAMask(400, 400, char(MSAAMult * MSAAMult));
+		for (auto& mesh : clippedMesh)
+		{
+			for (auto& fTransformed : mesh.faces)
 			{
 				/*  Back-Surface Culling  */
 				if (Dot(fTransformed[0].normal, this->camera.lookAt) > 0 &&
@@ -257,9 +269,8 @@ namespace EQX
 				fTransformed.Transform(ssTransform);
 				Face fOriginal(fTransformed);
 				fOriginal.Transform(inverseTransform);
-				RenderFaceSingle(image, fOriginal, fTransformed, ZBuf);
+				RenderFaceSingle(image, fOriginal, fTransformed, ZBuf, MSAAMask);
 			}
-
 		}
 	}
 
@@ -344,7 +355,7 @@ namespace EQX
 	}
 	
 	void Renderer::RenderFaceSingle(EQX_OUT Image& image, const Face& fOriginal, 
-		const Face& fTrans, const ImageGrey& ZBuffer) const
+		const Face& fTrans, const ImageGrey& ZBuffer, EQX_OUT ImageMask<char, 0>& MSAAMask) const
 	{
 		if (std::abs(fTrans.SlopeLM()) > SLOPE_MAX)
 		{
@@ -353,7 +364,7 @@ namespace EQX
 				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x - sgn(fTrans.SlopeLR())) * fTrans.SlopeLR() - 1;
 					ypos <= fTrans.M().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeMR())) * fTrans.SlopeMR() + 1;
 					++ypos)
-					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer, MSAAMask);
 		}
 		else if (std::abs(fTrans.SlopeMR()) > SLOPE_MAX)
 		{
@@ -362,7 +373,7 @@ namespace EQX
 				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x - sgn(fTrans.SlopeLM())) * fTrans.SlopeLM() - 1;
 					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeLR())) * fTrans.SlopeLR() + 1;
 					++ypos)
-					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer, MSAAMask);
 		}
 		else if (fTrans.SlopeLM() > fTrans.SlopeLR())
 		// GetM() lies above the line segment connecting l and GetR()
@@ -372,12 +383,12 @@ namespace EQX
 				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x - sgn(fTrans.SlopeLR())) * fTrans.SlopeLR() - 1;
 					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeLM())) * fTrans.SlopeLM() + 1; 
 					++ypos)
-					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer, MSAAMask);
 			for (xpos = fTrans.M().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
 				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x - sgn(fTrans.SlopeLR())) * fTrans.SlopeLR() - 1;
 					ypos <= fTrans.M().pos.y + (xpos - fTrans.M().pos.x + sgn(fTrans.SlopeMR())) * fTrans.SlopeMR() + 1; 
 					++ypos)
-					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer, MSAAMask);
 		}
 		else
 		{
@@ -386,12 +397,12 @@ namespace EQX
 				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x - sgn(fTrans.SlopeLM())) * fTrans.SlopeLM() - 1;
 					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeLR())) * fTrans.SlopeLR() + 1; 
 					++ypos)
-					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer, MSAAMask);
 			for (xpos = fTrans.M().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
 				for (ypos = fTrans.M().pos.y + (xpos - fTrans.M().pos.x - sgn(fTrans.SlopeMR())) * fTrans.SlopeMR() - 1;
 					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeLR())) * fTrans.SlopeLR() + 1; 
 					++ypos)
-					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer);
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer, MSAAMask);
 		}
 	}
 
@@ -452,7 +463,8 @@ namespace EQX
 	}
 
 	
-	void Renderer::UpdateFragColor(float xpos, float ypos, const Face& f, const Face& fOriginal, EQX_OUT Image& image, const ImageGrey& ZBuffer) const
+	void Renderer::UpdateFragColor(float xpos, float ypos, const Face& f, const Face& fOriginal, 
+		EQX_OUT Image& image, const ImageGrey& ZBuffer, EQX_OUT ImageMask<char, 0>& MSAAMask) const
 	{
 		// If camera disabled, only render white pixels
 		if (!this->cameraEnabled)
@@ -483,7 +495,7 @@ namespace EQX
 			if (newGreyScale > 255 || newGreyScale < 0)
 				return;
 
-			if (newGreyScale < curGreyScale + 0.05)
+			if (newGreyScale <= curGreyScale)
 			{
 				for (const auto& l : this->lights)
 				{
@@ -505,7 +517,7 @@ namespace EQX
 			Vec3 originalPos = inverseTransform * (curPos.ToVec4());
 			Vec3 baryCoord = fOriginal.baryCoord(originalPos.x, originalPos.y);
 			Vec3 fragNormal = baryCoord[0] * fOriginal.L().normal +
-			baryCoord[1] * fOriginal.M().normal + baryCoord[2] * fOriginal.R().normal;
+				baryCoord[1] * fOriginal.M().normal + baryCoord[2] * fOriginal.R().normal;
 
 			Color originalColor = image.Get(xpos, ypos);
 			Color resultColor = Color(0);
@@ -521,16 +533,19 @@ namespace EQX
 			int samplerCnt = MSAAMult * MSAAMult;
 			int validSamplerCnt = 0;
 			float step = 1.f / (MSAAMult + 1);
+
+			// TODO clamp the sum of {validSamplerCnt} to be {samplerCnt}
 			for (int i = 1; i <= MSAAMult; ++i)
 			{
 				for (int j = 1; j <= MSAAMult; ++j)
 				{
+
 					Vec2 curPos = Vec2(xpos - 0.5f + float(i) * step, ypos - 0.5f + float(j) * step);
 
 					/*  Occlusion Test  */
 					float z = face.ZAtXYFace(curPos.x, curPos.y);
 					float newGreyScale = (z == 1) ? 0 : 128 - 127.f * z;
-					if (newGreyScale >= curGreyScale + 0.05)
+					if (newGreyScale >= curGreyScale + 0.04)
 						continue;
 
 					/*  Coverage Test  */
@@ -538,6 +553,12 @@ namespace EQX
 						++validSamplerCnt;
 				}
 			}
+
+			int vacantSamplerCnt = int(MSAAMask.Get(xpos, ypos));
+			if (vacantSamplerCnt <= validSamplerCnt)
+				validSamplerCnt = vacantSamplerCnt;
+			MSAAMask.Set(xpos, ypos, vacantSamplerCnt - validSamplerCnt);
+
 			resultColor = resultColor * validSamplerCnt / samplerCnt;
 			resultColor = resultColor + originalColor;
 

@@ -11,6 +11,9 @@ namespace EQX {
 	class Image;
 	class ImageGrey;
 
+	template <typename T, T Zero>
+	class ImageMask;
+
 	enum class ImageType
 	{
 		TGA,	// Relies on tgaimage.h
@@ -154,8 +157,91 @@ namespace EQX {
 		inline unsigned int GetHeight() const { return height; }
 	};
 
+	/**
+	 * @tparam T - the type of data that the canvas is to be filled with
+	 * @tparam Zero - the Zero element for T
+	 */
+	template <typename T, T Zero>
+	class ImageMask
+	{
+	private:
+		unsigned int width, height;
+		T* canvas;
+
+	public:
+		ImageMask();
+		ImageMask(const T& val);	// Initialize the image mask uniformly with {val}
+		ImageMask(unsigned int width, unsigned int height);
+		ImageMask(unsigned int width, unsigned int height, const T& val);
+		~ImageMask();
+
+		void Set(unsigned int, unsigned int, const T&);
+		const T& Get(unsigned int, unsigned int) const;
+
+		void Clear();
+	};
+
 	Color blendColor(Color fore, Color back, float coeff);
 
 	TGAColor toTGAColor(Color);
+
+	template<typename T, T Zero>
+	ImageMask<T, Zero>::ImageMask() : ImageMask<T, Zero>(Zero) {	}
+
+	// TODO add the zero value for type T to the parameters of this class
+	template <typename T, T Zero>
+	ImageMask<T, Zero>::ImageMask(const T& val)
+	{
+		this->width = 100;
+		this->height = 100;
+		this->canvas = new T[100 * 100];
+		for (unsigned int i = 0; i != 100 * 100; ++i)
+			this->canvas[i] = val;
+	}
+
+	/*  Implementation of Template Class {ImageMask}  */
+
+	template<typename T, T Zero>
+	ImageMask<T, Zero>::ImageMask(unsigned int width, unsigned int height) :
+		ImageMask<T, Zero>(width, height, Zero) {	}
+
+	template <typename T, T Zero>
+	ImageMask<T, Zero>::ImageMask(unsigned int width, unsigned int height, const T& val)
+	{
+		this->width = width;
+		this->height = height;
+		this->canvas = new T[width * height];
+		for (unsigned int i = 0; i != width * height; ++i)
+			this->canvas[i] = val;
+	}
+
+	template <typename T, T Zero>
+	ImageMask<T, Zero>::~ImageMask()
+	{
+		if (canvas)
+			delete[] canvas;
+	}
+
+	template <typename T, T Zero>
+	void ImageMask<T, Zero>::Set(unsigned int w, unsigned int h, const T& val)
+	{
+		if (!(!canvas || w >= width || h >= height))
+			this->canvas[(size_t)(h * this->width + w)] = val;
+	}
+
+	template <typename T, T Zero>
+	const T& ImageMask<T, Zero>::Get(unsigned int w, unsigned int h) const
+	{
+		if (!(!canvas || w >= width || h >= height))
+			return this->canvas[(size_t)(h * this->width + w)];
+		return Zero;
+	}
+
+	template <typename T, T Zero>
+	void ImageMask<T, Zero>::Clear()
+	{
+		for (unsigned int i = 0; i != this->width * this->height; ++i)
+			this->canvas[i] = Zero;
+	}
 
 }

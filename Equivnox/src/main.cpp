@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
 	EQX::Mesh m1(m);
 	EQX::Scene defaultScene;
 	EQX::Entity ent(m);
-	m1.Shift(EQX::Vector3(1, 0, 0));
+	m1.Shift(EQX::Vector3(0, 0, 0.5));
 	EQX::Entity ent1(m1);
 
 	defaultScene.AddDefaultEntity(ent);

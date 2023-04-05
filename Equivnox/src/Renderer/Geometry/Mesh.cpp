@@ -213,5 +213,4 @@ namespace EQX {
 		this->rotAxis = Vec3::UnitZ;
 		this->rotAngle = 0.f;
 	}
-
 }

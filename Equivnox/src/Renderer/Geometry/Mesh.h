@@ -48,6 +48,20 @@ namespace EQX {
 
 	};
 
+	// Finalized mesh only to be created in the rendering process
+	class FMesh
+	{
+		friend class Renderer;
+	public:
+		FMesh() = default;
+
+		inline void AddFace(const Face& f) { this->faces.emplace_back(f); }
+		inline const std::vector<Face>& const Trigs() { return faces; }
+
+	private:
+		std::vector<Face> faces;
+	};
+
 	/**
 	 * The sequence of applying the changes is
 	 * Translation -> Scaling -> Rotation

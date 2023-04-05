@@ -15,12 +15,12 @@ namespace EQX {
 
 	/**
 	 * Apply Clipping in Clip Space
+	 * The clipped triangles will be pushed to the back of {faces}
 	 *
 	 * @param inFace - the face to be evaluated
 	 * @param faces - [OUT]the faces that need to be rendered
-	 * @return true if triangle needs to be rendered, false if triangle does not intersect with any fragment
 	 */
-	void FrustumClipping(const Face& inFace, EQX_OUT std::vector<Face>& faces);
+	void FrustumClipping(const Face& inFace, EQX_OUT FMesh& clippedMesh);
 
 	/**
 	 * @param intersections - {UnitBoxIntersection} in {FrustumClipping}
@@ -36,5 +36,6 @@ namespace EQX {
 	 * @param vertices - the vertices of the control point
 	 * @param trigs - [OUT] the resulting parsed triangles
 	 */
-	void TriangularizeHull(std::vector<Vertex>& vertices, EQX_OUT std::vector<Face>& trigs);
+	void TriangularizeHull(std::vector<Vertex>& vertices, EQX_OUT FMesh& clippedMesh);
+
 }

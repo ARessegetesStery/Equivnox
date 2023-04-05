@@ -9,8 +9,8 @@
 namespace EQX {
 
 #ifdef EQX_DEBUG
-#define EQX_LOG(x) cout << "| Variable: " << #x << " " << "| Type: " << typeid(x).name() << endl;\
-	cout << "|_"; Print(x);
+#define EQX_LOG(x) {cout << "| Variable: " << #x << " " << "| Type: " << typeid(x).name() << endl;\
+	cout << "|_"; Print(x);}
 
 	void Print(std::string msg);
 	void Print(int num);

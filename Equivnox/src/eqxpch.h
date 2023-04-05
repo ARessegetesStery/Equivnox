@@ -31,6 +31,11 @@
 #include <list>
 #include <iterator>
 
+using std::cout, std::endl;
+
+#include "Math/MathHeader.h"
+#include "Util/Log/Log.h"
+
 #ifdef EQX_DEBUG
  /*  Macros for Debug Msg Printing Control  */
 #define EQX_PRINT_STATUS
@@ -38,9 +43,4 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
-using std::cout, std::endl;
 #endif
-
-#include "Math/MathHeader.h"
-#include "Util/Log/Log.h"
-

@@ -464,7 +464,6 @@ namespace EQX {
 		}
 	}
 
-
 	/**
 	 * Mix Colors
 	 *
