@@ -35,9 +35,11 @@ int main(int argc, char** argv) {
 	EQX::Entity ent(m);
 	m1.Shift(EQX::Vector3(0, 0, 0.5));
 	EQX::Entity ent1(m1);
+	EQX::MeshTransform trans;
+	trans.displacement = EQX::Vec3(0, 0, 0.3);
 
 	defaultScene.AddDefaultEntity(ent);
-	defaultScene.AddDefaultEntity(ent1);
+	defaultScene.AddEntityWithTransform(ent1, trans);
 	coreRenderer.BindScene(&defaultScene);
 
 	coreRenderer.SetPass(EQX::RenderPass::FULL);

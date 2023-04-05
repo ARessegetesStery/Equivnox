@@ -165,7 +165,7 @@ namespace EQX {
 		for (auto iter = vertices.begin(); iter != vertices.cend(); ++iter)
 		{
 			Vec3 diff = iter->pos - center;
-			iter->pos = center + Vec3(diff.x * s.x, diff.y * s.y, diff.z * s.z);
+			iter->pos = center + TermWiseProduct(diff, s);
 		}
 	}
 
@@ -205,12 +205,4 @@ namespace EQX {
 			this->lineIndices.push_back(*iter);
 	}
 
-	MeshTransform::MeshTransform()
-	{
-		this->displacement = Vec3::Zero;
-		this->scaleCoeff = Vec3::One;
-		this->scaleRef = Vec3::Zero;
-		this->rotAxis = Vec3::UnitZ;
-		this->rotAngle = 0.f;
-	}
 }

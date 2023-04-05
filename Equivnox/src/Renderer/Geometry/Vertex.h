@@ -2,6 +2,8 @@
 
 #include "eqxpch.h"
 
+#include "MeshTransform.h"
+
 namespace EQX 
 {
 	/**    
@@ -33,6 +35,7 @@ namespace EQX
 		Vertex(Vector2 pos,	Vector3 normal = Vector3::UnitZ, Vector2 uv = Vector2::Zero);
 
 		void Transform(const Mat4& projection);
+		void Transform(const MeshTransform& trans);
 	};
 
 	bool operator== (Vertex&, Vertex&);

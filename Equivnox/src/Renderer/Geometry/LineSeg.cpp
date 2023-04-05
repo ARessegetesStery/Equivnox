@@ -47,6 +47,20 @@ namespace EQX
 		kSign = k / abs(k);
 	}
 
+	void LineSeg::Transform(const Mat4& projection)
+	{
+		this->start.Transform(projection);
+		this->end.Transform(projection);
+		*this = LineSeg(this->start, this->end);
+	}
+
+	void LineSeg::Transform(const MeshTransform& trans)
+	{
+		this->start.Transform(trans);
+		this->end.Transform(trans);
+		*this = LineSeg(this->start, this->end);
+	}
+
 	/**
 	 * Calculate approximate point to LineSeg distance
 	 * 

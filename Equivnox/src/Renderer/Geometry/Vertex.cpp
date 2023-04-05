@@ -31,6 +31,14 @@ namespace EQX
 		this->pos.Normalize();
 	}
 
+	void Vertex::Transform(const MeshTransform& trans)
+	{
+		this->pos = this->pos + trans.displacement;
+		this->pos = trans.scaleRef + TermWiseProduct(trans.scaleCoeff, 
+			(this->pos - trans.scaleRef).ToVec3());
+		// TODO implement rotation
+	}
+
 	bool LefterVertex(const Vertex& l, const Vertex& r)
 	{
 		return l.pos.x < r.pos.x;

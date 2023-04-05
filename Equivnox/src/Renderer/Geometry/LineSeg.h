@@ -17,6 +17,9 @@ namespace EQX {
 	public: 
 		LineSeg();
 		LineSeg(Vertex s, Vertex e);
+
+		void Transform(const Mat4& projection);
+		void Transform(const MeshTransform& trans);
 	};
 
 	using LineSegs = std::vector<LineSeg>;

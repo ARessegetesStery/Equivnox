@@ -49,6 +49,7 @@ namespace EQX {
 
 	float Dot(const Vector3&, const Vector3&);
 	Vector3 Cross(const Vector3&, const Vector3&);
+	Vector3 TermWiseProduct(const Vector3&, const Vector3&);
 
 	float Distance(const Vector3&, const Vector3&);
 

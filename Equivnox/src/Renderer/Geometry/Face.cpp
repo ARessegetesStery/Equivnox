@@ -98,6 +98,14 @@ namespace EQX {
 		this->ValidateSeq();
 	}
 
+	void Face::Transform(const MeshTransform& trans)
+	{
+		this->l.Transform(trans);
+		this->m.Transform(trans);
+		this->r.Transform(trans);
+		this->ValidateSeq();
+	}
+
 	// Set the Z field of all vertices in the face to 0
 	void Face::DiscardZ()
 	{

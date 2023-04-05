@@ -62,21 +62,5 @@ namespace EQX {
 		std::vector<Face> faces;
 	};
 
-	/**
-	 * The sequence of applying the changes is
-	 * Translation -> Scaling -> Rotation
-	 */
-	class MeshTransform
-	{
-	public:
-		Vec3 displacement;
-		Vec3 scaleCoeff;
-		Vec3 scaleRef;
-		float rotAngle;
-		Vec3 rotAxis;
-
-	public: 
-		MeshTransform();
-	};
 }
 

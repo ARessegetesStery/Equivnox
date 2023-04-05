@@ -188,7 +188,6 @@ namespace EQX {
 	template<typename T, T Zero>
 	ImageMask<T, Zero>::ImageMask() : ImageMask<T, Zero>(Zero) {	}
 
-	// TODO add the zero value for type T to the parameters of this class
 	template <typename T, T Zero>
 	ImageMask<T, Zero>::ImageMask(const T& val)
 	{

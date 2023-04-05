@@ -8,7 +8,6 @@ namespace EQX
 	{
 		/*  Configurations  */
 		this->curScene = nullptr;
-		this->finalScene = FScene();
 		this->cameraEnabled = true;
 		this->renderFill = RenderFill::WIREFRAME;
 		this->renderPass = RenderPass::FULL;
@@ -72,8 +71,6 @@ namespace EQX
 
 	void Renderer::Render()
 	{
-		this->finalScene.LoadScene(*curScene);
-
 		if (this->renderLightConfig == ShadingMode::RASTERIZE)
 			this->Rasterize();
 		else if (this->renderLightConfig == ShadingMode::RAYTRACING)
@@ -151,46 +148,50 @@ namespace EQX
 		if (this->cameraEnabled)
 			Projection = PerspMat;
 
-		for (auto curEntity = finalScene.Renderables()->begin(); 
-			curEntity != finalScene.Renderables()->cend(); ++curEntity)
+		for (auto entConfig = curScene->Renderables().begin();
+			entConfig != curScene->Renderables().cend(); ++entConfig)
 		{
-			const Mesh& curMesh = curEntity->GetMesh();
+			const Mesh& curMesh = curScene->FindUID(entConfig->GetUID()).GetMesh();
 
 			for (auto iter = curMesh.lineIndices.begin();
 				iter != curMesh.lineIndices.cend(); ++iter)
 			{
+				LineSeg l(curMesh.vertices[(*iter)[0]], curMesh.vertices[(*iter)[1]]);
+				l.Transform(entConfig->GetTransform());
+				l.Transform(Projection);
+
 				switch (this->renderAAConfig)
 				{
 				case RenderAAConfig::ANTIALIAS_OFF:
-					RenderLineRaw(image, LineSeg(curMesh.vertices[(*iter)[0]],
-						curMesh.vertices[(*iter)[1]]), Projection);
+					RenderLineRaw(image, l);
 					break;
 				case RenderAAConfig::MSAA: case RenderAAConfig::SMOOTH:
-					RenderLineSmooth(image, LineSeg(curMesh.vertices[(*iter)[0]],
-						curMesh.vertices[(*iter)[1]]), Projection);
+					RenderLineSmooth(image, l);
 					break;
 				}
 			}
 			for (auto iter = curMesh.faceIndices.begin();
 				iter != curMesh.faceIndices.cend(); ++iter)
 			{
+				std::array<LineSeg, 3> lines;
+				lines[0] = LineSeg(curMesh.vertices[(*iter)[0]], curMesh.vertices[(*iter)[1]]);
+				lines[1] = LineSeg(curMesh.vertices[(*iter)[0]], curMesh.vertices[(*iter)[2]]);
+				lines[2] = LineSeg(curMesh.vertices[(*iter)[1]], curMesh.vertices[(*iter)[2]]);
+				for (auto& l : lines)
+				{
+					l.Transform(entConfig->GetTransform());
+					l.Transform(Projection);
+				}
+
 				switch (this->renderAAConfig)
 				{
 				case RenderAAConfig::ANTIALIAS_OFF:
-					RenderLineRaw(image, LineSeg(curMesh.vertices[(*iter)[0]],
-						curMesh.vertices[(*iter)[1]]), Projection);
-					RenderLineRaw(image, LineSeg(curMesh.vertices[(*iter)[0]],
-						curMesh.vertices[(*iter)[2]]), Projection);
-					RenderLineRaw(image, LineSeg(curMesh.vertices[(*iter)[2]],
-						curMesh.vertices[(*iter)[1]]), Projection);
+					for (auto& l : lines)
+						RenderLineRaw(image, l);
 					break;
 				case RenderAAConfig::MSAA: case RenderAAConfig::FXAA:
-					RenderLineSmooth(image, LineSeg(curMesh.vertices[(*iter)[0]],
-						curMesh.vertices[(*iter)[1]]), Projection);
-					RenderLineSmooth(image, LineSeg(curMesh.vertices[(*iter)[0]],
-						curMesh.vertices[(*iter)[2]]), Projection);
-					RenderLineSmooth(image, LineSeg(curMesh.vertices[(*iter)[1]],
-						curMesh.vertices[(*iter)[2]]), Projection);
+					for (auto& l : lines)
+						RenderLineSmooth(image, l);
 					break;
 				}
 			}
@@ -203,10 +204,10 @@ namespace EQX
 		std::vector<FMesh> clippedMesh; 
 
 		/*  Frustum Clipping  */
-		for (auto curEntity = finalScene.Renderables()->begin();
-			curEntity != finalScene.Renderables()->cend(); ++curEntity)
+		for (auto entConfig = curScene->Renderables().begin();
+			entConfig != curScene->Renderables().cend(); ++entConfig)
 		{
-			const Mesh& curMesh = curEntity->GetMesh();
+			const Mesh& curMesh = curScene->FindUID(entConfig->GetUID()).GetMesh();
 			clippedMesh.emplace_back(FMesh());
 			auto curFMesh = clippedMesh.end() - 1;
 			curFMesh->faces.reserve(reserveScale * curMesh.faceIndices.size() * 3 * sizeof(Vertex));
@@ -216,7 +217,7 @@ namespace EQX
 				std::array<Vertex, 3> vertices{ curMesh.vertices[(*iter)[0]],
 					curMesh.vertices[(*iter)[1]] , curMesh.vertices[(*iter)[2]] };
 				Face f(vertices);
-				// TODO integrate the transformation in the initialization of FScene to here
+				f.Transform(entConfig->GetTransform());
 				f.Transform(this->perspTransform);
 				FrustumClipping(f, *curFMesh);
 			}
@@ -274,10 +275,8 @@ namespace EQX
 		}
 	}
 
-	void Renderer::RenderLineRaw(EQX_OUT Image& image, LineSeg l, const Mat4& projection) const
+	void Renderer::RenderLineRaw(EQX_OUT Image& image, const LineSeg& l) const
 	{
-		l.start.Transform(projection);
-		l.end.Transform(projection);
 		LineSeg perspL(l.start, l.end);
 
 		int sx = static_cast<int>(perspL.start.pos.x);
@@ -313,10 +312,8 @@ namespace EQX
 		}
 	}
 	 
-	void Renderer::RenderLineSmooth(EQX_OUT Image& image, LineSeg l, const Mat4& projection) const
+	void Renderer::RenderLineSmooth(EQX_OUT Image& image, const LineSeg& l) const
 	{
-		l.start.Transform(projection);
-		l.end.Transform(projection);
 		LineSeg perspL(l.start, l.end);
 
 		int sx = static_cast<int>(perspL.start.pos.x);
@@ -511,7 +508,6 @@ namespace EQX
 		else if (this->renderAAConfig == RenderAAConfig::MSAA)
 		{
 			// Obtains z value presuming that the point is in the triangle
-
 			float zpos = f.ZAtXYPlane(Vec2(xpos, ypos));
 			Vec3 curPos = Vec3(xpos, ypos, zpos);
 			Vec3 originalPos = inverseTransform * (curPos.ToVec4());
@@ -534,12 +530,10 @@ namespace EQX
 			int validSamplerCnt = 0;
 			float step = 1.f / (MSAAMult + 1);
 
-			// TODO clamp the sum of {validSamplerCnt} to be {samplerCnt}
 			for (int i = 1; i <= MSAAMult; ++i)
 			{
 				for (int j = 1; j <= MSAAMult; ++j)
 				{
-
 					Vec2 curPos = Vec2(xpos - 0.5f + float(i) * step, ypos - 0.5f + float(j) * step);
 
 					/*  Occlusion Test  */

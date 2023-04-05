@@ -59,15 +59,14 @@ namespace EQX
 		Renderer& operator= (const Renderer& r) = delete;
 
 		Scene* curScene;
-		FScene finalScene;
 
 		/*  Main Render Processes  */
 		void RenderLines(EQX_OUT Image& image) const;
 		void RenderFaces(EQX_OUT Image& image) const;
 
 		/// No need to clip for line rendering
-		void RenderLineRaw(EQX_OUT Image& image, LineSeg, const Mat4&) const;
-		void RenderLineSmooth(EQX_OUT Image& image, LineSeg, const Mat4&) const;
+		void RenderLineRaw(EQX_OUT Image& image, const LineSeg&) const;
+		void RenderLineSmooth(EQX_OUT Image& image, const LineSeg&) const;
 
 		void RenderFaceSingle(EQX_OUT Image& image, const Face& fOriginal, const Face& fTransformed, 
 			const ImageGrey& ZBuffer, EQX_OUT ImageMask<char, 0>& MSAAMask) const;
