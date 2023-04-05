@@ -16,8 +16,6 @@ namespace EQX {
 		
 		inline const std::vector<EntityConfig>& Renderables() const { return renderables; }
 		const Entity& FindUID(int UID) const;
-		void AddDefaultRenderable(int UID);
-		void AddRenderableWithTransform(int UID, const MeshTransform& transform);
 
 		inline void AddRawEntity(const Entity& ent) { this->entityPool.emplace_back(ent); }
 		// the corresponding EntityConfig is default 
@@ -40,7 +38,7 @@ namespace EQX {
 		FScene(const Scene&);
 		
 		// when loading a new scene, existing entities are cleared
-		void LoadScene(const Scene*);
+		void LoadScene(const Scene&);
 		inline const std::vector<Entity>* Renderables() const { return &entities; }
 
 	private:

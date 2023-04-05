@@ -22,8 +22,6 @@ namespace EQX {
 	class Entity
 	{
 	public:
-		static int UIDCounter;
-
 		Entity();
 		Entity(const Mesh&);
 		Entity(const Entity&);
@@ -38,6 +36,8 @@ namespace EQX {
 		int UID;
 		Mesh mesh;
 		std::vector<Entity*> children;
+
+		static int UIDCounter;
 	};
 
 	inline bool EqualID(const Entity& e1, const Entity& e2) { return e1.GetUID() == e2.GetUID(); }
@@ -45,6 +45,8 @@ namespace EQX {
 	class EntityConfig
 	{
 	public:
+		EntityConfig(int);
+		EntityConfig(int, const MeshTransform&);
 		EntityConfig(const Entity&);
 		EntityConfig(const Entity&, const MeshTransform&);
 
@@ -54,11 +56,11 @@ namespace EQX {
 		inline void ScaleCenter(const Vec3& point) { this->transform.scaleRef = point; }
 		inline void RotAxis(const Vec3& axis) { this->transform.rotAxis = axis; }
 		inline void RotAngle(float angle) { this->transform.rotAngle = angle; }
-		inline const Entity& GetBoundEntity() const { return this->binded; }
+		inline int GetUID() const { return this->UID; }
 		inline const MeshTransform& GetTransform() const { return this->transform; }
 
 	private:
-		const Entity& binded;
+		int UID;
 		MeshTransform transform;
 	};
 	

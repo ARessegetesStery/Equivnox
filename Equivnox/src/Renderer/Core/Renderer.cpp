@@ -72,7 +72,7 @@ namespace EQX
 
 	void Renderer::Render()
 	{
-		this->finalScene.LoadScene(curScene);
+		this->finalScene.LoadScene(*curScene);
 
 		if (this->renderLightConfig == ShadingMode::RASTERIZE)
 			this->Rasterize();

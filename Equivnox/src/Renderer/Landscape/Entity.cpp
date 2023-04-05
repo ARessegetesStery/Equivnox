@@ -28,9 +28,14 @@ namespace EQX {
 		this->UID = ent.GetUID();
 	}
 
-	EntityConfig::EntityConfig(const Entity& ent) : binded(ent)  {	}
+	EntityConfig::EntityConfig(int UID) : UID(UID) { }
+
+	EntityConfig::EntityConfig(int UID, const MeshTransform& trans) : 
+		UID(UID), transform(trans) { }
+
+	EntityConfig::EntityConfig(const Entity& ent) : UID(ent.GetUID())  {	}
 
 	EntityConfig::EntityConfig(const Entity& ent, const MeshTransform& trans) : 
-		binded(ent), transform(trans) { }
+		UID(ent.GetUID()), transform(trans) { }
 
 }
