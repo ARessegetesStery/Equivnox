@@ -10,13 +10,18 @@
 
 namespace EQX
 {
+	/**
+	 * 
+	 */
 	class Renderer
 	{
 	public:
 #ifdef EQX_DEBUG
 		friend class Face;
 #endif
+		// canvas size should be determined upon initialization to avoid reallocation of memory
 		static Renderer& Init();
+		static Renderer& Init(unsigned int, unsigned int);
 
 		void BindScene(Scene*);
 		void UnbindScene();
@@ -32,9 +37,6 @@ namespace EQX
 		inline void SetOutputType(ImageType t) { this->imageType = t; }
 		inline void SetOutputPath(std::string s) { this->outputPath = s; }
 		
-		inline void SetCanvas(unsigned int w, unsigned int h) { this->width = w; this->height = h; }
-		inline void SetCanvasWidth(unsigned int w) { this->width = w; };
-		inline void SetCanvasHeight(unsigned int h) { this->height = h; }
 		inline void SetWidthScale(float w) { this->wScale = w; }
 		inline void SetHeightScale(float h) { this->hScale = h; }
 		void SetMSAAMult(unsigned int);
@@ -55,22 +57,20 @@ namespace EQX
 
 	private:
 		Renderer();
+		Renderer(unsigned int, unsigned int);
 		Renderer(const Renderer& r) = delete;
 		Renderer& operator= (const Renderer& r) = delete;
 
-		Scene* curScene;
-
 		/*  Main Render Processes  */
-		void RenderLines(EQX_OUT Image& image) const;
-		void RenderFaces(EQX_OUT Image& image) const;
+		void RenderLines();
+		void RenderFaces();
 
 		/// No need to clip for line rendering
-		void RenderLineRaw(EQX_OUT Image& image, const LineSeg&) const;
-		void RenderLineSmooth(EQX_OUT Image& image, const LineSeg&) const;
+		void RenderLineRaw(const LineSeg&);
+		void RenderLineSmooth(const LineSeg&);
 
-		void RenderFaceSingle(EQX_OUT Image& image, const Face& fOriginal, const Face& fTransformed, 
-			const ImageGrey& ZBuffer, EQX_OUT ImageMask<char, 0>& MSAAMask) const;
-		void RenderFaceZBuf(EQX_OUT ImageGrey& image, const Face& fTransformed) const;
+		void RenderFaceSingle(const Face& fOriginal, const Face& fTransformed);
+		void RenderFaceZBuf(const Face& fTransformed);
 
 		/*  Render Configs  */
 		bool cameraEnabled;
@@ -79,6 +79,7 @@ namespace EQX
 		RenderAAConfig renderAAConfig;
 		ShadingMode renderLightConfig;
 		unsigned int MSAAMult;			// the rate of sampling in MSAA, 2^x
+		Scene* curScene;
 
 		unsigned int width, height;
 		float wScale, hScale;
@@ -91,8 +92,14 @@ namespace EQX
 		Mat4 transform;					// Transform Matrix; = persp * ss
 		Mat4 inverseTransform;			// Inverse Transform Matrix
 
+		/*  Buffers and Outputs  */
+		Image outputImage;
+		ImageGrey ZBuffer;
+		ImageMask<char, int, 0> MSAAMask;
+		std::vector<ImageMask<float, int, 0>> lightZMaps;
+
 		/*  Helper Functions  */
-		void UpdateZBufColor(float x, float y, const Face& f, EQX_OUT ImageGrey& ZBuffer) const;
+		void UpdateZBufColor(float x, float y, const Face& f);
 
 		/**
 		 * Render face according to the precomputed ZBuffer
@@ -105,10 +112,9 @@ namespace EQX
 		 * @param image - [OUT]Image to write to
 		 * @param ZBuffer - Precomputed ZBuffer
 		 */
-		void UpdateFragColor(float x, float y, const Face& f, const Face& fOriginal, EQX_OUT Image& image, 
-			const ImageGrey& ZBuffer, EQX_OUT ImageMask<char, 0>& MSAAMask) const;
+		void UpdateFragColor(float x, float y, const Face& f, const Face& fOriginal);
 
-		Color PhongLighting(Vec3 originalPos, Vec3 fragNormal, Color texColor, const Light& l) const;
+		Color PhongLighting(Vec3 originalPos, Vec3 fragNormal, Color texColor, const Light& l);
 
 		void ValidateConfig();		// Ensures no config conflict presents
 	};

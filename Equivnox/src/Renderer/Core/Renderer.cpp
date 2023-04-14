@@ -4,27 +4,35 @@
 
 namespace EQX
 {
-	Renderer::Renderer()
-	{
-		/*  Configurations  */
-		this->curScene = nullptr;
-		this->cameraEnabled = true;
-		this->renderFill = RenderFill::WIREFRAME;
-		this->renderPass = RenderPass::FULL;
-		this->renderAAConfig = RenderAAConfig::ANTIALIAS_OFF;
-		this->renderLightConfig = ShadingMode::RASTERIZE;
-		this->imageType = ImageType::TGA;
-		this->outputPath = "output";
-		this->ssTransform = Mat4::Identity;
-		this->perspTransform = Mat4::Identity;
-		this->transform = Mat4::Identity;
-		this->inverseTransform = Mat4::Identity;
-		this->width = 400;
-		this->height = 400;
-		this->wScale = 1.0f;
-		this->hScale = 1.0f;
-		this->MSAAMult = 4;
-	}
+	Renderer::Renderer() : Renderer(400, 400) {  }
+
+	Renderer::Renderer(unsigned int width, unsigned int height) :
+		curScene(nullptr),
+		cameraEnabled(true),
+		renderFill(RenderFill::WIREFRAME),
+		renderPass(RenderPass::FULL),
+		renderAAConfig(RenderAAConfig::ANTIALIAS_OFF),
+		renderLightConfig(ShadingMode::RASTERIZE),
+		imageType(ImageType::TGA),
+		outputPath("output"),
+		width(width),
+		height(height),
+		wScale(1.0f),
+		hScale(1.0f),
+		MSAAMult(4),
+
+		/*  Temporary Data Storage  */
+		ssTransform(Mat4::Identity),
+		perspTransform(Mat4::Identity),
+		transform(Mat4::Identity),
+		inverseTransform(Mat4::Identity),
+
+		/*  Buffers and Outputs  */
+		outputImage(width, height),
+		ZBuffer(width, height),
+		MSAAMask(width, height, (char)(MSAAMult* MSAAMult)),
+		lightZMaps({})
+	{  }
 
 	Renderer& Renderer::Init()
 	{
@@ -32,6 +40,15 @@ namespace EQX
 		EQX::Print("Welcome to Equivnox!");
 #endif
 		static Renderer _renderer;
+		return _renderer;
+	}
+
+	Renderer& Renderer::Init(unsigned int width, unsigned int height)
+	{
+#ifdef EQX_PRINT_STATUS
+		EQX::Print("Welcome to Equivnox!");
+#endif
+		static Renderer _renderer (width, height);
 		return _renderer;
 	}
 
@@ -56,6 +73,8 @@ namespace EQX
 			MSAAMult = 8;
 		else
 			MSAAMult = scale;
+
+		this->MSAAMask.SetAll(MSAAMult * MSAAMult);
 	}
 
 	void Renderer::addLight(Light l)
@@ -84,8 +103,6 @@ namespace EQX
 
 	void Renderer::Rasterize()
 	{
-		Image image(this->width, this->height);
-
 #ifdef EQX_PRINT_STATUS
 		Print("Rendering Faces [Mode: Rasterizer]..");
 #endif
@@ -93,7 +110,7 @@ namespace EQX
 		/*  Initializing the background color to be black  */
 		for (int x = 0; x < this->width; ++x)
 			for (int y = 0; y < this->height; ++y)
-				image.Set(x, y, Color::Black);
+				outputImage.Set(x, y, Color::Black);
 
 		/*  Setup Transformation Matrix  */
 		Mat4 ssMat = MakeScreenSpace(this->width, this->height);
@@ -114,25 +131,25 @@ namespace EQX
 		switch (renderFill)
 		{
 		case RenderFill::WIREFRAME:
-			RenderLines(image);
+			RenderLines();
 			break;
 		case RenderFill::FILL:
-			RenderFaces(image);
+			RenderFaces();
 			break;
 		default:
 			break;
 		}
 
 		if (this->wScale != 1.0f || this->hScale != 1.0f)
-			image.Rescale(wScale * this->width, hScale * this->height);
+			outputImage.Rescale(wScale * this->width, hScale * this->height);
 
 #ifdef EQX_PRINT_STATUS
 		Print("Writing into output file..");
 #endif
-		image.Write(this->imageType, this->outputPath);
+		outputImage.Write(this->imageType, this->outputPath);
 	}
 
-	void Renderer::RenderLines(EQX_OUT Image& image) const
+	void Renderer::RenderLines()
 	{
 		Mat4 PerspMat = Mat4::Identity;
 		if (this->camera.upDir == Vec4::Zero || Dot(this->camera.upDir, this->camera.lookAt) != 0)
@@ -163,10 +180,10 @@ namespace EQX
 				switch (this->renderAAConfig)
 				{
 				case RenderAAConfig::ANTIALIAS_OFF:
-					RenderLineRaw(image, l);
+					RenderLineRaw(l);
 					break;
 				case RenderAAConfig::MSAA: case RenderAAConfig::SMOOTH:
-					RenderLineSmooth(image, l);
+					RenderLineSmooth(l);
 					break;
 				}
 			}
@@ -187,18 +204,18 @@ namespace EQX
 				{
 				case RenderAAConfig::ANTIALIAS_OFF:
 					for (auto& l : lines)
-						RenderLineRaw(image, l);
+						RenderLineRaw(l);
 					break;
 				case RenderAAConfig::MSAA: case RenderAAConfig::FXAA:
 					for (auto& l : lines)
-						RenderLineSmooth(image, l);
+						RenderLineSmooth(l);
 					break;
 				}
 			}
 		}
 	}
 
-	void Renderer::RenderFaces(EQX_OUT Image& image) const
+	void Renderer::RenderFaces()
 	{
 		constexpr double reserveScale = 1.5;	// reserve scale for clipping meshes
 		std::vector<FMesh> clippedMesh; 
@@ -224,12 +241,11 @@ namespace EQX
 		}
 
 		/*  Z-Buffer Rendering  */
-		ImageGrey ZBuf(this->width, this->height);
 
 		// Background of ZBuf should be white
 		for (int x = 0; x < this->width; ++x)
 			for (int y = 0; y < this->height; ++y)
-				ZBuf.Set(x, y, 255.0f);
+				ZBuffer.Set(x, y, 255.0f);
 
 		for (auto curMesh = clippedMesh.begin(); curMesh != clippedMesh.cend(); ++curMesh)
 		{
@@ -241,7 +257,7 @@ namespace EQX
 					{
 						Face fTransformed(f);
 						fTransformed.Transform(this->ssTransform);
-						RenderFaceZBuf(ZBuf, fTransformed);
+						RenderFaceZBuf(fTransformed);
 					}
 				}
 			}
@@ -250,12 +266,11 @@ namespace EQX
 		/*  Rendering Only Z-Buffer  */
 		if (this->renderPass == RenderPass::ZBUFFER_ONLY)
 		{
-			image = ZBuf;
+			outputImage = ZBuffer;
 			return;
 		}
 
 		/*  Rendering Full Image  */
-		ImageMask<char, 0> MSAAMask(400, 400, char(MSAAMult * MSAAMult));
 		for (auto& mesh : clippedMesh)
 		{
 			for (auto& fTransformed : mesh.faces)
@@ -270,12 +285,12 @@ namespace EQX
 				fTransformed.Transform(ssTransform);
 				Face fOriginal(fTransformed);
 				fOriginal.Transform(inverseTransform);
-				RenderFaceSingle(image, fOriginal, fTransformed, ZBuf, MSAAMask);
+				RenderFaceSingle(fOriginal, fTransformed);
 			}
 		}
 	}
 
-	void Renderer::RenderLineRaw(EQX_OUT Image& image, const LineSeg& l) const
+	void Renderer::RenderLineRaw(const LineSeg& l)
 	{
 		LineSeg perspL(l.start, l.end);
 
@@ -302,17 +317,17 @@ namespace EQX
 			if (transpose)
 			{
 				int y = std::roundf(1 / perspL.k * (x - sx)) + sy;
-				image.Set(y, x, Color::White);
+				outputImage.Set(y, x, Color::White);
 			}
 			else
 			{
 				int y = std::roundf(perspL.k * (x - sx)) + sy;
-				image.Set(x, y, Color::White);
+				outputImage.Set(x, y, Color::White);
 			}
 		}
 	}
 	 
-	void Renderer::RenderLineSmooth(EQX_OUT Image& image, const LineSeg& l) const
+	void Renderer::RenderLineSmooth(const LineSeg& l)
 	{
 		LineSeg perspL(l.start, l.end);
 
@@ -328,10 +343,10 @@ namespace EQX
 
 		if (sy == ey)
 			for (int x = sx; x != ex + xPace; x += xPace)
-				image.Set(x, sy, blendColor(Color::White, image.Get(x, sy), 1.0));
+				outputImage.Set(x, sy, blendColor(Color::White, outputImage.Get(x, sy), 1.0));
 		else if (abs(perspL.k) > SLOPE_MAX)
 			for (int y = sy; y != ey + yPace; y += yPace)
-				image.Set(sx, y, blendColor(Color::White, image.Get(sx, y), 1.0));
+				outputImage.Set(sx, y, blendColor(Color::White, outputImage.Get(sx, y), 1.0));
 		else
 		{
 			for (int x = sx; x != ex; x += xPace)
@@ -345,109 +360,103 @@ namespace EQX
 						continue;
 					Vector2 center(x + xPace / 2.0f, y + yPace / 2.0f);
 					float coeff = PixelAmp(perspL, center);
-					image.Set(x, y, blendColor(Color::White, image.Get(x, y), coeff));
+					outputImage.Set(x, y, blendColor(Color::White, outputImage.Get(x, y), coeff));
 				}
 			}
 		}
 	}
 	
-	void Renderer::RenderFaceSingle(EQX_OUT Image& image, const Face& fOriginal, 
-		const Face& fTrans, const ImageGrey& ZBuffer, EQX_OUT ImageMask<char, 0>& MSAAMask) const
+	void Renderer::RenderFaceSingle(const Face& fOriginal, const Face& fTrans)
 	{
+		int xpos, ypos;
 		if (std::abs(fTrans.SlopeLM()) > SLOPE_MAX)
 		{
-			int xpos, ypos;
 			for (xpos = fTrans.L().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
 				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x - sgn(fTrans.SlopeLR())) * fTrans.SlopeLR() - 1;
 					ypos <= fTrans.M().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeMR())) * fTrans.SlopeMR() + 1;
 					++ypos)
-					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer, MSAAMask);
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal);
 		}
 		else if (std::abs(fTrans.SlopeMR()) > SLOPE_MAX)
 		{
-			int xpos, ypos;
 			for (xpos = fTrans.L().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
 				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x - sgn(fTrans.SlopeLM())) * fTrans.SlopeLM() - 1;
 					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeLR())) * fTrans.SlopeLR() + 1;
 					++ypos)
-					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer, MSAAMask);
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal);
 		}
 		else if (fTrans.SlopeLM() > fTrans.SlopeLR())
 		// GetM() lies above the line segment connecting l and GetR()
 		{
-			int xpos, ypos;
 			for (xpos = fTrans.L().pos.x; xpos < floor(fTrans.M().pos.x); ++xpos)
 				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x - sgn(fTrans.SlopeLR())) * fTrans.SlopeLR() - 1;
 					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeLM())) * fTrans.SlopeLM() + 1; 
 					++ypos)
-					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer, MSAAMask);
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal);
 			for (xpos = fTrans.M().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
 				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x - sgn(fTrans.SlopeLR())) * fTrans.SlopeLR() - 1;
 					ypos <= fTrans.M().pos.y + (xpos - fTrans.M().pos.x + sgn(fTrans.SlopeMR())) * fTrans.SlopeMR() + 1; 
 					++ypos)
-					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer, MSAAMask);
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal);
 		}
 		else
 		{
-			int xpos, ypos;
 			for (xpos = fTrans.L().pos.x; xpos < floor(fTrans.M().pos.x); ++xpos)
 				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x - sgn(fTrans.SlopeLM())) * fTrans.SlopeLM() - 1;
-					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeLR())) * fTrans.SlopeLR() + 1; 
+					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeLR())) * fTrans.SlopeLR() + 1;
 					++ypos)
-					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer, MSAAMask);
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal);
 			for (xpos = fTrans.M().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
 				for (ypos = fTrans.M().pos.y + (xpos - fTrans.M().pos.x - sgn(fTrans.SlopeMR())) * fTrans.SlopeMR() - 1;
-					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeLR())) * fTrans.SlopeLR() + 1; 
+					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeLR())) * fTrans.SlopeLR() + 1;
 					++ypos)
-					UpdateFragColor(xpos, ypos, fTrans, fOriginal, image, ZBuffer, MSAAMask);
+					UpdateFragColor(xpos, ypos, fTrans, fOriginal);
 		}
 	}
 
-	void Renderer::RenderFaceZBuf(EQX_OUT ImageGrey& image, const Face& fTrans) const
+	void Renderer::RenderFaceZBuf(const Face& fTrans)
 	{
+		int xpos, ypos;
 		if (std::abs(fTrans.SlopeLM()) > SLOPE_MAX)
 		{
-			int xpos, ypos;
 			for (xpos = fTrans.L().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
 				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x) * fTrans.SlopeLR() - 1;
 					ypos <= fTrans.M().pos.y + (xpos - fTrans.L().pos.x) * fTrans.SlopeMR() + 1; ++ypos)
-					UpdateZBufColor(xpos, ypos, fTrans, image);
+					UpdateZBufColor(xpos, ypos, fTrans);
 		}
 		else if (fTrans.SlopeLM() > fTrans.SlopeLR())
 		{
-			int xpos, ypos;
 			for (xpos = fTrans.L().pos.x; xpos <= fTrans.M().pos.x; ++xpos)
 				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x) * fTrans.SlopeLR() - 1;
 					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x) * fTrans.SlopeLM() + 1; ++ypos)
-					if (image.IsPointOnCanvas(xpos, ypos))
-						UpdateZBufColor(xpos, ypos, fTrans, image);
+					if (ZBuffer.IsPointOnCanvas(xpos, ypos))
+						UpdateZBufColor(xpos, ypos, fTrans);
 			for (xpos = fTrans.M().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
 				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x) * fTrans.SlopeLR() - 1;
 					ypos <= fTrans.M().pos.y + (xpos - fTrans.M().pos.x) * fTrans.SlopeMR() + 1; ++ypos)
-					if (image.IsPointOnCanvas(xpos, ypos))
-						UpdateZBufColor(xpos, ypos, fTrans, image);
+					if (ZBuffer.IsPointOnCanvas(xpos, ypos))
+						UpdateZBufColor(xpos, ypos, fTrans);
 		}
 		else
 		{
-			int xpos, ypos;
 			for (xpos = fTrans.L().pos.x; xpos <= fTrans.M().pos.x; ++xpos)
 			{
 				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x) * fTrans.SlopeLM() - 1;
 					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x) * fTrans.SlopeLR() + 1; ++ypos)
-					if (image.IsPointOnCanvas(xpos, ypos))
-						UpdateZBufColor(xpos, ypos, fTrans, image);
+					if (ZBuffer.IsPointOnCanvas(xpos, ypos))
+						UpdateZBufColor(xpos, ypos, fTrans);
 			}
 			for (xpos = fTrans.M().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
 				for (ypos = fTrans.M().pos.y + (xpos - fTrans.M().pos.x) * fTrans.SlopeMR() - 1;
 					ypos <= fTrans.L().pos.y + (xpos - fTrans.L().pos.x) * fTrans.SlopeLR() + 1; ++ypos)
-					if (image.IsPointOnCanvas(xpos, ypos))
-						UpdateZBufColor(xpos, ypos, fTrans, image);
+					if (ZBuffer.IsPointOnCanvas(xpos, ypos))
+						UpdateZBufColor(xpos, ypos, fTrans);
 		}
 	}
 
-	void Renderer::UpdateZBufColor(float x, float y, const Face& f, EQX_OUT ImageGrey& ZBuf) const
+	void Renderer::UpdateZBufColor(float x, float y, const Face& f)
 	{
-		float curGreyScale = ZBuf.Get(x, y);
+		float curGreyScale = ZBuffer.Get(x, y);
 
 		float zpos = f.ZAtXYFace(Vec2(x, y));
 		float newGreyScale = (zpos == 1) ? 0 : 128 - 127.f * zpos;
@@ -456,17 +465,16 @@ namespace EQX
 			return;
 
 		if (newGreyScale < curGreyScale)
-			ZBuf.Set(x, y, newGreyScale);
+			ZBuffer.Set(x, y, newGreyScale);
 	}
 
 	
-	void Renderer::UpdateFragColor(float xpos, float ypos, const Face& f, const Face& fOriginal, 
-		EQX_OUT Image& image, const ImageGrey& ZBuffer, EQX_OUT ImageMask<char, 0>& MSAAMask) const
+	void Renderer::UpdateFragColor(float xpos, float ypos, const Face& f, const Face& fOriginal)
 	{
 		// If camera disabled, only render white pixels
 		if (!this->cameraEnabled)
 		{
-			image.Set(xpos, ypos, Color::White);
+			outputImage.Set(xpos, ypos, Color::White);
 			return;
 		}
 
@@ -502,7 +510,7 @@ namespace EQX
 						pixelColor = pixelColor + resultColor;
 					}
 				}
-				image.Set(xpos, ypos, pixelColor);
+				outputImage.Set(xpos, ypos, pixelColor);
 			}
 		}
 		else if (this->renderAAConfig == RenderAAConfig::MSAA)
@@ -515,7 +523,7 @@ namespace EQX
 			Vec3 fragNormal = baryCoord[0] * fOriginal.L().normal +
 				baryCoord[1] * fOriginal.M().normal + baryCoord[2] * fOriginal.R().normal;
 
-			Color originalColor = image.Get(xpos, ypos);
+			Color originalColor = outputImage.Get(xpos, ypos);
 			Color resultColor = Color(0);
 			Face face(f);
 
@@ -556,11 +564,11 @@ namespace EQX
 			resultColor = resultColor * validSamplerCnt / samplerCnt;
 			resultColor = resultColor + originalColor;
 
-			image.Set(xpos, ypos, resultColor);
+			outputImage.Set(xpos, ypos, resultColor);
 		}
 	}
 
-	Color Renderer::PhongLighting(Vec3 originalPos, Vec3 fragNormal, Color texColor, const Light& l) const
+	Color Renderer::PhongLighting(Vec3 originalPos, Vec3 fragNormal, Color texColor, const Light& l)
 	{
 		float distance = (l.pos - originalPos).Norm();
 		Vec3 lightDir = (l.pos - originalPos) / distance;
