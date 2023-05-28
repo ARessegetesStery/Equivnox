@@ -27,6 +27,7 @@ namespace EQX {
 		Entity(const Entity&);
 
 		inline int GetUID() const { return this->UID; }
+		inline Mesh& GetMesh() { return this->mesh; }
 		inline const Mesh& GetMesh() const { return this->mesh; }
 		inline const std::vector<Entity*>& GetChildren() const { return this->children; }
 

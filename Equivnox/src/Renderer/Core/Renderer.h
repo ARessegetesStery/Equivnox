@@ -74,6 +74,7 @@ namespace EQX
 
 		/*  Render Configs  */
 		bool cameraEnabled;
+		bool hardShadow;
 		RenderFill renderFill;
 		RenderPass renderPass;
 		RenderAAConfig renderAAConfig;

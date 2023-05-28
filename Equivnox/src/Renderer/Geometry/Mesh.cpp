@@ -61,7 +61,7 @@ namespace EQX {
 		this->faceIndices.push_back(indices);
 	}
 
-	void Mesh::AddFace(Face& f)
+	void Mesh::AddFace(const Face& f)
 	{
 		Mesh::AddFace(f.L(), f.M(), f.R());
 	}
@@ -187,6 +187,9 @@ namespace EQX {
 
 	Mesh::Mesh(const Mesh& m)
 	{
+		this->faceIndices.clear();
+		this->faceIndices.clear();
+		this->lineIndices.clear();
 		for (auto iter = m.vertices.begin(); iter != m.vertices.cend(); ++iter)
 			this->vertices.push_back(*iter);
 		for (auto iter = m.faceIndices.begin(); iter != m.faceIndices.cend(); ++iter)
@@ -197,6 +200,9 @@ namespace EQX {
 
 	void Mesh::operator=(const Mesh& m)
 	{
+		this->faceIndices.clear();
+		this->faceIndices.clear();
+		this->lineIndices.clear();
 		for (auto iter = m.vertices.begin(); iter != m.vertices.cend(); ++iter)
 			this->vertices.push_back(*iter);
 		for (auto iter = m.faceIndices.begin(); iter != m.faceIndices.cend(); ++iter)

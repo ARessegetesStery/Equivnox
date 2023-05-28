@@ -30,13 +30,14 @@ int main(int argc, char** argv) {
 	// m.AddLine(v1, v3);
 	// m.AddFace(f);
 
+	// TODO prevent memory copying when duplicating entities
 	EQX::Mesh m1(m);
 	EQX::Scene defaultScene;
 	EQX::Entity ent(m);
 	m1.Shift(EQX::Vector3(0, 0, 0.5));
 	EQX::Entity ent1(m1);
 	EQX::MeshTransform trans;
-	trans.displacement = EQX::Vec3(0, 0, 0.3);
+	//trans.displacement = EQX::Vec3(0, 0, 0.5);
 
 	defaultScene.AddDefaultEntity(ent);
 	defaultScene.AddEntityWithTransform(ent1, trans);
@@ -50,7 +51,7 @@ int main(int argc, char** argv) {
 	coreRenderer.SetLight(EQX::ShadingMode::RASTERIZE);
 
 	coreRenderer.EnableCamera();
-	coreRenderer.camera.SetPos(EQX::Vec3(1, 1, 1));
+	coreRenderer.camera.SetPos(EQX::Vec3(0, 1, 2));
 	coreRenderer.camera.LookAt(EQX::Vec3::Zero);
 	coreRenderer.camera.fromFoV(45, 1.0);
 

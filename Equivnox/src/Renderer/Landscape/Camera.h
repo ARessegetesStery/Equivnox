@@ -36,6 +36,9 @@ namespace EQX {
 		inline void LookAt(Vec3 pos) { this->lookAt = (this->pos + pos.Neg()).Neg(); }
 		inline void LookAt(Vec4 pos) { this->LookAt(pos.ToVec3()); }
 
+		inline void SetUp(Vec4 up) { this->upDir = up; }
+		inline void SetUp(Vec3 up) { this->upDir = up.ToVec4(); }
+
 		inline Vec3 GetPos() { return this->pos; }
 	};
 

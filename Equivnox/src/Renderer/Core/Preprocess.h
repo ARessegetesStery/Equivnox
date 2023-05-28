@@ -20,7 +20,7 @@ namespace EQX {
 	 * @param inFace - the face to be evaluated
 	 * @param faces - [OUT]the faces that need to be rendered
 	 */
-	void FrustumClipping(const Face& inFace, EQX_OUT FMesh& clippedMesh);
+	void FrustumClipping(const Face& inFace, EQX_OUT Mesh& clippedMesh);
 
 	/**
 	 * @param intersections - {UnitBoxIntersection} in {FrustumClipping}
@@ -36,6 +36,6 @@ namespace EQX {
 	 * @param vertices - the vertices of the control point
 	 * @param trigs - [OUT] the resulting parsed triangles
 	 */
-	void TriangularizeHull(std::vector<Vertex>& vertices, EQX_OUT FMesh& clippedMesh);
+	void TriangularizeHull(std::vector<Vertex>& vertices, EQX_OUT Mesh& clippedMesh);
 
 }

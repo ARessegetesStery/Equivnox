@@ -15,7 +15,7 @@ namespace EQX {
 		friend class Renderer;
 
 		void AddFace(const Vertex&, const Vertex&, const Vertex&);
-		void AddFace(Face&);
+		void AddFace(const Face&);
 		void AddFace(std::vector<Face>&);
 		void AddFace(const std::initializer_list<Face>&);
 
@@ -41,25 +41,11 @@ namespace EQX {
 
 		static const Mesh EmptyMesh;
 
-	public:
+	private:
 		std::vector<Vertex> vertices;
 		std::vector<std::array<unsigned int, 3>> faceIndices;
 		std::vector<std::array<unsigned int, 2>> lineIndices;
 
-	};
-
-	// Finalized mesh only to be created in the rendering process
-	class FMesh
-	{
-		friend class Renderer;
-	public:
-		FMesh() = default;
-
-		inline void AddFace(const Face& f) { this->faces.emplace_back(f); }
-		inline const std::vector<Face>& const Trigs() { return faces; }
-
-	private:
-		std::vector<Face> faces;
 	};
 
 }

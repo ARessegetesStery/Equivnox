@@ -98,7 +98,7 @@ namespace EQX {
 		this->ValidateSeq();
 	}
 
-	void Face::Transform(const MeshTransform& trans)
+	void Face::TransformMesh(const MeshTransform& trans)
 	{
 		this->l.Transform(trans);
 		this->m.Transform(trans);

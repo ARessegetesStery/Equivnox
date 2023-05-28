@@ -278,12 +278,15 @@ namespace EQX {
 		Vector3 UpDir;
 		Vector3 look = LookAt.ToVec3();
 		if (look.y == 0)
-			UpDir = Vec3(look.x, 1.0f, look.z);
+			UpDir = Vec3(0, 1.0f, 0);
 		else
 		{
 			float upYDisp = 0;
 			upYDisp = -(look.x * look.x + look.z * look.z) / look.y;
-			UpDir = Vec3(look.x, upYDisp, look.z);
+			if (look.x == 0 && look.z == 0)
+				UpDir = Vec3(1, 0, 0);
+			else
+				UpDir = Vec3(look.x, upYDisp, look.z);
 		}
 		UpDir = UpDir.Normalize();
 		return MakeView(CameraPos, LookAt, UpDir.ToVec4());

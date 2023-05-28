@@ -10,7 +10,7 @@ namespace EQX {
 		v.pos.y = floor(v.pos.y);
 	}
 
-	void FrustumClipping(const Face& inFace, EQX_OUT FMesh& clippedMesh)
+	void FrustumClipping(const Face& inFace, EQX_OUT Mesh& clippedMesh)
 	{
 		auto IsCanonic = [=](float x) -> bool { return x >= -1.f && x <= 1.f; };
 		auto IsVec4InCanonic = [=](const Vec3 v) -> bool { return IsCanonic(v.x) && IsCanonic(v.y) && IsCanonic(v.z); };
@@ -181,7 +181,7 @@ namespace EQX {
 		return exists;
 	}
 
-	void TriangularizeHull(std::vector<Vertex>& vertices, EQX_OUT FMesh& clippedMesh)
+	void TriangularizeHull(std::vector<Vertex>& vertices, EQX_OUT Mesh& clippedMesh)
 	{
 		if (vertices.size() <= 2)
 			return;

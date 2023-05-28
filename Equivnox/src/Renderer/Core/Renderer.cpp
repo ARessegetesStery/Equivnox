@@ -9,6 +9,7 @@ namespace EQX
 	Renderer::Renderer(unsigned int width, unsigned int height) :
 		curScene(nullptr),
 		cameraEnabled(true),
+		hardShadow(true),
 		renderFill(RenderFill::WIREFRAME),
 		renderPass(RenderPass::FULL),
 		renderAAConfig(RenderAAConfig::ANTIALIAS_OFF),
@@ -79,6 +80,7 @@ namespace EQX
 
 	void Renderer::addLight(Light l)
 	{
+		this->lightZMaps.emplace_back(this->width, this->height);
 		this->lights.push_back(l);
 	}
 
@@ -127,6 +129,10 @@ namespace EQX
 			this->inverseTransform = this->transform.Inverse();
 		}
 
+		/*  Load Scene  */
+
+		// TODO apply tranforms for duplicate Entities
+
 		/*  Render Meshes  */
 		switch (renderFill)
 		{
@@ -168,7 +174,7 @@ namespace EQX
 		for (auto entConfig = curScene->Renderables().begin();
 			entConfig != curScene->Renderables().cend(); ++entConfig)
 		{
-			const Mesh& curMesh = curScene->FindUID(entConfig->GetUID()).GetMesh();
+			const Mesh& curMesh = curScene->FindEntityWithUID(entConfig->GetUID()).GetMesh();
 
 			for (auto iter = curMesh.lineIndices.begin();
 				iter != curMesh.lineIndices.cend(); ++iter)
@@ -218,40 +224,49 @@ namespace EQX
 	void Renderer::RenderFaces()
 	{
 		constexpr double reserveScale = 1.5;	// reserve scale for clipping meshes
-		std::vector<FMesh> clippedMesh; 
 
-		/*  Frustum Clipping  */
-		for (auto entConfig = curScene->Renderables().begin();
-			entConfig != curScene->Renderables().cend(); ++entConfig)
-		{
-			const Mesh& curMesh = curScene->FindUID(entConfig->GetUID()).GetMesh();
-			clippedMesh.emplace_back(FMesh());
-			auto curFMesh = clippedMesh.end() - 1;
-			curFMesh->faces.reserve(reserveScale * curMesh.faceIndices.size() * 3 * sizeof(Vertex));
-			for (auto iter = curMesh.faceIndices.begin();
-				iter != curMesh.faceIndices.cend(); ++iter)
-			{
-				std::array<Vertex, 3> vertices{ curMesh.vertices[(*iter)[0]],
-					curMesh.vertices[(*iter)[1]] , curMesh.vertices[(*iter)[2]] };
-				Face f(vertices);
-				f.Transform(entConfig->GetTransform());
-				f.Transform(this->perspTransform);
-				FrustumClipping(f, *curFMesh);
-			}
-		}
+		// TODO Release the memory after reading infos on meshes
 
-		/*  Z-Buffer Rendering  */
+		/*  Load Scene and Apply Transforms  */
+
+		// TODO Imeplement loading with AssetManager; MeshTransform unavailable now. 
+
+		/*  Generate Z-Buffer from Lights  */
+
+		// TODO Implement Hard Shadow Here
+
+		/*  Z-Buffer Rendering and Frustum Clipping  */
 
 		// Background of ZBuf should be white
 		for (int x = 0; x < this->width; ++x)
 			for (int y = 0; y < this->height; ++y)
 				ZBuffer.Set(x, y, 255.0f);
 
-		for (auto curMesh = clippedMesh.begin(); curMesh != clippedMesh.cend(); ++curMesh)
+		if (this->cameraEnabled)
+		{
+			for (auto entConfig = curScene->Renderables().begin();
+				entConfig != curScene->Renderables().cend(); ++entConfig)
+			{
+				Mesh& curMesh = curScene->FindEntityWithUID(entConfig->GetUID()).GetMesh();
+				std::vector<std::array<unsigned int, 3>> faceIndices = curMesh.faceIndices;
+				std::vector<Vertex> vertices = curMesh.vertices;
+				curMesh = Mesh::EmptyMesh;
+				for (auto& indexVec : faceIndices)
+				{
+					Face f(vertices[indexVec[0]], vertices[indexVec[1]], vertices[indexVec[2]]);
+					f.Transform(this->perspTransform);
+					FrustumClipping(f, curMesh);
+					f.Transform(this->ssTransform);
+					RenderFaceZBuf(f);
+				}
+			}
+		}
+
+		/*for (auto curMesh = meshCollection.begin(); curMesh != meshCollection.cend(); ++curMesh)
 		{
 			if (this->cameraEnabled)
 			{
-				for (const auto& mesh : clippedMesh)
+				for (const auto& mesh : meshCollection)
 				{
 					for (const auto& f : mesh.faces)
 					{
@@ -261,7 +276,7 @@ namespace EQX
 					}
 				}
 			}
-		}
+		}*/
 
 		/*  Rendering Only Z-Buffer  */
 		if (this->renderPass == RenderPass::ZBUFFER_ONLY)
@@ -270,11 +285,16 @@ namespace EQX
 			return;
 		}
 
+		/*  ZBuffer Prep for Shadow Rendering  */
+
 		/*  Rendering Full Image  */
-		for (auto& mesh : clippedMesh)
+		for (auto entConfig = curScene->Renderables().begin();
+			entConfig != curScene->Renderables().cend(); ++entConfig)
 		{
-			for (auto& fTransformed : mesh.faces)
+			Mesh& curMesh = curScene->FindEntityWithUID(entConfig->GetUID()).GetMesh();
+			for (auto& indexVec : curMesh.faceIndices)
 			{
+				Face fTransformed(curMesh.vertices[indexVec[0]], curMesh.vertices[indexVec[1]], curMesh.vertices[indexVec[2]]);
 				/*  Back-Surface Culling  */
 				if (Dot(fTransformed[0].normal, this->camera.lookAt) > 0 &&
 					Dot(fTransformed[1].normal, this->camera.lookAt) > 0 &&
