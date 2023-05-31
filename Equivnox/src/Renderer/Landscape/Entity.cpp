@@ -4,38 +4,101 @@
 
 namespace EQX {
 
-	int Entity::UIDCounter = 0;
+	const std::string EntityConfig::s_defaultEntityName = "__world__";
 
-	Entity::Entity()
+	EntityID Entity::UIDCounter = 0;
+	ConfigID EntityConfig::UIDCounter = 0;
+
+	Entity::Entity() : UID(UIDCounter)
 	{
-		this->UID = UIDCounter;
 		++UIDCounter;
-		this->mesh = Mesh::EmptyMesh;
+		this->mesh = Mesh();
 	}
 
-	Entity::Entity(const Mesh& mesh)
+	Entity::Entity(const Mesh& mesh) : UID(UIDCounter)
 	{
-		this->UID = UIDCounter;
 		++UIDCounter;
 		this->mesh = mesh;
 	}
 
-	Entity::Entity(const Entity& ent)
+	Entity::Entity(const Entity& ent) : UID(ent.GetUID())
 	{
 		for (auto iter = ent.GetChildren().begin(); iter != ent.GetChildren().cend(); ++iter)
 			this->children.push_back(*iter);
 		this->mesh = ent.GetMesh();
-		this->UID = ent.GetUID();
 	}
 
-	EntityConfig::EntityConfig(int UID) : UID(UID) { }
+	Entity& Entity::operator=(const Entity& ent)
+	{
+		this->UID = ent.GetUID();
+		for (auto iter = ent.GetChildren().begin(); iter != ent.GetChildren().cend(); ++iter)
+			this->children.push_back(*iter);
+		this->mesh = ent.GetMesh();
+		return *this;
+	}
 
-	EntityConfig::EntityConfig(int UID, const MeshTransform& trans) : 
-		UID(UID), transform(trans) { }
+	void Entity::ClearMesh()
+	{
+		this->mesh.Clear();
+	}
 
-	EntityConfig::EntityConfig(const Entity& ent) : UID(ent.GetUID())  {	}
+	void Entity::AddFaceToMesh(const Vertex& a, const Vertex& b, const Vertex& c)
+	{
+		this->mesh.AddFace(a, b, c);
+	}
 
-	EntityConfig::EntityConfig(const Entity& ent, const MeshTransform& trans) : 
-		UID(ent.GetUID()), transform(trans) { }
+	void Entity::AddFaceToMesh(const Face& f)
+	{
+		this->mesh.AddFace(f);
+	}
 
+	void Entity::AddFaceToMesh(std::vector<Face>& ls)
+	{
+		this->mesh.AddFace(ls);
+	}
+
+	void Entity::AddFaceToMesh(const std::initializer_list<Face>& ls)
+	{
+		this->mesh.AddFace(ls);
+	}
+
+	EntityConfig::EntityConfig(int UID, std::string name) : 
+		entityID(UID), name(name), transform(MeshTransform()) 
+	{
+		configID = UIDCounter;
+		++UIDCounter;
+	}
+
+	EntityConfig::EntityConfig(Entity& ent, std::string name) : 
+		entityID(ent.GetUID()), name(name), transform(MeshTransform()) 
+	{
+		configID = UIDCounter;
+		++UIDCounter;
+	}
+
+	EntityConfig::EntityConfig(int UID, std::string name, const MeshTransform& trans) :
+		entityID(UID), name(name), transform(trans) 
+	{
+		configID = UIDCounter;
+		++UIDCounter;
+	}
+
+	EntityConfig::EntityConfig(Entity& ent, std::string name, const MeshTransform& trans) :
+		entityID(ent.GetUID()), name(name), transform(trans) 
+	{
+		configID = UIDCounter;
+		++UIDCounter;
+	}
+
+	EntityConfig& EntityConfig::operator=(const EntityConfig& entConfig)
+	{
+		this->configID = entConfig.configID;
+		this->entityID= entConfig.GetBoundUID();
+		this->name = entConfig.GetName();
+		this->transform = entConfig.GetTransform();
+		return *this;
+	}
+
+	EntityInfo::EntityInfo(std::string name, ConfigID CID, EntityID EID, SceneInfo parent) : 
+		name(name), configID(CID), entityID(EID), parent(parent)	{	}
 }

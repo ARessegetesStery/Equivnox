@@ -49,15 +49,15 @@ namespace EQX
 
 	void LineSeg::Transform(const Mat4& projection)
 	{
-		this->start.Transform(projection);
-		this->end.Transform(projection);
+		this->start.MatTransform(projection);
+		this->end.MatTransform(projection);
 		*this = LineSeg(this->start, this->end);
 	}
 
 	void LineSeg::Transform(const MeshTransform& trans)
 	{
-		this->start.Transform(trans);
-		this->end.Transform(trans);
+		this->start.MeshTransform(trans);
+		this->end.MeshTransform(trans);
 		*this = LineSeg(this->start, this->end);
 	}
 

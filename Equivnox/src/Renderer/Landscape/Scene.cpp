@@ -4,7 +4,10 @@
 
 namespace EQX {
 
-    // If there are lots of entities, maintain a binary tree
+    const std::string Scene::s_defaultSceneName = "__nil__";
+    const std::string Scene::s_rendererSceneName = "__renderer__";
+
+    // TODO Maintain searching structure
     const Entity& Scene::FindEntityWithUID(int UID) const
     {
         for (auto iter = entityPool.begin(); iter != entityPool.cend(); ++iter)
@@ -14,27 +17,48 @@ namespace EQX {
         }
     }
 
+    Scene::Scene(std::string str)
+    {
+        this->name = str;
+        this->renderables = {};
+        this->entityPool = {};
+        this->AddDefaultEntity(Entity(), EntityConfig::s_defaultEntityName); // serve as a placeholder
+    }
+
     Entity& Scene::FindEntityWithUID(int UID)
     {
         for (auto iter = entityPool.begin(); iter != entityPool.cend(); ++iter)
-        {
             if (iter->GetUID() == UID)
                 return *iter;
-        }
+        return *entityPool.begin();
     }
 
-    void Scene::AddDefaultEntity(const Entity& ent)
+    EntityConfig& Scene::AddDefaultEntity(const Entity& ent, std::string name)
     {
         int UID = ent.GetUID();
-        this->entityPool.push_back(ent);
-        this->renderables.push_back(EntityConfig(UID));
+        bool existDuplicate = false;
+        for (auto iter = entityPool.begin(); iter != entityPool.cend(); ++iter)
+            if (iter->GetUID() == UID)
+                existDuplicate = true;
+        if (!existDuplicate)
+            this->entityPool.emplace_back(ent);
+        this->renderables.push_back(EntityConfig(UID, name));
+        return *(this->renderables.end() - 1);
     }
 
-    void Scene::AddEntityWithTransform(const Entity& ent, const MeshTransform& transform)
+    EntityConfig& Scene::AddEntityWithTransform(const Entity& ent, std::string name, const MeshTransform& transform)
     {
         int UID = ent.GetUID();
-        this->entityPool.push_back(ent);
-        this->renderables.push_back(EntityConfig(UID, transform));
+        bool existDuplicate = false;
+        for (auto iter = entityPool.begin(); iter != entityPool.cend(); ++iter)
+            if (iter->GetUID() == UID)
+                existDuplicate = true;
+        if (!existDuplicate)
+            this->entityPool.emplace_back(ent);
+        this->renderables.push_back(EntityConfig(UID, name, transform));
+        return *(this->renderables.end() - 1);
     }
+
+    SceneInfo::SceneInfo(std::string name, SceneID ID) : name(name), sceneID(ID)  {  }
 
 }

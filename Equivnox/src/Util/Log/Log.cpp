@@ -20,6 +20,11 @@ namespace EQX {
 		cout << num << endl;
 	}
 
+	void Print(size_t num)
+	{
+		cout << num << endl;
+	}
+
 	void Print(float num)
 	{
 		cout << num << endl;

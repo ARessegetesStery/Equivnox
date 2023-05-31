@@ -4,8 +4,6 @@
 
 namespace EQX {
 
-	const Mesh Mesh::EmptyMesh;
-
 	void Mesh::AddFace(const Vertex& a, const Vertex& b, const Vertex& c)
 	{
 		bool ARep = false, BRep = false, CRep = false;
@@ -182,14 +180,26 @@ namespace EQX {
 		this->Shift(transform.displacement);
 		if (transform.scaleCoeff != Vec3::One)
 			this->Scale(transform.scaleCoeff, transform.scaleRef);
-		// TODO Apply rotation
+		// TODO implement rotation
 	}
 
-	Mesh::Mesh(const Mesh& m)
+	void Mesh::Clear()
 	{
 		this->faceIndices.clear();
 		this->faceIndices.clear();
 		this->lineIndices.clear();
+	}
+
+	Mesh::Mesh()
+	{
+		this->vertices = {};
+		this->faceIndices = {};
+		this->lineIndices = {};
+	}
+
+	Mesh::Mesh(const Mesh& m)
+	{
+		this->Clear();
 		for (auto iter = m.vertices.begin(); iter != m.vertices.cend(); ++iter)
 			this->vertices.push_back(*iter);
 		for (auto iter = m.faceIndices.begin(); iter != m.faceIndices.cend(); ++iter)
@@ -200,9 +210,7 @@ namespace EQX {
 
 	void Mesh::operator=(const Mesh& m)
 	{
-		this->faceIndices.clear();
-		this->faceIndices.clear();
-		this->lineIndices.clear();
+		this->Clear();
 		for (auto iter = m.vertices.begin(); iter != m.vertices.cend(); ++iter)
 			this->vertices.push_back(*iter);
 		for (auto iter = m.faceIndices.begin(); iter != m.faceIndices.cend(); ++iter)

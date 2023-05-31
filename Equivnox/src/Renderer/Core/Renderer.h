@@ -2,6 +2,7 @@
 
 #include "eqxpch.h"
 
+#include "AssetManager.h"
 #include "Preprocess.h"
 #include "RenderConfig.h"
 #include "Renderer/ExternalTools/ExternalTools.h"
@@ -15,15 +16,14 @@ namespace EQX
 	 */
 	class Renderer
 	{
+		/*  Friends here are toolchains that will be invoked by Renderer  */
+		friend class ObjParser;
 	public:
-#ifdef EQX_DEBUG
-		friend class Face;
-#endif
 		// canvas size should be determined upon initialization to avoid reallocation of memory
 		static Renderer& Init();
 		static Renderer& Init(unsigned int, unsigned int);
 
-		void BindScene(Scene*);
+		void BindScene(SceneInfo);
 		void UnbindScene();
 
 		void Render();
@@ -54,6 +54,12 @@ namespace EQX
 
 		Camera camera;
 		std::vector<Light> lights;
+
+		/*  Interacting with Asset Manager  */
+		SceneInfo CreateEmptyScene(std::string sceneName);
+		EntityInfo CreateEmptyEntityUnderScene(SceneInfo scene, std::string entityName);
+		EntityInfo DuplicateEntity(SceneInfo curScene, std::string from, std::string to);
+		EntityInfo DuplicateEntityWithTransform(SceneInfo curScene, std::string from, std::string to, const MeshTransform& trans);
 
 	private:
 		Renderer();
@@ -87,6 +93,9 @@ namespace EQX
 		ImageType imageType;
 		std::string outputPath;
 
+		/*  Asset Management  */
+		AssetManager& assetManager;
+
 		/*  Temporary Data Storage  */
 		Mat4 perspTransform;			// Perspective Transform Matrix
 		Mat4 ssTransform;				// Screenspace Transform Matrix
@@ -118,6 +127,15 @@ namespace EQX
 		Color PhongLighting(Vec3 originalPos, Vec3 fragNormal, Color texColor, const Light& l);
 
 		void ValidateConfig();		// Ensures no config conflict presents
+
+		/*  Tools that may be Invoked by Friends  */
+		Scene& _scene(std::string sceneName);
+		Scene& _scene(SceneInfo sceneInfo);
+
+		EntityConfig& _configUnderScene(SceneInfo scene, std::string entName);
+
+		Entity& _entityUnderScene(SceneInfo sceneInfo, EntityID id);
+
 	};
 
 

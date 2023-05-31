@@ -90,19 +90,19 @@ namespace EQX {
 		return this->ZAtXYPlane(Vec2(x, y));
 	}
 
-	void Face::Transform(const Mat4& projection)
+	void Face::MatTransform(const Mat4& projection)
 	{
-		this->l.Transform(projection);
-		this->m.Transform(projection);
-		this->r.Transform(projection);
+		this->l.MatTransform(projection);
+		this->m.MatTransform(projection);
+		this->r.MatTransform(projection);
 		this->ValidateSeq();
 	}
 
-	void Face::TransformMesh(const MeshTransform& trans)
+	void Face::MeshTransform(const EQX::MeshTransform& trans)
 	{
-		this->l.Transform(trans);
-		this->m.Transform(trans);
-		this->r.Transform(trans);
+		this->l.MeshTransform(trans);
+		this->m.MeshTransform(trans);
+		this->r.MeshTransform(trans);
 		this->ValidateSeq();
 	}
 

@@ -34,8 +34,8 @@ namespace EQX
 		Vertex(Vector3 pos, Vector3 normal = Vector3::UnitZ, Vector2 uv = Vector2::Zero);
 		Vertex(Vector2 pos,	Vector3 normal = Vector3::UnitZ, Vector2 uv = Vector2::Zero);
 
-		void Transform(const Mat4& projection);
-		void Transform(const MeshTransform& trans);
+		void MatTransform(const Mat4& projection);
+		void MeshTransform(const MeshTransform& trans);
 	};
 
 	bool operator== (Vertex&, Vertex&);

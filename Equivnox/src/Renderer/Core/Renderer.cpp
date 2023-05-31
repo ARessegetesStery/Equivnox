@@ -21,6 +21,7 @@ namespace EQX
 		wScale(1.0f),
 		hScale(1.0f),
 		MSAAMult(4),
+		assetManager(AssetManager::_init()),
 
 		/*  Temporary Data Storage  */
 		ssTransform(Mat4::Identity),
@@ -53,12 +54,12 @@ namespace EQX
 		return _renderer;
 	}
 
-	void Renderer::BindScene(Scene* scene)
+	void Renderer::BindScene(SceneInfo scene)
 	{
 #ifdef EQX_PRINT_STATUS
 		Print("Loading Scene..");
 #endif
-		this->curScene = scene;
+		this->curScene = &_scene(scene);
 	}
 
 	void Renderer::UnbindScene()
@@ -82,6 +83,26 @@ namespace EQX
 	{
 		this->lightZMaps.emplace_back(this->width, this->height);
 		this->lights.push_back(l);
+	}
+
+	SceneInfo Renderer::CreateEmptyScene(std::string sceneName)
+	{
+		return assetManager._createEmptyScene(sceneName);
+	}
+
+	EntityInfo Renderer::CreateEmptyEntityUnderScene(SceneInfo scene, std::string entityName)
+	{
+		return assetManager._createEmptyEntityUnderScene(scene, entityName);
+	}
+
+	EntityInfo Renderer::DuplicateEntity(SceneInfo curScene, std::string from, std::string to)
+	{
+		return assetManager._duplicateEntity(curScene, from, to);
+	}
+
+	EntityInfo Renderer::DuplicateEntityWithTransform(SceneInfo curScene, std::string from, std::string to, const MeshTransform& trans)
+	{
+		return assetManager._duplicateEntityWithTransform(curScene, from, to, trans);
 	}
 
 	void Renderer::ValidateConfig()
@@ -129,10 +150,6 @@ namespace EQX
 			this->inverseTransform = this->transform.Inverse();
 		}
 
-		/*  Load Scene  */
-
-		// TODO apply tranforms for duplicate Entities
-
 		/*  Render Meshes  */
 		switch (renderFill)
 		{
@@ -155,6 +172,7 @@ namespace EQX
 		outputImage.Write(this->imageType, this->outputPath);
 	}
 
+	// TODO Change accordingly
 	void Renderer::RenderLines()
 	{
 		Mat4 PerspMat = Mat4::Identity;
@@ -174,7 +192,7 @@ namespace EQX
 		for (auto entConfig = curScene->Renderables().begin();
 			entConfig != curScene->Renderables().cend(); ++entConfig)
 		{
-			const Mesh& curMesh = curScene->FindEntityWithUID(entConfig->GetUID()).GetMesh();
+			const Mesh& curMesh = curScene->FindEntityWithUID(entConfig->GetBoundUID()).mesh;
 
 			for (auto iter = curMesh.lineIndices.begin();
 				iter != curMesh.lineIndices.cend(); ++iter)
@@ -224,59 +242,67 @@ namespace EQX
 	void Renderer::RenderFaces()
 	{
 		constexpr double reserveScale = 1.5;	// reserve scale for clipping meshes
+		Scene& sceneToRender = this->assetManager._scene(Scene::s_rendererSceneName);
+		SceneInfo sceneToRenderInfo = SceneInfo(sceneToRender.GetName(), sceneToRender.GetSceneID());
 
 		// TODO Release the memory after reading infos on meshes
 
 		/*  Load Scene and Apply Transforms  */
 
-		// TODO Imeplement loading with AssetManager; MeshTransform unavailable now. 
-
 		/*  Generate Z-Buffer from Lights  */
 
-		// TODO Implement Hard Shadow Here
 
-		/*  Z-Buffer Rendering and Frustum Clipping  */
+		/*  Frustum Clipping  */
 
 		// Background of ZBuf should be white
 		for (int x = 0; x < this->width; ++x)
 			for (int y = 0; y < this->height; ++y)
 				ZBuffer.Set(x, y, 255.0f);
 
-		if (this->cameraEnabled)
+		for (auto entConfig = curScene->Renderables().begin();
+			entConfig != curScene->Renderables().cend(); ++entConfig)
 		{
-			for (auto entConfig = curScene->Renderables().begin();
-				entConfig != curScene->Renderables().cend(); ++entConfig)
+			if (entConfig->GetName() == EntityConfig::s_defaultEntityName)
+				continue;
+
+			const Mesh& curMesh = curScene->FindEntityWithUID(entConfig->GetBoundUID()).mesh;
+			EntityInfo targetConfig = assetManager._createEmptyEntityUnderScene(sceneToRenderInfo, entConfig->GetName());
+			Mesh& targetMesh = sceneToRender.FindEntityWithUID(targetConfig.entityID).mesh;
+			std::vector<Vertex> vertices = {};
+			for (auto iter = curMesh.vertices.begin(); iter != curMesh.vertices.cend(); ++iter)
 			{
-				Mesh& curMesh = curScene->FindEntityWithUID(entConfig->GetUID()).GetMesh();
-				std::vector<std::array<unsigned int, 3>> faceIndices = curMesh.faceIndices;
-				std::vector<Vertex> vertices = curMesh.vertices;
-				curMesh = Mesh::EmptyMesh;
-				for (auto& indexVec : faceIndices)
+				vertices.push_back(*iter);
+			}
+			targetMesh.faceIndices.reserve(reserveScale * curMesh.faceIndices.size() * 3 * sizeof(std::array<unsigned int, 3>));
+			targetMesh.vertices.reserve(reserveScale * curMesh.vertices.size() * 3 * sizeof(Vertex));
+			for (auto& vert : vertices)
+				vert.MeshTransform(entConfig->GetTransform());
+			for (auto& indexVec : curMesh.faceIndices)
+			{
+				Face f(vertices[indexVec[0]], vertices[indexVec[1]], vertices[indexVec[2]]);
+				f.MatTransform(this->perspTransform);
+				FrustumClipping(f, targetMesh);
+			}
+		}
+
+		/*  Z-Buffer Rendering  */
+		if (cameraEnabled)
+		{
+			for (auto entConfig = sceneToRender.Renderables().begin();
+				entConfig != sceneToRender.Renderables().cend(); ++entConfig)
+			{
+				if (entConfig->GetName() == EntityConfig::s_defaultEntityName)
+					continue;
+
+				const Mesh& curMesh = sceneToRender.FindEntityWithUID(entConfig->GetBoundUID()).mesh;
+				for (auto& indexVec : curMesh.faceIndices)
 				{
-					Face f(vertices[indexVec[0]], vertices[indexVec[1]], vertices[indexVec[2]]);
-					f.Transform(this->perspTransform);
-					FrustumClipping(f, curMesh);
-					f.Transform(this->ssTransform);
+					Face f(curMesh.vertices[indexVec[0]], curMesh.vertices[indexVec[1]], curMesh.vertices[indexVec[2]]);
+					f.MatTransform(this->ssTransform);
 					RenderFaceZBuf(f);
 				}
 			}
 		}
-
-		/*for (auto curMesh = meshCollection.begin(); curMesh != meshCollection.cend(); ++curMesh)
-		{
-			if (this->cameraEnabled)
-			{
-				for (const auto& mesh : meshCollection)
-				{
-					for (const auto& f : mesh.faces)
-					{
-						Face fTransformed(f);
-						fTransformed.Transform(this->ssTransform);
-						RenderFaceZBuf(fTransformed);
-					}
-				}
-			}
-		}*/
 
 		/*  Rendering Only Z-Buffer  */
 		if (this->renderPass == RenderPass::ZBUFFER_ONLY)
@@ -288,10 +314,13 @@ namespace EQX
 		/*  ZBuffer Prep for Shadow Rendering  */
 
 		/*  Rendering Full Image  */
-		for (auto entConfig = curScene->Renderables().begin();
-			entConfig != curScene->Renderables().cend(); ++entConfig)
+		for (auto entConfig = sceneToRender.Renderables().begin();
+			entConfig != sceneToRender.Renderables().cend(); ++entConfig)
 		{
-			Mesh& curMesh = curScene->FindEntityWithUID(entConfig->GetUID()).GetMesh();
+			if (entConfig->GetName() == EntityConfig::s_defaultEntityName)
+				continue;
+
+			Mesh& curMesh = sceneToRender.FindEntityWithUID(entConfig->GetBoundUID()).mesh;
 			for (auto& indexVec : curMesh.faceIndices)
 			{
 				Face fTransformed(curMesh.vertices[indexVec[0]], curMesh.vertices[indexVec[1]], curMesh.vertices[indexVec[2]]);
@@ -302,9 +331,9 @@ namespace EQX
 					continue;
 
 				/*  Render Each Fragment  */
-				fTransformed.Transform(ssTransform);
+				fTransformed.MatTransform(ssTransform);
 				Face fOriginal(fTransformed);
-				fOriginal.Transform(inverseTransform);
+				fOriginal.MatTransform(inverseTransform);
 				RenderFaceSingle(fOriginal, fTransformed);
 			}
 		}
@@ -476,6 +505,9 @@ namespace EQX
 
 	void Renderer::UpdateZBufColor(float x, float y, const Face& f)
 	{
+		/*EQX_LOG(x)
+		EQX_LOG(y)*/
+
 		float curGreyScale = ZBuffer.Get(x, y);
 
 		float zpos = f.ZAtXYFace(Vec2(x, y));
@@ -501,7 +533,7 @@ namespace EQX
 		/*  Full Pixel Processing  */
 		float curGreyScale = ZBuffer.Get(xpos, ypos);
 		Color pixelColor = Color(0);
-		Color texColor = Color(200); // TODO Texture Reading
+		Color texColor = Color(200); 
 
 		if (this->renderAAConfig == RenderAAConfig::ANTIALIAS_OFF)
 		{
@@ -601,6 +633,26 @@ namespace EQX
 			pow(std::max(0.f, Dot(fragNormal, halfDir)), 8);
 		Color resultColor = ambient + diffuse + specular;
 		return resultColor;
+	}
+
+	Scene& Renderer::_scene(std::string sceneName)
+	{
+		return assetManager._scene(sceneName);
+	}
+
+	Scene& Renderer::_scene(SceneInfo sceneInfo)
+	{
+		return assetManager._scene(sceneInfo);
+	}
+
+	EntityConfig& Renderer::_configUnderScene(SceneInfo scene, std::string entName)
+	{
+		return assetManager._configUnderScene(scene, entName);
+	}
+
+	Entity& Renderer::_entityUnderScene(SceneInfo sceneInfo, EntityID id)
+	{
+		return assetManager._entityUnderScene(sceneInfo, id);
 	}
 
 }

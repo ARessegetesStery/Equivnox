@@ -19,6 +19,7 @@ namespace EQX {
 
 	public:
 		MeshTransform();
+		MeshTransform(Vec3 d, Vec3 sc, Vec3 sr, float angle, Vec3 axis);
 	};
 
 }

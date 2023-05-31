@@ -32,16 +32,15 @@ namespace EQX {
 
 		void Transform(const MeshTransform&);
 
-		inline bool Empty() { return vertices.empty(); }
+		inline bool Empty() const { return vertices.empty(); }
+		void Clear();
 
-		Mesh() = default;
+		Mesh();
 		Mesh(const Mesh& m);
 
 		void operator= (const Mesh& m);
 
-		static const Mesh EmptyMesh;
-
-	private:
+	public:
 		std::vector<Vertex> vertices;
 		std::vector<std::array<unsigned int, 3>> faceIndices;
 		std::vector<std::array<unsigned int, 2>> lineIndices;

@@ -50,8 +50,8 @@ namespace EQX {
 		float ZAtXYPlane(Vector2) const;
 		float ZAtXYPlane(float, float) const;
 
-		void Transform(const Mat4& projection);
-		void TransformMesh(const MeshTransform& trans);
+		void MatTransform(const Mat4& projection);
+		void MeshTransform(const MeshTransform& trans);
 		void DiscardZ();
 	};
 

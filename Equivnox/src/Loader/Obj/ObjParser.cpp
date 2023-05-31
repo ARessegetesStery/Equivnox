@@ -6,8 +6,15 @@ namespace EQX {
 
     void ObjParser::Parse()
     {
+        this->ParseWith(MeshTransform());
+    }
+
+    void ObjParser::ParseWith(MeshTransform& trans)
+    {
     std::ifstream infile;
     infile.open((filename + ".obj"), std::ios::in);
+
+    p_ent->ClearMesh();
 
     if (!infile.is_open())
     {
@@ -42,7 +49,7 @@ namespace EQX {
             {
                 for (auto iter = fs.begin(); iter != fs.cend(); ++iter)
                 {
-                    p_mesh->AddFace({ {v[iter->f[0].x], v[iter->f[1].x], v[iter->f[2].x]},
+                    p_ent->AddFaceToMesh({ {v[iter->f[0].x], v[iter->f[1].x], v[iter->f[2].x]},
                         {v[iter->f[2].x], v[iter->f[0].x], v[iter->f[3].x]} });
                 }
                 fs.clear();
@@ -91,13 +98,15 @@ namespace EQX {
     // writing to mesh
     for (auto iter = fs.begin(); iter != fs.cend(); ++iter)
     {
-        p_mesh->AddFace(Vertex(v[iter->f[0].x], vn[iter->f[0].z], vt[iter->f[0].y]),
+        p_ent->AddFaceToMesh(Vertex(v[iter->f[0].x], vn[iter->f[0].z], vt[iter->f[0].y]),
             Vertex(v[iter->f[1].x], vn[iter->f[1].z], vt[iter->f[1].y]), 
             Vertex(v[iter->f[2].x], vn[iter->f[2].z], vt[iter->f[2].y]));
-        p_mesh->AddFace(Vertex(v[iter->f[2].x], vn[iter->f[2].z], vt[iter->f[2].y]),
+        p_ent->AddFaceToMesh(Vertex(v[iter->f[2].x], vn[iter->f[2].z], vt[iter->f[2].y]),
             Vertex(v[iter->f[0].x], vn[iter->f[0].z], vt[iter->f[0].y]),
             Vertex(v[iter->f[3].x], vn[iter->f[3].z], vt[iter->f[3].y]));
     }
+
+    p_ent->TransformMesh(trans);
 
     infile.close();
 }

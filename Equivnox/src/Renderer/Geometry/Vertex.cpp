@@ -16,26 +16,26 @@ namespace EQX
 	bool operator== (Vertex& v1, Vertex& v2)
 	{
 		return (v1.color == v2.color) && (v1.uv == v2.uv)
-			&& (v1.normal == v2.color) && (v1.pos == v2.pos);
+			&& (v1.normal == v2.normal) && (v1.pos == v2.pos);
 	}
 
 	bool operator== (Vertex& v1, const Vertex& v2)
 	{
 		return (v1.color == v2.color) && (v1.uv == v2.uv)
-			&& (v1.normal == v2.color) && (v1.pos == v2.pos);
+			&& (v1.normal == v2.normal) && (v1.pos == v2.pos);
 	}
 
-	void Vertex::Transform(const Mat4& projection)
+	void Vertex::MatTransform(const Mat4& projection)
 	{
 		this->pos = projection * this->pos;
 		this->pos.Normalize();
 	}
 
-	void Vertex::Transform(const MeshTransform& trans)
+	void Vertex::MeshTransform(const EQX::MeshTransform& trans)
 	{
 		this->pos = this->pos + trans.displacement;
-		this->pos = trans.scaleRef + TermWiseProduct(trans.scaleCoeff, 
-			(this->pos - trans.scaleRef).ToVec3());
+		// this->pos = trans.scaleRef + TermWiseProduct(trans.scaleCoeff, 
+		// 	(this->pos - trans.scaleRef).ToVec3());
 		// TODO implement rotation
 	}
 
