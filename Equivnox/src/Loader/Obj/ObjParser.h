@@ -14,7 +14,17 @@ namespace EQX {
     public:
         ObjParser(Renderer& renderer, EntityInfo ent, std::string filename)
         {
-            this->p_ent = &renderer._entityUnderScene(ent.parent, ent.entityID);
+            if (ent.name == EntityConfig::s_defaultEntityName)
+            {
+#ifdef EQX_DEBUG
+                Print("[ERROR] Invalid Entity to parse into!");
+                Print("The EntityInfo passed in is:");
+                EQX_LOG(ent)
+#endif
+                p_ent = nullptr;
+            }
+            else
+                this->p_ent = &renderer._entityUnderScene(ent.parent, ent.entityID);
             this->filename = filename;
         }
         void ParseWith(MeshTransform&);

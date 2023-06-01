@@ -109,6 +109,8 @@ namespace EQX
 		std::vector<ImageMask<float, int, 0>> lightZMaps;
 
 		/*  Helper Functions  */
+		bool Validify();
+
 		void UpdateZBufColor(float x, float y, const Face& f);
 
 		/**

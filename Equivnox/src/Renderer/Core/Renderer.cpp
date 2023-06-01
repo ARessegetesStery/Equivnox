@@ -113,6 +113,16 @@ namespace EQX
 
 	void Renderer::Render()
 	{
+		/*  Check Validity  */
+		if (!this->Validify())
+		{
+#ifdef EQX_DEBUG
+			Print("Quitting...");
+#endif
+			return;
+		}
+
+		/*  Trigger Render Process  */
 		if (this->renderLightConfig == ShadingMode::RASTERIZE)
 			this->Rasterize();
 		else if (this->renderLightConfig == ShadingMode::RAYTRACING)
@@ -501,6 +511,41 @@ namespace EQX
 					if (ZBuffer.IsPointOnCanvas(xpos, ypos))
 						UpdateZBufColor(xpos, ypos, fTrans);
 		}
+	}
+
+	bool Renderer::Validify()
+	{
+		if (this->curScene == nullptr)
+		{
+			Print("[ERROR] Cannot render if no scene is binded!");
+			return false;
+		}
+		else if (this->curScene->GetName() == Scene::s_defaultSceneName)
+		{
+			Print("[ERROR] Please select a valid scene to render!");
+			return false;
+		}
+		else
+		{
+			bool existNonEmpty = false;
+			for (auto iter = this->curScene->Renderables().begin();
+				iter != this->curScene->Renderables().cend(); ++iter)
+			{
+				if (iter->GetName() != EntityConfig::s_defaultEntityName)
+				{
+					Entity& ent = curScene->FindEntityWithUID(iter->GetBoundUID());
+					if (!ent.mesh.Empty())
+						existNonEmpty = true;
+				}
+			}
+			if (!existNonEmpty)
+			{
+				Print("[WARNING] All Entities are empty. Nothing to render.");
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 	void Renderer::UpdateZBufColor(float x, float y, const Face& f)

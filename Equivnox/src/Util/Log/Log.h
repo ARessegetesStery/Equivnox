@@ -5,6 +5,7 @@
 #include "Math/MathHeader.h"
 
 #include "Renderer/Geometry/Geometry.h"
+#include "Renderer/Landscape/Landscape.h"
 
 namespace EQX {
 
@@ -22,6 +23,9 @@ namespace EQX {
 	void Print(const Vector3&);
 	void Print(const Vector4&);
 	void Print(const Face&);
+
+	void Print(const SceneInfo&);
+	void Print(const EntityInfo&);
 #endif
 
 }

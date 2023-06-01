@@ -19,7 +19,7 @@ namespace EQX {
 				existDuplicate = true;
 		if (existDuplicate)
 		{
-			Scene& defaultScene = _scene(Scene::s_defaultSceneName);
+			Scene& defaultScene = *this->scenes.begin();
 			return SceneInfo(defaultScene.GetName(), defaultScene.GetSceneID());
 		}
 		else
@@ -48,7 +48,13 @@ namespace EQX {
 		return _duplicateEntityWithTransform(sceneInfo, from, to, MeshTransform());
 	}
 
-	EntityInfo AssetManager::_duplicateEntityWithTransform(SceneInfo sceneInfo, std::string from, std::string to, const MeshTransform& trans)
+	EntityInfo AssetManager::_duplicateEntity(SceneInfo curScene, std::string from, EntityInfo ent)
+	{
+		return _duplicateEntity(curScene, from, ent.name);
+	}
+
+	EntityInfo AssetManager::_duplicateEntityWithTransform(SceneInfo sceneInfo, 
+		std::string from, std::string to, const MeshTransform& trans)
 	{
 		Scene& curScene = _scene(sceneInfo);
 		const EntityConfig& original = _configUnderScene(sceneInfo, from);
@@ -60,6 +66,12 @@ namespace EQX {
 		const Entity& originalEntity = curScene.FindEntityWithUID(original.GetBoundUID());
 		const EntityConfig& res = curScene.AddEntityWithTransform(originalEntity, to, trans);
 		return EntityInfo(res.name, res.configID, res.entityID, sceneInfo);
+	}
+
+	EntityInfo AssetManager::_duplicateEntityWithTransform(SceneInfo curScene, 
+		EntityInfo from, EntityInfo to, const MeshTransform& trans)
+	{
+		return _duplicateEntityWithTransform(curScene, from.name, to.name, trans);
 	}
 
 	AssetManager& AssetManager::_init()
@@ -74,7 +86,7 @@ namespace EQX {
 		for (auto iter = scenes.begin(); iter != scenes.cend(); ++iter)
 			if (iter->name == sceneName)
 				return *iter;
-		return _scene(Scene::s_defaultSceneName);
+		return *this->scenes.begin();
 	}
 
 	Scene& AssetManager::_scene(SceneInfo sceneInfo)

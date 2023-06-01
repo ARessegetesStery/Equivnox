@@ -55,6 +55,28 @@ namespace EQX {
 		cout << "|_Vertex 3: ";
 		Print(f.R().pos);
 	}
+	void Print(const SceneInfo& info)
+	{
+		Print("| SceneInfo:");
+		cout << "| Name: ";
+		Print(info.name);
+		cout << "|_Scene ID: ";
+		Print(info.sceneID);
+	}
+
+	void Print(const EntityInfo& info)
+	{
+		Print("| EntityInfo: ");
+		cout << "| Name: ";
+		Print(info.name);
+		cout << "| EntityUID: ";
+		Print(info.entityID);
+		cout << "| ConfigUID: ";
+		Print(info.configID);
+		cout << "| with parent:" << endl;
+		Print(info.parent);
+	}
+
 #endif
 
 }

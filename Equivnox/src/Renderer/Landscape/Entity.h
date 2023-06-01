@@ -25,11 +25,6 @@ namespace EQX {
 		inline void AddChild(Entity* c) { this->children.push_back(c); };
 
 		// Directly acts on mesh; call corresponding functions of class {Mesh}
-		// inline void ScaleOnMesh(float s) { return mesh.Scale(s); };
-		// inline void ScaleOnMesh(float s, Vector3 center) { return mesh.Scale(s, center); };
-		// inline void ScaleOnMesh(Vector3 s) { return mesh.Scale(s); };
-		// inline void ScaleOnMesh(Vector3 s, Vector3 center) { return mesh.Scale(s, center); };
-		// inline void ShiftOnMesh(Vector3 delta) { return mesh.Shift(delta); };
 
 		inline void TransformMesh(MeshTransform& trans) { this->mesh.Transform(trans); }
 
