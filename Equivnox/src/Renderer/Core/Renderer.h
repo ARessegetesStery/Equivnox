@@ -11,6 +11,9 @@
 
 namespace EQX
 {
+	using MSAABuffer = ImageBuffer<char, int, 0>;
+	using LightZBuffer = ImageBuffer<float, int, 0>;
+
 	/**
 	 * 
 	 */
@@ -27,9 +30,8 @@ namespace EQX
 		void UnbindScene();
 
 		void Render();
-		void Rasterize();
-		void Raytrace();
 
+		/*  Settings and Querying  */
 		inline void SetFill(RenderFill f) { this->renderFill = f; }
 		inline void SetPass(RenderPass p) { this->renderPass = p; }
 		inline void SetAA(RenderAAConfig t) { this->renderAAConfig = t; }
@@ -50,10 +52,7 @@ namespace EQX
 		}		
 		inline void EnableCamera() { this->cameraEnabled = true; }			// Enable rendering with perspective
 
-		void addLight(Light);
-
-		Camera camera;
-		std::vector<Light> lights;
+		void AddLight(Light);
 
 		/*  Interacting with Asset Manager  */
 		SceneInfo CreateEmptyScene(std::string sceneName);
@@ -61,13 +60,29 @@ namespace EQX
 		EntityInfo DuplicateEntity(SceneInfo curScene, std::string from, std::string to);
 		EntityInfo DuplicateEntityWithTransform(SceneInfo curScene, std::string from, std::string to, const MeshTransform& trans);
 
+		/*  Setting Main Camera  */
+		inline void fromFoV(const float FoV, const float aspect) { this->camera.fromFoV(FoV, aspect); };
+		inline void SetCameraPos(Vec4 pos) { this->camera.SetPos(pos); }
+		inline void SetCameraPos(Vec3 pos) { this->camera.SetPos(pos); }
+		inline void CameraLookAt(Vec3 pos) { this->camera.LookAt(pos); }
+		inline void CameraLookAt(Vec4 pos) { this->camera.LookAt(pos); }
+		inline void SetCameraUp(Vec4 up) { this->camera.SetUp(up); }
+		inline void SetCameraUp(Vec3 up) { this->camera.SetUp(up); }
+		inline Vec3 GetCameraPos() { return this->camera.GetPos(); }
+
 	private:
+		/*  Scene Raw Data  */
+		Camera camera;
+		std::vector<Light> lights;
+
 		Renderer();
 		Renderer(unsigned int, unsigned int);
 		Renderer(const Renderer& r) = delete;
 		Renderer& operator= (const Renderer& r) = delete;
 
 		/*  Main Render Processes  */
+		void Rasterize();
+		void Raytrace();
 		void RenderLines();
 		void RenderFaces();
 
@@ -75,8 +90,28 @@ namespace EQX
 		void RenderLineRaw(const LineSeg&);
 		void RenderLineSmooth(const LineSeg&);
 
+		void RenderZBuf(std::vector<EntityConfig>::iterator entConfig, Scene& sceneToRender);
+		void RenderLightZBuf(); // TODO
+
 		void RenderFaceSingle(const Face& fOriginal, const Face& fTransformed);
 		void RenderFaceZBuf(const Face& fTransformed);
+
+		void UpdateZBufColor(float x, float y, const Face& f);
+
+		/**
+		 * Render face according to the precomputed ZBuffer
+		 * Note: After clipping fOriginal does not change
+		 *
+		 * @param x
+		 * @param y
+		 * @param Face - after perspective transformation
+		 * @param fOriginal - Face without perspective transformation
+		 * @param image - [OUT]Image to write to
+		 * @param ZBuffer - Precomputed ZBuffer
+		 */
+		void UpdateFragColor(float x, float y, const Face& f, const Face& fOriginal);
+
+		Color PhongLighting(Vec3 originalPos, Vec3 fragNormal, Color texColor, const Light& l);
 
 		/*  Render Configs  */
 		bool cameraEnabled;
@@ -97,38 +132,23 @@ namespace EQX
 		AssetManager& assetManager;
 
 		/*  Temporary Data Storage  */
-		Mat4 perspTransform;			// Perspective Transform Matrix
-		Mat4 ssTransform;				// Screenspace Transform Matrix
-		Mat4 transform;					// Transform Matrix; = persp * ss
-		Mat4 inverseTransform;			// Inverse Transform Matrix
+		Mat4 perspTransform;					  // Perspective Transform Matrix
+		Mat4 ssTransform;						  // Screenspace Transform Matrix
+		Mat4 transform;							  // Transform Matrix; = persp * ss
+		Mat4 inverseTransform;					  // Inverse Transform Matrix
+		std::vector<Mat4> lightPerspTransforms;	  // Transform Matrices for lights, same sequence as that of creation
 
 		/*  Buffers and Outputs  */
 		Image outputImage;
 		ImageGrey ZBuffer;
-		ImageMask<char, int, 0> MSAAMask;
-		std::vector<ImageMask<float, int, 0>> lightZMaps;
+		MSAABuffer MSAAMask;
+		std::vector<LightZBuffer> lightZMaps;
 
 		/*  Helper Functions  */
 		bool Validify();
+		void ValidateConfig();		// Ensures no config conflict exists
 
-		void UpdateZBufColor(float x, float y, const Face& f);
-
-		/**
-		 * Render face according to the precomputed ZBuffer
-		 * Note: After clipping fOriginal does not change
-		 *
-		 * @param x
-		 * @param y
-		 * @param Face - after perspective transformation
-		 * @param fOriginal - Face without perspective transformation
-		 * @param image - [OUT]Image to write to
-		 * @param ZBuffer - Precomputed ZBuffer
-		 */
-		void UpdateFragColor(float x, float y, const Face& f, const Face& fOriginal);
-
-		Color PhongLighting(Vec3 originalPos, Vec3 fragNormal, Color texColor, const Light& l);
-
-		void ValidateConfig();		// Ensures no config conflict presents
+		Mat4 perspMatFromCamera(Camera& c);
 
 		/*  Tools that may be Invoked by Friends  */
 		Scene& _scene(std::string sceneName);
@@ -138,7 +158,8 @@ namespace EQX
 
 		Entity& _entityUnderScene(SceneInfo sceneInfo, EntityID id);
 
-	};
+		void FrustumClippingWithCamera();
+	}; 
 
 
 }

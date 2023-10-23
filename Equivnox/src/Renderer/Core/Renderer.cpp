@@ -79,7 +79,7 @@ namespace EQX
 		this->MSAAMask.SetAll(MSAAMult * MSAAMult);
 	}
 
-	void Renderer::addLight(Light l)
+	void Renderer::AddLight(Light l)
 	{
 		this->lightZMaps.emplace_back(this->width, this->height);
 		this->lights.push_back(l);
@@ -103,12 +103,6 @@ namespace EQX
 	EntityInfo Renderer::DuplicateEntityWithTransform(SceneInfo curScene, std::string from, std::string to, const MeshTransform& trans)
 	{
 		return assetManager._duplicateEntityWithTransform(curScene, from, to, trans);
-	}
-
-	void Renderer::ValidateConfig()
-	{
-		if (!this->cameraEnabled)
-			this->renderPass = RenderPass::FULL;
 	}
 
 	void Renderer::Render()
@@ -147,11 +141,7 @@ namespace EQX
 
 		/*  Setup Transformation Matrix  */
 		Mat4 ssMat = MakeScreenSpace(this->width, this->height);
-		Mat4 perspMat = Mat4::Identity;
-		if (this->camera.upDir == Vec4::Zero)
-			perspMat = MakePersp(camera.width, camera.height) * MakeView(camera.pos, camera.lookAt);
-		else
-			perspMat = MakePersp(camera.width, camera.height) * MakeView(camera.pos, camera.lookAt, camera.upDir);
+		Mat4 perspMat = perspMatFromCamera(this->camera);
 		if (this->cameraEnabled)
 		{
 			this->ssTransform = ssMat;
@@ -182,7 +172,6 @@ namespace EQX
 		outputImage.Write(this->imageType, this->outputPath);
 	}
 
-	// TODO Change accordingly
 	void Renderer::RenderLines()
 	{
 		Mat4 PerspMat = Mat4::Identity;
@@ -257,12 +246,7 @@ namespace EQX
 
 		// TODO Release the memory after reading infos on meshes
 
-		/*  Load Scene and Apply Transforms  */
-
-		/*  Generate Z-Buffer from Lights  */
-
-
-		/*  Frustum Clipping  */
+		/*  Frustum Clipping & Generating ZBuf for Shadow and Result */
 
 		// Background of ZBuf should be white
 		for (int x = 0; x < this->width; ++x)
@@ -280,13 +264,17 @@ namespace EQX
 			Mesh& targetMesh = sceneToRender.FindEntityWithUID(targetConfig.entityID).mesh;
 			std::vector<Vertex> vertices = {};
 			for (auto iter = curMesh.vertices.begin(); iter != curMesh.vertices.cend(); ++iter)
-			{
 				vertices.push_back(*iter);
-			}
 			targetMesh.faceIndices.reserve(reserveScale * curMesh.faceIndices.size() * 3 * sizeof(std::array<unsigned int, 3>));
 			targetMesh.vertices.reserve(reserveScale * curMesh.vertices.size() * 3 * sizeof(Vertex));
 			for (auto& vert : vertices)
 				vert.MeshTransform(entConfig->GetTransform());
+
+			// TODO Add Hard Shadows Here
+			/*  Frustum Clipping & ZBuf for Hard Shadow  */
+
+
+			/*  Frustum Clipping & ZBuf for Result  */
 			for (auto& indexVec : curMesh.faceIndices)
 			{
 				Face f(vertices[indexVec[0]], vertices[indexVec[1]], vertices[indexVec[2]]);
@@ -295,7 +283,15 @@ namespace EQX
 			}
 		}
 
+		// TODO Compare and select
+		/*if (cameraEnabled)
+			for (auto entConfig = curScene->Renderables().begin();
+				entConfig != curScene->Renderables().cend(); ++entConfig)
+				RenderZBuf(entConfig, sceneToRender);*/
+
+
 		/*  Z-Buffer Rendering  */
+
 		if (cameraEnabled)
 		{
 			for (auto entConfig = sceneToRender.Renderables().begin();
@@ -424,6 +420,23 @@ namespace EQX
 			}
 		}
 	}
+
+	void Renderer::RenderZBuf(std::vector<EntityConfig>::iterator entConfig, Scene& sceneToRender)
+	{
+		// TODO modify this to encapsulate the ZBuf rendering process in RenderFaces()
+		// The following version does not work as Z-testing should be conducted w.r.t. faces
+	
+		//if (entConfig->GetName() == EntityConfig::s_defaultEntityName)
+		//	return;
+
+		//const Mesh& curMesh = sceneToRender.FindEntityWithUID(entConfig->GetBoundUID()).mesh;
+		//for (auto& indexVec : curMesh.faceIndices)
+		//{
+		//	Face f(curMesh.vertices[indexVec[0]], curMesh.vertices[indexVec[1]], curMesh.vertices[indexVec[2]]);
+		//	f.MatTransform(this->ssTransform);
+		//	RenderFaceZBuf(f);
+		//}
+	}
 	
 	void Renderer::RenderFaceSingle(const Face& fOriginal, const Face& fTrans)
 	{
@@ -432,7 +445,7 @@ namespace EQX
 		{
 			for (xpos = fTrans.L().pos.x; xpos <= fTrans.R().pos.x; ++xpos)
 				for (ypos = fTrans.L().pos.y + (xpos - fTrans.L().pos.x - sgn(fTrans.SlopeLR())) * fTrans.SlopeLR() - 1;
-					ypos <= fTrans.M().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeMR())) * fTrans.SlopeMR() + 1;
+					ypos <= fTrans.M().pos.y + (xpos - fTrans.L().pos.x + sgn(fTrans.SlopeMR())) * fTrans.SlopeMR() + 1;  
 					++ypos)
 					UpdateFragColor(xpos, ypos, fTrans, fOriginal);
 		}
@@ -546,6 +559,22 @@ namespace EQX
 		}
 		
 		return true;
+	}
+
+	void Renderer::ValidateConfig()
+	{
+		if (!this->cameraEnabled)
+			this->renderPass = RenderPass::FULL;
+	}
+
+	Mat4 Renderer::perspMatFromCamera(Camera& c)
+	{
+		Mat4 perspMat;
+		if (c.upDir == Vec4::Zero)
+			perspMat = MakePersp(c.width, c.height) * MakeView(c.pos, c.lookAt);
+		else
+			perspMat = MakePersp(c.width, c.height) * MakeView(c.pos, c.lookAt, c.upDir);
+		return perspMat;
 	}
 
 	void Renderer::UpdateZBufColor(float x, float y, const Face& f)

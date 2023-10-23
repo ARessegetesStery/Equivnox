@@ -17,20 +17,21 @@ int main(int argc, char** argv) {
 	EQX::Renderer& coreRenderer = EQX::Renderer::Init();
 
 	EQX::MeshTransform trans;
-	trans.displacement = EQX::Vec3(0, 0, 1.0);
+	trans.displacement = EQX::Vec3(0, 0, 0.6);
 
 	EQX::MeshTransform scale;
 	scale.scaleCoeff = EQX::Vec3(0.3, 0.3, 0.3);
 
 	// TODO Further simplify with parent in EntityInfo
-	// EQX::SceneInfo testScene = coreRenderer.CreateEmptyScene("test");
-	// EQX::EntityInfo cube1 = coreRenderer.CreateEmptyEntityUnderScene(testScene, "cube1");
-	// EQX::EntityInfo cube2 = coreRenderer.DuplicateEntityWithTransform(testScene, "cube1", "cube1", trans);
-	// 
-	// EQX::ObjParser objParser(coreRenderer, cube1, "Cube");
-	// objParser.ParseWith(scale);
-	// 
-	// coreRenderer.BindScene(testScene);
+	EQX::SceneInfo testScene = coreRenderer.CreateEmptyScene("test");
+	EQX::EntityInfo cube1 = coreRenderer.CreateEmptyEntityUnderScene(testScene, "cube1");
+	 
+	EQX::ObjParser objParser(coreRenderer, cube1, "Cube");
+	objParser.ParseWith(scale);
+
+	EQX::EntityInfo cube2 = coreRenderer.DuplicateEntityWithTransform(testScene, "cube1", "cube2", trans);
+	 
+	coreRenderer.BindScene(testScene);
 
 	coreRenderer.SetPass(EQX::RenderPass::FULL);
 	coreRenderer.SetFill(EQX::RenderFill::FILL);
@@ -40,11 +41,11 @@ int main(int argc, char** argv) {
 	coreRenderer.SetLight(EQX::ShadingMode::RASTERIZE);
 
 	coreRenderer.EnableCamera();
-	coreRenderer.camera.SetPos(EQX::Vec3(0, 1, 2));
-	coreRenderer.camera.LookAt(EQX::Vec3::Zero);
-	coreRenderer.camera.fromFoV(45, 1.0);
+	coreRenderer.SetCameraPos(EQX::Vec3(0, 1, 2));
+	coreRenderer.CameraLookAt(EQX::Vec3::Zero);
+	coreRenderer.fromFoV(45, 1.0);
 
-	coreRenderer.addLight(EQX::Light(coreRenderer.camera.GetPos(), EQX::Color::White, .5f, EQX::LightType::Point));
+	coreRenderer.AddLight(EQX::Light(coreRenderer.GetCameraPos(), EQX::Color::White, .5f, EQX::LightType::Point));
 
 	coreRenderer.Render();
 }

@@ -12,7 +12,7 @@ namespace EQX {
 	class ImageGrey;
 
 	template <typename T, typename ZT, ZT Zero>
-	class ImageMask;
+	class ImageBuffer;
 
 	enum class ImageType
 	{
@@ -163,18 +163,18 @@ namespace EQX {
 	 * @tparam Zero - the Zero element for ZT, which should be transformable to Zero element for T
 	 */
 	template <typename T, typename ZT, ZT Zero>
-	class ImageMask
+	class ImageBuffer
 	{
 	private:
 		unsigned int width, height;
 		T* canvas;
 
 	public:
-		ImageMask();
-		ImageMask(const T& val);	// Initialize the image mask uniformly with {val}
-		ImageMask(unsigned int width, unsigned int height);
-		ImageMask(unsigned int width, unsigned int height, const T& val);
-		~ImageMask();
+		ImageBuffer();
+		ImageBuffer(const T& val);	// Initialize the image mask uniformly with {val}
+		ImageBuffer(unsigned int width, unsigned int height);
+		ImageBuffer(unsigned int width, unsigned int height, const T& val);
+		~ImageBuffer();
 
 		void SetAll(const T&);
 		void Set(unsigned int, unsigned int, const T&);
@@ -188,10 +188,10 @@ namespace EQX {
 	TGAColor toTGAColor(Color);
 
 	template<typename T, typename ZT, ZT Zero>
-	ImageMask<T, ZT, Zero>::ImageMask() : ImageMask<T, ZT, Zero>(Zero) {	}
+	ImageBuffer<T, ZT, Zero>::ImageBuffer() : ImageBuffer<T, ZT, Zero>(Zero) {	}
 
 	template <typename T, typename ZT, ZT Zero>
-	ImageMask<T, ZT, Zero>::ImageMask(const T& val)
+	ImageBuffer<T, ZT, Zero>::ImageBuffer(const T& val)
 	{
 		this->width = 100;
 		this->height = 100;
@@ -203,11 +203,11 @@ namespace EQX {
 	/*  Implementation of Template Class {ImageMask}  */
 
 	template<typename T, typename ZT, ZT Zero>
-	ImageMask<T, ZT, Zero>::ImageMask(unsigned int width, unsigned int height) :
-		ImageMask<T, ZT, Zero>(width, height, Zero) {	}
+	ImageBuffer<T, ZT, Zero>::ImageBuffer(unsigned int width, unsigned int height) :
+		ImageBuffer<T, ZT, Zero>(width, height, Zero) {	}
 
 	template <typename T, typename ZT, ZT Zero>
-	ImageMask<T, ZT, Zero>::ImageMask(unsigned int width, unsigned int height, const T& val)
+	ImageBuffer<T, ZT, Zero>::ImageBuffer(unsigned int width, unsigned int height, const T& val)
 	{
 		this->width = width;
 		this->height = height;
@@ -217,28 +217,28 @@ namespace EQX {
 	}
 
 	template <typename T, typename ZT, ZT Zero>
-	ImageMask<T, ZT, Zero>::~ImageMask()
+	ImageBuffer<T, ZT, Zero>::~ImageBuffer()
 	{
 		if (canvas)
 			delete[] canvas;
 	}
 
 	template<typename T, typename ZT, ZT Zero>
-	inline void ImageMask<T, ZT, Zero>::SetAll(const T& val)
+	inline void ImageBuffer<T, ZT, Zero>::SetAll(const T& val)
 	{
 		for (unsigned int i = 0; i != width * height; ++i)
 			this->canvas[i] = val;
 	}
 
 	template <typename T, typename ZT, ZT Zero>
-	void ImageMask<T, ZT, Zero>::Set(unsigned int w, unsigned int h, const T& val)
+	void ImageBuffer<T, ZT, Zero>::Set(unsigned int w, unsigned int h, const T& val)
 	{
 		if (!(!canvas || w >= width || h >= height))
 			this->canvas[(size_t)(h * this->width + w)] = val;
 	}
 
 	template <typename T, typename ZT, ZT Zero>
-	const T& ImageMask<T, ZT, Zero>::Get(unsigned int w, unsigned int h) const
+	const T& ImageBuffer<T, ZT, Zero>::Get(unsigned int w, unsigned int h) const
 	{
 		if (!(!canvas || w >= width || h >= height))
 			return this->canvas[(size_t)(h * this->width + w)];
@@ -246,7 +246,7 @@ namespace EQX {
 	}
 
 	template <typename T, typename ZT, ZT Zero>
-	void ImageMask<T, ZT, Zero>::Clear()
+	void ImageBuffer<T, ZT, Zero>::Clear()
 	{
 		for (unsigned int i = 0; i != this->width * this->height; ++i)
 			this->canvas[i] = Zero;
