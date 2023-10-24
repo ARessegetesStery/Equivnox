@@ -2,10 +2,6 @@
 
 #include <CoreMinimal.h>
 
-#ifdef EQX_DEBUG
-#include <CoreDebugs.h>
-#endif
-
 #include "vendor/TGA/tgaimage.h"
 
 namespace EQX {

@@ -1,3 +1,3 @@
 #pragma once
 
-#include "Util/Log/Log.h"
+#include "Util/Log/DebugLog.h"

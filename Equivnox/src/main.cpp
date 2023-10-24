@@ -1,12 +1,12 @@
 #include "eqxpch.h"
 
-#include "Util/Log/Log.h"
+#include <CoreDebugs.h>
+
 #include "Runtime/Renderer/Core.h"
 #include "Runtime/Geometry/Geometry.h"
 #include "Loader/Loader.h"
 #include "Runtime/Landscape/Landscape.h"
 #include "Runtime/ExternalTools/Image.h"
-#include "Math/MathHeader.h"
 
 namespace EQX {
 	const TGAColor white = TGAColor(255, 255, 255, 255);
@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
 
 	coreRenderer.SetPass(EQX::RenderPass::FULL);
 	coreRenderer.SetFill(EQX::RenderFill::FILL);
-	coreRenderer.SetAA(EQX::RenderAAConfig::ANTIALIAS_OFF);
+	coreRenderer.SetAA(EQX::RenderAAConfig::MSAA);
 	coreRenderer.SetMSAAMult(4);
 	coreRenderer.SetOutputType(EQX::ImageType::PNG);
 	coreRenderer.SetLight(EQX::ShadingMode::RASTERIZE);

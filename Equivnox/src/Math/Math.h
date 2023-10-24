@@ -1,5 +1,10 @@
 #pragma once
 
+/* Math tools are independent of the rest of the project.
+ * All files in `Math` directory should NOT include `CoreMinimal.h` or other enhanced versions of it.
+ *
+ **/
+
 #include <float.h>
 
 namespace EQX

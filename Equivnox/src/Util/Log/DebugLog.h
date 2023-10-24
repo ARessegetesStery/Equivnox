@@ -1,49 +1,18 @@
-#include "eqxpch.h"
+#pragma once
+
+// All Logging functions should be inlined as this header is included multiple times throughout the project
 
 #include "CoreLog.h"
-#include "DebugLog.h"
+
+#include "Runtime/Geometry/Geometry.h"
+#include "Runtime/Landscape/LandscapeInfo.h"
 
 namespace EQX {
 
-	void Print(std::string msg)
-	{
-		cout << msg << endl;
-	}
 
-	void Print(int num)
-	{
-		cout << num << endl;
-	}
-
-	void Print(unsigned int num)
-	{
-		cout << num << endl;
-	}
-
-	void Print(size_t num)
-	{
-		cout << num << endl;
-	}
-
-	void Print(float num)
-	{
-		cout << num << endl;
-	}
-
-	void Print(double num)
-	{
-		cout << num << endl;
-	}
-
-	void Print(const Vector3& vec)
-	{
-		cout << vec.x << " " << vec.y << " " << vec.z << " " << endl;
-	}
-
-	void Print(const Vector4& vec)
-	{
-		cout << vec.x << " " << vec.y << " " << vec.z << " " << endl;
-	}
+	inline void Print(const Face&);
+	inline void Print(const SceneInfo&);
+	inline void Print(const EntityInfo&);
 
 	void Print(const Face& f)
 	{

@@ -1,6 +1,10 @@
 #pragma 
 
-#include "CoreMinimal.h"
+#include <CoreMinimal.h>
+
+#ifdef EQX_DEBUG
+#include <CoreDebugs.h>
+#endif
 
 #include "Loader/Parsing.h"
 #include "Runtime/Renderer/Renderer.h"

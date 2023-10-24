@@ -4,6 +4,7 @@
 #include "Core/CoreDefines.h"
 
 #include "Math/MathHeader.h"
+#include "Util/Log/CoreLog.h"
 
 /**
  * Convention:
