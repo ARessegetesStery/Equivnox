@@ -4,7 +4,7 @@
 
 namespace EQX {
 
-	const std::string EntityConfig::s_defaultEntityName = "__world__";
+	const XString EntityConfig::s_defaultEntityName = "__world__";
 
 	EntityID Entity::UIDCounter = 0;
 	ConfigID EntityConfig::UIDCounter = 0;
@@ -62,28 +62,28 @@ namespace EQX {
 		this->mesh.AddFace(ls);
 	}
 
-	EntityConfig::EntityConfig(int UID, std::string name) : 
+	EntityConfig::EntityConfig(XInt UID, XString name) : 
 		entityID(UID), name(name), transform(MeshTransform()) 
 	{
 		configID = UIDCounter;
 		++UIDCounter;
 	}
 
-	EntityConfig::EntityConfig(Entity& ent, std::string name) : 
+	EntityConfig::EntityConfig(Entity& ent, XString name) : 
 		entityID(ent.GetUID()), name(name), transform(MeshTransform()) 
 	{
 		configID = UIDCounter;
 		++UIDCounter;
 	}
 
-	EntityConfig::EntityConfig(int UID, std::string name, const MeshTransform& trans) :
+	EntityConfig::EntityConfig(XInt UID, XString name, const MeshTransform& trans) :
 		entityID(UID), name(name), transform(trans) 
 	{
 		configID = UIDCounter;
 		++UIDCounter;
 	}
 
-	EntityConfig::EntityConfig(Entity& ent, std::string name, const MeshTransform& trans) :
+	EntityConfig::EntityConfig(Entity& ent, XString name, const MeshTransform& trans) :
 		entityID(ent.GetUID()), name(name), transform(trans) 
 	{
 		configID = UIDCounter;
@@ -99,6 +99,6 @@ namespace EQX {
 		return *this;
 	}
 
-	EntityInfo::EntityInfo(std::string name, ConfigID CID, EntityID EID, SceneInfo parent) : 
+	EntityInfo::EntityInfo(XString name, ConfigID CID, EntityID EID, SceneInfo parent) : 
 		name(name), configID(CID), entityID(EID), parent(parent)	{	}
 }

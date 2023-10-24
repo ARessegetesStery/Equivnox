@@ -11,8 +11,8 @@ namespace EQX {
 	public: 
 		Vertex start;
 		Vertex end;
-		float k;
-		int kSign;
+		XFloat k;
+		XInt kSign;
 
 	public: 
 		LineSeg();
@@ -22,10 +22,10 @@ namespace EQX {
 		void Transform(const MeshTransform& trans);
 	};
 
-	float P2LDistance(LineSeg& l, Vertex p);
+	XFloat P2LDistance(LineSeg& l, Vertex p);
 
-	float PixelAmp(LineSeg&, Vertex);
+	XFloat PixelAmp(LineSeg&, Vertex);
 
-	float GetSlope(Vertex& v1, Vertex& v2);
+	XFloat GetSlope(Vertex& v1, Vertex& v2);
 
 }

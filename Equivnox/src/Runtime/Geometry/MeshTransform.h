@@ -14,12 +14,12 @@ namespace EQX {
 		Vec3 displacement;
 		Vec3 scaleCoeff;
 		Vec3 scaleRef;
-		float rotAngle;
+		XFloat rotAngle;
 		Vec3 rotAxis;
 
 	public:
 		MeshTransform();
-		MeshTransform(Vec3 d, Vec3 sc, Vec3 sr, float angle, Vec3 axis);
+		MeshTransform(Vec3 d, Vec3 sc, Vec3 sr, XFloat angle, Vec3 axis);
 	};
 
 }

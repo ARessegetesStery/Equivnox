@@ -50,23 +50,23 @@ namespace EQX {
 
 	Vector3 Face::baryCoord(Vector2 xy) const
 	{
-		EQXFloat D = (l.pos.x - r.pos.x) * (m.pos.y - r.pos.y) - 
+		XFloat D = (l.pos.x - r.pos.x) * (m.pos.y - r.pos.y) - 
 			(m.pos.x - r.pos.x) * (l.pos.y - r.pos.y);
-		EQXFloat DAlpha = (xy.x - r.pos.x) * (m.pos.y - r.pos.y) -
+		XFloat DAlpha = (xy.x - r.pos.x) * (m.pos.y - r.pos.y) -
 			(m.pos.x - r.pos.x) * (xy.y - r.pos.y);
-		EQXFloat DBeta = (l.pos.x - r.pos.x) * (xy.y - r.pos.y) -
+		XFloat DBeta = (l.pos.x - r.pos.x) * (xy.y - r.pos.y) -
 			(xy.x - r.pos.x) * (l.pos.y - r.pos.y);
-		EQXFloat alpha = DAlpha / D;
-		EQXFloat beta = DBeta / D;
+		XFloat alpha = DAlpha / D;
+		XFloat beta = DBeta / D;
 		return Vec3(alpha, beta, 1 - alpha - beta);
 	}
 
-	Vector3 Face::baryCoord(EQXFloat x, EQXFloat y) const
+	Vector3 Face::baryCoord(XFloat x, XFloat y) const
 	{
 		return baryCoord(Vec2(x, y));
 	}
 
-	EQXFloat Face::ZAtXYFace(Vector2 xy) const
+	XFloat Face::ZAtXYFace(Vector2 xy) const
 	{
 		Vec3 baryCoord = this->baryCoord(xy);
 		 if (baryCoord[0] < 0 || baryCoord[1] < 0 || baryCoord[2] < 0)
@@ -74,18 +74,18 @@ namespace EQX {
 		return baryCoord[0] * l.pos.z + baryCoord[1] * m.pos.z + baryCoord[2] * r.pos.z;
 	}
 
-	EQXFloat Face::ZAtXYFace(EQXFloat x, EQXFloat y) const
+	XFloat Face::ZAtXYFace(XFloat x, XFloat y) const
 	{
 		return this->ZAtXYFace(Vec2(x, y));
 	}
 
-	EQXFloat Face::ZAtXYPlane(Vector2 xy) const
+	XFloat Face::ZAtXYPlane(Vector2 xy) const
 	{
 		Vec3 baryCoord = this->baryCoord(xy);
 		return baryCoord[0] * l.pos.z + baryCoord[1] * m.pos.z + baryCoord[2] * r.pos.z;
 	}
 
-	EQXFloat Face::ZAtXYPlane(EQXFloat x, EQXFloat y) const
+	XFloat Face::ZAtXYPlane(XFloat x, XFloat y) const
 	{
 		return this->ZAtXYPlane(Vec2(x, y));
 	}
@@ -154,7 +154,7 @@ namespace EQX {
 		}
 	}
 
-	bool IsPointInTriangle(Vertex v, Face f)
+	XBool IsPointInTriangle(Vertex v, Face f)
 	{
 		f.DiscardZ();
 		v.pos.z = 0;
@@ -173,7 +173,7 @@ namespace EQX {
 		v.uv = baryCoordAtV[0] * f.L().uv + baryCoordAtV[1] * f.M().uv + baryCoordAtV[2] * f.R().uv;
 	}
 
-	bool FaceIntersectWithLine(const Face& f, const Line& l, EQX_OUT Vec3& pos)
+	XBool FaceIntersectWithLine(const Face& f, const Line& l, EQX_OUT Vec3& pos)
 	{
 		Vec3 originalPos = pos;
 		Plane facePlane = Plane(f.L().pos, f.M().pos, f.R().pos);
@@ -190,12 +190,12 @@ namespace EQX {
 		return false;
 	}
 
-	bool PlaneIntersectWithLine(const Plane& p, const Line& l, EQX_OUT Vector3& pos)
+	XBool PlaneIntersectWithLine(const Plane& p, const Line& l, EQX_OUT Vector3& pos)
 	{
 		if (Dot(p.GetNormal(), l.GetDirection()) == 0)
 			return false;
 
-		EQXFloat dirMult = (Dot(p.GetNormal(), p.GetPoint()) - Dot(p.GetNormal(), l.GetPoint())) /
+		XFloat dirMult = (Dot(p.GetNormal(), p.GetPoint()) - Dot(p.GetNormal(), l.GetPoint())) /
 			(Dot(p.GetNormal(), l.GetDirection()));
 		pos = l.GetPoint() + dirMult * l.GetDirection();
 		return true;

@@ -2,6 +2,9 @@
 
 #include "ObjParser.h"
 
+#pragma warning(push)
+#pragma warning(disable:4996)
+
 namespace EQX {
 
     void ObjParser::Parse()
@@ -28,18 +31,18 @@ namespace EQX {
             return;
         }
         
-        EQXChar linebuf[1024];
+        XChar linebuf[1024];
         std::vector<Vector3> v;
         std::vector<Vector2> vt;
         std::vector<Vector3> vn;
         std::vector<EQX_PARSING::face> fs;
-        EQXChar curObjName[128];
+        XChar curObjName[128];
         Vector3 v3;
         Vector2 v2;
         v.push_back(v3);
         vt.push_back(v2);
         vn.push_back(v3);
-        EQXBool isFirstObj = true;
+        XBool isFirstObj = true;
 
         while (infile.getline(linebuf, 1024, '\n'))
         {
@@ -64,9 +67,9 @@ namespace EQX {
                     {
                         curObjName[0] = curObjName[0] + 32;
                     }
-                    for (int i = 0; i < strlen(curObjName); ++i)
+                    for (XInt i = 0; i < strlen(curObjName); ++i)
                     {
-                        EQXChar c = curObjName[i];
+                        XChar c = curObjName[i];
                         if (c < 48 || (c > 57 && c < 65) || (c > 90 && c < 97) || c > 122)
                         {
                             curObjName[i] = '_';
@@ -118,3 +121,5 @@ namespace EQX {
     }
 
 }
+
+#pragma warning(pop)

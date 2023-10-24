@@ -17,10 +17,10 @@ int main(int argc, char** argv) {
 	EQX::Renderer& coreRenderer = EQX::Renderer::Init();
 
 	EQX::MeshTransform trans;
-	trans.displacement = EQX::Vec3(0, 0, 0.6);
+	trans.displacement = EQX::Vec3(0, 0, 0.6f);
 
 	EQX::MeshTransform scale;
-	scale.scaleCoeff = EQX::Vec3(0.3, 0.3, 0.3);
+	scale.scaleCoeff = EQX::Vec3(0.3f, 0.3f, 0.3f);
 
 	// TODO Further simplify with parent in EntityInfo
 	EQX::SceneInfo testScene = coreRenderer.CreateEmptyScene("test");

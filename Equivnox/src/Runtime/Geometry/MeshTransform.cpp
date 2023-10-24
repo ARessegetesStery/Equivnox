@@ -13,7 +13,7 @@ namespace EQX {
 		this->rotAxis = Vec3::UnitZ;
 	}
 
-	MeshTransform::MeshTransform(Vec3 d, Vec3 sc, Vec3 sr, float angle, Vec3 axis) : 
+	MeshTransform::MeshTransform(Vec3 d, Vec3 sc, Vec3 sr, XFloat angle, Vec3 axis) : 
 		displacement(d), scaleCoeff(sc), scaleRef(sr), rotAngle(angle), rotAxis(axis) {	}
 
 }

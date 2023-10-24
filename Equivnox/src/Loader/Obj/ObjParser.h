@@ -16,7 +16,7 @@ namespace EQX {
     class ObjParser
     {
     public:
-        ObjParser(Renderer& renderer, EntityInfo ent, EQXString filename)
+        ObjParser(Renderer& renderer, EntityInfo ent, XString filename)
         {
             if (ent.name == EntityConfig::s_defaultEntityName)
             {
@@ -36,7 +36,7 @@ namespace EQX {
 
     private:
         Entity* p_ent;
-        EQXString filename;
+        XString filename;
     };
 
 }

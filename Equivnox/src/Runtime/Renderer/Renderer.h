@@ -11,8 +11,8 @@
 
 namespace EQX
 {
-	using MSAABuffer = ImageBuffer<EQXChar, EQXInt, 0>;
-	using LightZBuffer = ImageBuffer<EQXFloat, EQXInt, 0>;
+	using MSAABuffer = ImageBuffer<XChar, XInt, 0>;
+	using LightZBuffer = ImageBuffer<XFloat, XInt, 0>;
 
 	/**
 	 * 
@@ -24,7 +24,7 @@ namespace EQX
 	public:
 		// canvas size should be determined upon initialization to avoid reallocation of memory
 		static Renderer& Init();
-		static Renderer& Init(EQXUInt, EQXUInt);
+		static Renderer& Init(XUInt, XUInt);
 
 		void BindScene(SceneInfo);
 		void UnbindScene();
@@ -37,11 +37,11 @@ namespace EQX
 		inline void SetAA(RenderAAConfig t) { this->renderAAConfig = t; }
 		inline void SetLight(ShadingMode t) { this->renderLightConfig = t; }
 		inline void SetOutputType(ImageType t) { this->imageType = t; }
-		inline void SetOutputPath(std::string s) { this->outputPath = s; }
+		inline void SetOutputPath(XString s) { this->outputPath = s; }
 		
-		inline void SetWidthScale(EQXFloat w) { this->wScale = w; }
-		inline void SetHeightScale(EQXFloat h) { this->hScale = h; }
-		void SetMSAAMult(EQXUInt);
+		inline void SetWidthScale(XFloat w) { this->wScale = w; }
+		inline void SetHeightScale(XFloat h) { this->hScale = h; }
+		void SetMSAAMult(XUInt);
 
 		// Accept pixel info and render as it is
 		inline void DisableCamera() 
@@ -55,13 +55,13 @@ namespace EQX
 		void AddLight(Light);
 
 		/*  Interacting with Asset Manager  */
-		SceneInfo CreateEmptyScene(std::string sceneName);
-		EntityInfo CreateEmptyEntityUnderScene(SceneInfo scene, std::string entityName);
-		EntityInfo DuplicateEntity(SceneInfo curScene, std::string from, std::string to);
-		EntityInfo DuplicateEntityWithTransform(SceneInfo curScene, std::string from, std::string to, const MeshTransform& trans);
+		SceneInfo CreateEmptyScene(XString sceneName);
+		EntityInfo CreateEmptyEntityUnderScene(SceneInfo scene, XString entityName);
+		EntityInfo DuplicateEntity(SceneInfo curScene, XString from, XString to);
+		EntityInfo DuplicateEntityWithTransform(SceneInfo curScene, XString from, XString to, const MeshTransform& trans);
 
 		/*  Setting Main Camera  */
-		inline void fromFoV(const EQXFloat FoV, const EQXFloat aspect) { this->camera.fromFoV(FoV, aspect); };
+		inline void fromFoV(const XFloat FoV, const XFloat aspect) { this->camera.fromFoV(FoV, aspect); };
 		inline void SetCameraPos(Vec4 pos) { this->camera.SetPos(pos); }
 		inline void SetCameraPos(Vec3 pos) { this->camera.SetPos(pos); }
 		inline void CameraLookAt(Vec3 pos) { this->camera.LookAt(pos); }
@@ -76,7 +76,7 @@ namespace EQX
 		std::vector<Light> lights;
 
 		Renderer();
-		Renderer(EQXUInt, EQXUInt);
+		Renderer(XUInt, XUInt);
 		Renderer(const Renderer& r) = delete;
 		Renderer& operator= (const Renderer& r) = delete;
 
@@ -96,7 +96,7 @@ namespace EQX
 		void RenderFaceSingle(const Face& fOriginal, const Face& fTransformed);
 		void RenderFaceZBuf(const Face& fTransformed);
 
-		void UpdateZBufColor(EQXFloat x, EQXFloat y, const Face& f);
+		void UpdateZBufColor(XFloat x, XFloat y, const Face& f);
 
 		/**
 		 * Render face according to the precomputed ZBuffer
@@ -109,24 +109,24 @@ namespace EQX
 		 * @param image - [OUT]Image to write to
 		 * @param ZBuffer - Precomputed ZBuffer
 		 */
-		void UpdateFragColor(EQXFloat x, EQXFloat y, const Face& f, const Face& fOriginal);
+		void UpdateFragColor(XFloat x, XFloat y, const Face& f, const Face& fOriginal);
 
 		Color PhongLighting(Vec3 originalPos, Vec3 fragNormal, Color texColor, const Light& l);
 
 		/*  Render Configs  */
-		EQXBool cameraEnabled;
-		EQXBool hardShadow;
+		XBool cameraEnabled;
+		XBool hardShadow;
 		RenderFill renderFill;
 		RenderPass renderPass;
 		RenderAAConfig renderAAConfig;
 		ShadingMode renderLightConfig;
-		EQXUInt MSAAMult;			// the rate of sampling in MSAA, 2^x
+		XUInt MSAAMult;			// the rate of sampling in MSAA, 2^x
 		Scene* curScene;
 
-		EQXUInt width, height;
-		EQXFloat wScale, hScale;
+		XUInt width, height;
+		XFloat wScale, hScale;
 		ImageType imageType;
-		std::string outputPath;
+		XString outputPath;
 
 		/*  Asset Management  */
 		AssetManager& assetManager;
@@ -145,16 +145,16 @@ namespace EQX
 		std::vector<LightZBuffer> lightZMaps;
 
 		/*  Helper Functions  */
-		EQXBool Validify();
+		XBool Validify();
 		void ValidateConfig();		// Ensures no config conflict exists
 
 		Mat4 perspMatFromCamera(Camera& c);
 
 		/*  Tools that may be Invoked by Friends  */
-		Scene& _scene(std::string sceneName);
+		Scene& _scene(XString sceneName);
 		Scene& _scene(SceneInfo sceneInfo);
 
-		EntityConfig& _configUnderScene(SceneInfo scene, std::string entName);
+		EntityConfig& _configUnderScene(SceneInfo scene, XString entName);
 
 		Entity& _entityUnderScene(SceneInfo sceneInfo, EntityID id);
 

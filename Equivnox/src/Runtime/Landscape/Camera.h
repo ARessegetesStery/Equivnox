@@ -4,21 +4,21 @@
 
 namespace EQX {
 
-	struct Camera
+	class Camera
 	{
 		friend class Renderer;
 	private:
 		Vector4 pos;
 		Vector4 lookAt;
 		Vector4 upDir;
-		float width;
-		float height;
-		float nearClip;
-		float farClip;
+		XFloat width;
+		XFloat height;
+		XFloat nearClip;
+		XFloat farClip;
 
 	public:
 		Camera();
-		Camera(float nearClip, float farClip);
+		Camera(XFloat nearClip, XFloat farClip);
 		Camera(const Camera&);
 
 		/**
@@ -27,7 +27,7 @@ namespace EQX {
 		 * @param FoV - field of view
 		 * @param aspect - aspect ratio
 		 */
-		void fromFoV(const float FoV, const float aspect); 
+		void fromFoV(const XFloat FoV, const XFloat aspect); 
 
 		inline void SetPos(Vec4 pos) { this->pos = pos; }
 		inline void SetPos(Vec3 pos) { this->pos = pos.ToVec4(); }

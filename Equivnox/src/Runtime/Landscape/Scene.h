@@ -12,27 +12,27 @@ namespace EQX {
 		friend class AssetManager;
 	public:
 		Scene() = default;
-		Scene(std::string);
+		Scene(XString);
 
-		inline const std::string GetName() const { return this->name; }
-		inline void SetName(std::string& name) { this->name = name; }
+		inline const XString GetName() const { return this->name; }
+		inline void SetName(XString& name) { this->name = name; }
 		
 		inline std::vector<EntityConfig>& Renderables() { return renderables; }
 
-		Entity& FindEntityWithUID(int UID);
-		const Entity& FindEntityWithUID(int UID) const;
+		Entity& FindEntityWithUID(XInt UID);
+		const Entity& FindEntityWithUID(XInt UID) const;
 
 		inline const SceneID GetSceneID() const { return this->sceneID; }
 
-		static const std::string s_defaultSceneName;
-		static const std::string s_rendererSceneName;
+		static const XString s_defaultSceneName;
+		static const XString s_rendererSceneName;
 
 	private:
 		// the corresponding EntityConfig is default 
-		EntityConfig& AddDefaultEntity(const Entity& ent, std::string name);
-		EntityConfig& AddEntityWithTransform(const Entity& ent, std::string name, const MeshTransform& transform);
+		EntityConfig& AddDefaultEntity(const Entity& ent, XString name);
+		EntityConfig& AddEntityWithTransform(const Entity& ent, XString name, const MeshTransform& transform);
 		
-		std::string name;
+		XString name;
 		SceneID sceneID;
 
 		std::vector<EntityConfig> renderables;

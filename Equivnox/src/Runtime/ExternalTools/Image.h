@@ -37,12 +37,12 @@ namespace EQX {
 	{
 		friend class _ColorIntermediate;
 	public:
-		EQXUChar r, g, b, a;
+		XUChar r, g, b, a;
 
 	public:
 		Color();
-		Color(EQXFloat);
-		Color(EQXFloat, EQXFloat, EQXFloat, EQXFloat);
+		Color(XFloat);
+		Color(XFloat, XFloat, XFloat, XFloat);
 		Color(_ColorIntermediate);			// clamps at 0 and 255
 		Color(Vector4&);
 		Color(Vector3&);
@@ -50,10 +50,10 @@ namespace EQX {
 
 		Color& operator= (const Color&);
 		Color& operator+= (const Color&);
-		bool operator== (const Color&);
-		bool operator!= (const Color&);
-		EQXUChar& operator[] (size_t index);
-		const EQXUChar& operator[] (size_t index) const;
+		XBool operator== (const Color&);
+		XBool operator!= (const Color&);
+		XUChar& operator[] (size_t index);
+		const XUChar& operator[] (size_t index) const;
 
 		static Color White;
 		static Color Black;
@@ -62,9 +62,9 @@ namespace EQX {
 	void Print(const Color&);
 #endif
 
-	_ColorIntermediate operator* (const Color, const EQXFloat);
-	_ColorIntermediate operator* (const EQXFloat, const Color);
-	_ColorIntermediate operator/ (const Color, const EQXFloat);
+	_ColorIntermediate operator* (const Color, const XFloat);
+	_ColorIntermediate operator* (const XFloat, const Color);
+	_ColorIntermediate operator/ (const Color, const XFloat);
 	Color LitColor(const Color, const Color);
 
 	// Class handling value overflow for class Color
@@ -72,19 +72,19 @@ namespace EQX {
 	{
 		friend class Color;
 	public:
-		EQXFloat r, g, b, a;
+		XFloat r, g, b, a;
 
 	public:
 		_ColorIntermediate(Color);
 		_ColorIntermediate(const _ColorIntermediate&);
 
-		EQXFloat& operator[] (size_t index);
-		const EQXFloat& operator[] (size_t index) const;
+		XFloat& operator[] (size_t index);
+		const XFloat& operator[] (size_t index) const;
 	};
 
-	_ColorIntermediate operator* (const _ColorIntermediate, const EQXFloat);
-	_ColorIntermediate operator* (const EQXFloat, const _ColorIntermediate);
-	_ColorIntermediate operator/ (const _ColorIntermediate, const EQXFloat);
+	_ColorIntermediate operator* (const _ColorIntermediate, const XFloat);
+	_ColorIntermediate operator* (const XFloat, const _ColorIntermediate);
+	_ColorIntermediate operator/ (const _ColorIntermediate, const XFloat);
 	_ColorIntermediate operator+ (const Color c1, const Color c2);
 	_ColorIntermediate operator+ (const _ColorIntermediate c1, const _ColorIntermediate c2);
 	_ColorIntermediate operator+ (const Color c1, const _ColorIntermediate c2);
@@ -98,63 +98,63 @@ namespace EQX {
 	class Image
 	{
 	private:
-		EQXUInt width, height;
+		XUInt width, height;
 		Color* canvas;
 
 	public:
 		Image();
 		Image(const ImageGrey&);
-		Image(EQXUInt, EQXUInt);
+		Image(XUInt, XUInt);
 		Image(const Image&);
 		~Image();
 
 		Image& operator= (const Image&);
 		Image& operator= (const ImageGrey&);
 
-		void Set(EQXUInt, EQXUInt, Color);
-		Color Get(EQXUInt, EQXUInt) const;
+		void Set(XUInt, XUInt, Color);
+		Color Get(XUInt, XUInt) const;
 
 		void Clear();
-		void Write(ImageType type = ImageType::TGA, EQXString filename = "output");
+		void Write(ImageType type = ImageType::TGA, XString filename = "output");
 
-		void Rescale(EQXUInt, EQXUInt, RescaleFunc func = RescaleFunc::GAUSSIAN);
+		void Rescale(XUInt, XUInt, RescaleFunc func = RescaleFunc::GAUSSIAN);
 
 		inline const Color* GetCanvas() const { return this->canvas; };
 
-		inline EQXUInt GetWidth() const { return width; }
-		inline EQXUInt GetHeight() const { return height; }
+		inline XUInt GetWidth() const { return width; }
+		inline XUInt GetHeight() const { return height; }
 	};
 
 	// Mono-channel image
 	class ImageGrey
 	{
 	private:
-		EQXUInt width, height;
-		EQXFloat* canvas;
+		XUInt width, height;
+		XFloat* canvas;
 
 	public:
 		ImageGrey();
-		ImageGrey(EQXUInt, EQXUInt);
+		ImageGrey(XUInt, XUInt);
 		ImageGrey(const ImageGrey&) = delete;
 		~ImageGrey();
 
 		ImageGrey& operator= (const ImageGrey&);
 
-		void Set(EQXUInt, EQXUInt, EQXFloat);
-		EQXFloat Get(EQXUInt, EQXUInt) const;
+		void Set(XUInt, XUInt, XFloat);
+		XFloat Get(XUInt, XUInt) const;
 
 		void Clear();
-		void Write(ImageType type = ImageType::TGA, EQXString filename = "output");
+		void Write(ImageType type = ImageType::TGA, XString filename = "output");
 
-		inline bool IsPointOnCanvas(EQXFloat x, EQXFloat y) 
+		inline XBool IsPointOnCanvas(XFloat x, XFloat y) 
 		{ 
 			return 0 <= x && x < this->width && 0 <= y && y <= this->height; 
 		}
 
-		const EQXFloat* GetCanvas() const { return this->canvas; };
+		const XFloat* GetCanvas() const { return this->canvas; };
 
-		inline EQXUInt GetWidth() const { return width; }
-		inline EQXUInt GetHeight() const { return height; }
+		inline XUInt GetWidth() const { return width; }
+		inline XUInt GetHeight() const { return height; }
 	};
 
 	/**
@@ -166,24 +166,24 @@ namespace EQX {
 	class ImageBuffer
 	{
 	private:
-		EQXUInt width, height;
+		XUInt width, height;
 		T* canvas;
 
 	public:
 		ImageBuffer();
 		ImageBuffer(const T& val);	// Initialize the image mask uniformly with {val}
-		ImageBuffer(EQXUInt width, EQXUInt height);
-		ImageBuffer(EQXUInt width, EQXUInt height, const T& val);
+		ImageBuffer(XUInt width, XUInt height);
+		ImageBuffer(XUInt width, XUInt height, const T& val);
 		~ImageBuffer();
 
 		void SetAll(const T&);
-		void Set(EQXUInt, EQXUInt, const T&);
-		const T& Get(EQXUInt, EQXUInt) const;
+		void Set(XUInt, XUInt, const T&);
+		const T& Get(XUInt, XUInt) const;
 
 		void Clear();
 	};
 
-	Color blendColor(Color fore, Color back, EQXFloat coeff);
+	Color blendColor(Color fore, Color back, XFloat coeff);
 
 	TGAColor toTGAColor(Color);
 
@@ -196,23 +196,23 @@ namespace EQX {
 		this->width = 100;
 		this->height = 100;
 		this->canvas = new T[100 * 100];
-		for (EQXUInt i = 0; i != 100 * 100; ++i)
+		for (XUInt i = 0; i != 100 * 100; ++i)
 			this->canvas[i] = val;
 	}
 
 	/*  Implementation of Template Class {ImageMask}  */
 
 	template<typename T, typename ZT, ZT Zero>
-	ImageBuffer<T, ZT, Zero>::ImageBuffer(EQXUInt width, EQXUInt height) :
+	ImageBuffer<T, ZT, Zero>::ImageBuffer(XUInt width, XUInt height) :
 		ImageBuffer<T, ZT, Zero>(width, height, Zero) {	}
 
 	template <typename T, typename ZT, ZT Zero>
-	ImageBuffer<T, ZT, Zero>::ImageBuffer(EQXUInt width, EQXUInt height, const T& val)
+	ImageBuffer<T, ZT, Zero>::ImageBuffer(XUInt width, XUInt height, const T& val)
 	{
 		this->width = width;
 		this->height = height;
 		this->canvas = new T[width * height];
-		for (EQXUInt i = 0; i != width * height; ++i)
+		for (XUInt i = 0; i != width * height; ++i)
 			this->canvas[i] = val;
 	}
 
@@ -226,19 +226,19 @@ namespace EQX {
 	template<typename T, typename ZT, ZT Zero>
 	inline void ImageBuffer<T, ZT, Zero>::SetAll(const T& val)
 	{
-		for (EQXUInt i = 0; i != width * height; ++i)
+		for (XUInt i = 0; i != width * height; ++i)
 			this->canvas[i] = val;
 	}
 
 	template <typename T, typename ZT, ZT Zero>
-	void ImageBuffer<T, ZT, Zero>::Set(EQXUInt w, EQXUInt h, const T& val)
+	void ImageBuffer<T, ZT, Zero>::Set(XUInt w, XUInt h, const T& val)
 	{
 		if (!(!canvas || w >= width || h >= height))
 			this->canvas[(size_t)(h * this->width + w)] = val;
 	}
 
 	template <typename T, typename ZT, ZT Zero>
-	const T& ImageBuffer<T, ZT, Zero>::Get(EQXUInt w, EQXUInt h) const
+	const T& ImageBuffer<T, ZT, Zero>::Get(XUInt w, XUInt h) const
 	{
 		if (!(!canvas || w >= width || h >= height))
 			return this->canvas[(size_t)(h * this->width + w)];
@@ -248,7 +248,7 @@ namespace EQX {
 	template <typename T, typename ZT, ZT Zero>
 	void ImageBuffer<T, ZT, Zero>::Clear()
 	{
-		for (EQXUInt i = 0; i != this->width * this->height; ++i)
+		for (XUInt i = 0; i != this->width * this->height; ++i)
 			this->canvas[i] = Zero;
 	}
 

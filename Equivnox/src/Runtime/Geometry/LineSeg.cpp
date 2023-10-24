@@ -4,9 +4,9 @@
 
 namespace EQX
 {
-	extern struct TGAColor;
+	struct TGAColor;
 
-	extern TGAColor blendTGAColor(TGAColor fore, TGAColor back, float foreAmp);
+	extern TGAColor blendTGAColor(TGAColor fore, TGAColor back, XFloat foreAmp);
 
 	LineSeg::LineSeg() : start(Vector2(0,0)), end(Vector2(0,0)), k(0), kSign(1) {  }
 	
@@ -44,7 +44,7 @@ namespace EQX
 		}
 
 		k = GetSlope(start, end);
-		kSign = k / abs(k);
+		kSign = static_cast<XInt>(std::floor(k / abs(k)));
 	}
 
 	void LineSeg::Transform(const Mat4& projection)
@@ -68,7 +68,7 @@ namespace EQX
 	 * @param p
 	 * @return distance; SLOPE_MAX when slope is too high
 	 */
-	float P2LDistance(LineSeg& l, Vertex point)
+	XFloat P2LDistance(LineSeg& l, Vertex point)
 	{
 		Vector2 p(point.pos.x, point.pos.y);
 		if (p.x > l.end.pos.x && l.kSign * (p.y - l.end.pos.y) > 0)
@@ -90,23 +90,23 @@ namespace EQX
 		else
 		{
 			Vector2 start(l.start.pos.x, l.start.pos.y);
-			float d = abs((-p.y + start.y) * (l.kSign) + abs(l.k) * (p.x - start.x));
-			return d * InvSqrt(float(l.k * l.k + 1)); // avoid calculating square root
+			XFloat d = abs((-p.y + start.y) * (l.kSign) + abs(l.k) * (p.x - start.x));
+			return d * InvSqrt(XFloat(l.k * l.k + 1)); // avoid calculating square root
 		}
 	}
 
-	float PixelAmp(LineSeg& l, Vertex p)
+	XFloat PixelAmp(LineSeg& l, Vertex p)
 	{
-		float distance = P2LDistance(l, p);
+		XFloat distance = P2LDistance(l, p);
 		if (distance > 1.3)
 			return 0.0;
 		else
-			return exp(3 * -pow(distance, 3));
+			return expf(3 * -powf(distance, 3));
 	}
 
-	float GetSlope(Vertex& start, Vertex& end)
+	XFloat GetSlope(Vertex& start, Vertex& end)
 	{
-		float k;
+		XFloat k;
 		if (abs(start.pos.x - end.pos.x) < FLOAT_PREC)
 			k = (SLOPE_MAX + 1) * (end.pos.x >= start.pos.x ? 1 : -1);
 		else

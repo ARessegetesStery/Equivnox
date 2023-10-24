@@ -13,13 +13,13 @@ namespace EQX
 	Vertex::Vertex(Vector2 pos, Vector3 normal, Vector2 uv)
 		: pos(Vector4(pos.x, pos.y, 0.0, 1.0)), normal(normal), uv(uv) {  }
 
-	bool operator== (Vertex& v1, Vertex& v2)
+	XBool operator== (Vertex& v1, Vertex& v2)
 	{
 		return (v1.color == v2.color) && (v1.uv == v2.uv)
 			&& (v1.normal == v2.normal) && (v1.pos == v2.pos);
 	}
 
-	bool operator== (Vertex& v1, const Vertex& v2)
+	XBool operator== (Vertex& v1, const Vertex& v2)
 	{
 		return (v1.color == v2.color) && (v1.uv == v2.uv)
 			&& (v1.normal == v2.normal) && (v1.pos == v2.pos);
@@ -39,17 +39,17 @@ namespace EQX
 		// TODO implement rotation
 	}
 
-	bool LefterVertex(const Vertex& l, const Vertex& r)
+	XBool LefterVertex(const Vertex& l, const Vertex& r)
 	{
 		return l.pos.x < r.pos.x;
 	}
 
-	bool LowerVertex(const Vertex& l, const Vertex& u)
+	XBool LowerVertex(const Vertex& l, const Vertex& u)
 	{
 		return l.pos.y < u.pos.y;
 	}
 
-	bool LefterLowerBehindVertex(const Vertex& l, const Vertex& r)
+	XBool LefterLowerBehindVertex(const Vertex& l, const Vertex& r)
 	{
 		if (l.pos.x != r.pos.x)
 			return l.pos.x < r.pos.x;

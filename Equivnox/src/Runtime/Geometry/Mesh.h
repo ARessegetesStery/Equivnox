@@ -24,15 +24,15 @@ namespace EQX {
 		void AddLine(std::vector<LineSeg>&);
 		void AddLine(const std::initializer_list<LineSeg>&);
 
-		void Scale(float s);
-		void Scale(float s, Vector3 center);
+		void Scale(XFloat s);
+		void Scale(XFloat s, Vector3 center);
 		void Scale(Vector3 s);
 		void Scale(Vector3 s, Vector3 center);
 		void Shift(Vector3 delta);
 
 		void Transform(const MeshTransform&);
 
-		inline bool Empty() const { return vertices.empty(); }
+		inline XBool Empty() const { return vertices.empty(); }
 		void Clear();
 
 		Mesh();
@@ -42,8 +42,8 @@ namespace EQX {
 
 	public:
 		std::vector<Vertex> vertices;
-		std::vector<std::array<unsigned int, 3>> faceIndices;
-		std::vector<std::array<unsigned int, 2>> lineIndices;
+		std::vector<std::array<XUInt, 3>> faceIndices;
+		std::vector<std::array<XUInt, 2>> lineIndices;
 
 	};
 

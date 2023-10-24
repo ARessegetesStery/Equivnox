@@ -17,11 +17,11 @@ namespace EQX
 		LightType lightType;
 		Vec3 pos;
 		Vec3 Direction;
-		float intensity;
+		XFloat intensity;
 		Color lightColor;
 
 	public:
-		Light(Vector3 pos_or_dir, Color color, float intensity, LightType type);
+		Light(Vector3 pos_or_dir, Color color, XFloat intensity, LightType type);
 
 		static const Vec3 _LightPlaceHolder;
 	};

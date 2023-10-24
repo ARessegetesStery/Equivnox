@@ -6,25 +6,25 @@ namespace EQX {
 
 	void Mesh::AddFace(const Vertex& a, const Vertex& b, const Vertex& c)
 	{
-		bool ARep = false, BRep = false, CRep = false;
-		EQXUInt AIndex = 0, BIndex = 0, CIndex = 0;
-		EQXUInt CurIndex = this->vertices.size();
-		std::array<EQXUInt, 3> indices;
+		XBool ARep = false, BRep = false, CRep = false;
+		XUInt AIndex = 0, BIndex = 0, CIndex = 0;
+		XUInt CurIndex = static_cast<XUInt>(this->vertices.size());
+		std::array<XUInt, 3> indices;
 		for (auto iter = vertices.begin(); iter != vertices.cend(); ++iter)
 		{
 			if (!ARep && *iter == a)
 			{
-				AIndex = static_cast<EQXUInt>(iter - vertices.cbegin());
+				AIndex = static_cast<XUInt>(iter - vertices.cbegin());
 				ARep = true;
 			}
 			if (!BRep && *iter == b)
 			{
-				BIndex = static_cast<EQXUInt>(iter - vertices.cbegin());
+				BIndex = static_cast<XUInt>(iter - vertices.cbegin());
 				BRep = true;
 			}
 			if (!CRep && *iter == c)
 			{
-				CIndex = static_cast<EQXUInt>(iter - vertices.cbegin());
+				CIndex = static_cast<XUInt>(iter - vertices.cbegin());
 				CRep = true;
 			}
 			if (ARep && BRep && CRep)
@@ -78,12 +78,12 @@ namespace EQX {
 
 	void Mesh::AddLine(Vertex a, Vertex b)
 	{
-		bool ARep = false;
-		bool BRep = false;
-		EQXUInt AIndex;
-		EQXUInt BIndex;
-		EQXUInt CurIndex = this->vertices.size();
-		std::array<EQXUInt, 2> indices;
+		XBool ARep = false;
+		XBool BRep = false;
+		XUInt AIndex;
+		XUInt BIndex;
+		XUInt CurIndex = static_cast<XUInt>(this->vertices.size());
+		std::array<XUInt, 2> indices;
 		for (auto iter = vertices.begin(); iter != vertices.cend(); ++iter)
 		{
 			if (!ARep)
@@ -91,7 +91,7 @@ namespace EQX {
 				if (*iter == a)
 				{
 					ARep = true;
-					AIndex = static_cast<EQXUInt>(iter - vertices.cbegin());
+					AIndex = static_cast<XUInt>(iter - vertices.cbegin());
 				}
 			}
 			if (!BRep)
@@ -99,7 +99,7 @@ namespace EQX {
 				if (*iter == b)
 				{
 					BRep = true;
-					BIndex = static_cast<EQXUInt>(iter - vertices.cbegin());
+					BIndex = static_cast<XUInt>(iter - vertices.cbegin());
 				}
 			}
 			if (ARep && BRep)
@@ -143,12 +143,12 @@ namespace EQX {
 			Mesh::AddLine(iter);
 	}
 
-	void Mesh::Scale(float s)
+	void Mesh::Scale(XFloat s)
 	{
 		this->Scale(Vec3(s, s, s), Vec3::Zero);
 	}
 
-	void Mesh::Scale(float s, Vector3 center)
+	void Mesh::Scale(XFloat s, Vector3 center)
 	{
 		this->Scale(Vec3(s, s, s),center);
 	}

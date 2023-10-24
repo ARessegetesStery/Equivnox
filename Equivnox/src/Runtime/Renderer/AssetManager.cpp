@@ -11,9 +11,9 @@ namespace EQX {
 		this->_createEmptyScene(Scene::s_rendererSceneName);
 	}
 
-	SceneInfo AssetManager::_createEmptyScene(std::string sceneName)
+	SceneInfo AssetManager::_createEmptyScene(XString sceneName)
 	{
-		EQXBool existDuplicate = false;
+		XBool existDuplicate = false;
 		for (auto iter = scenes.begin(); iter != scenes.cend(); ++iter)
 			if (iter->name == sceneName)
 				existDuplicate = true;
@@ -30,7 +30,7 @@ namespace EQX {
 		}
 	}
 
-	EntityInfo AssetManager::_createEmptyEntityUnderScene(SceneInfo sceneInfo, std::string entityName)
+	EntityInfo AssetManager::_createEmptyEntityUnderScene(SceneInfo sceneInfo, XString entityName)
 	{
 		Scene& scene = _scene(sceneInfo.name);
 		for (auto iter = scene.Renderables().begin(); iter != scene.Renderables().cend(); ++iter)
@@ -43,18 +43,18 @@ namespace EQX {
 		return EntityInfo(entityName, res.configID, res.entityID, sceneInfo);
 	}
 
-	EntityInfo AssetManager::_duplicateEntity(SceneInfo sceneInfo, std::string from, std::string to)
+	EntityInfo AssetManager::_duplicateEntity(SceneInfo sceneInfo, XString from, XString to)
 	{
 		return _duplicateEntityWithTransform(sceneInfo, from, to, MeshTransform());
 	}
 
-	EntityInfo AssetManager::_duplicateEntity(SceneInfo curScene, std::string from, EntityInfo ent)
+	EntityInfo AssetManager::_duplicateEntity(SceneInfo curScene, XString from, EntityInfo ent)
 	{
 		return _duplicateEntity(curScene, from, ent.name);
 	}
 
 	EntityInfo AssetManager::_duplicateEntityWithTransform(SceneInfo sceneInfo, 
-		std::string from, std::string to, const MeshTransform& trans)
+		XString from, XString to, const MeshTransform& trans)
 	{
 		Scene& curScene = _scene(sceneInfo);
 		const EntityConfig& original = _configUnderScene(sceneInfo, from);
@@ -81,7 +81,7 @@ namespace EQX {
 	}
 
 	// TODO test whether __nil__/__world__ is always the first element of vector
-	Scene& AssetManager::_scene(std::string sceneName)
+	Scene& AssetManager::_scene(XString sceneName)
 	{
 		for (auto iter = scenes.begin(); iter != scenes.cend(); ++iter)
 			if (iter->name == sceneName)
@@ -94,7 +94,7 @@ namespace EQX {
 		return this->_scene(sceneInfo.name);
 	}
 
-	EntityConfig& AssetManager::_configUnderScene(SceneInfo sceneInfo, std::string entName)
+	EntityConfig& AssetManager::_configUnderScene(SceneInfo sceneInfo, XString entName)
 	{
 		Scene& scene = _scene(sceneInfo.name);
 		auto world = scene.Renderables().begin();

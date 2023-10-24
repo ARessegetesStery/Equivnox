@@ -1,3 +1,6 @@
+#pragma warning(push)
+#pragma warning(disable:26819 6262)
+
 /* stb_image - v2.27 - public domain image loader - http://nothings.org/stb
                                   no warranty implied; use at your own risk
 
@@ -7670,6 +7673,7 @@ STBIDEF int stbi_is_16_bit_from_callbacks(stbi_io_callbacks const *c, void *user
 
 #endif // STB_IMAGE_IMPLEMENTATION
 
+#pragma warning(pop)
 /*
    revision history:
       2.20  (2019-02-07) support utf8 filenames in Windows; fix warnings and platform ifdefs

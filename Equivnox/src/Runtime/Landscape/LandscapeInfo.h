@@ -25,29 +25,29 @@ namespace EQX {
 
 	class SceneInfo;
 
-	using EntityID = unsigned int;
-	using ConfigID = unsigned int;
-	using SceneID = unsigned int;
+	using EntityID = XUInt;
+	using ConfigID = XUInt;
+	using SceneID = XUInt;
 
 	class SceneInfo
 	{
 	public:
-		std::string name;
+		XString name;
 		SceneID sceneID;
 
-		SceneInfo(std::string, SceneID);
+		SceneInfo(XString, SceneID);
 	};
 
 	class EntityInfo
 	{
 	public:
-		std::string name;
+		XString name;
 		ConfigID configID;
 		EntityID entityID;
 
 		SceneInfo parent;
 
-		EntityInfo(std::string, ConfigID, EntityID, SceneInfo);
+		EntityInfo(XString, ConfigID, EntityID, SceneInfo);
 	};
 
 }

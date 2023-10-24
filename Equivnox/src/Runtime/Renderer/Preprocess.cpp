@@ -12,8 +12,8 @@ namespace EQX {
 
 	void FrustumClipping(const Face& inFace, EQX_OUT Mesh& clippedMesh)
 	{
-		auto IsCanonic = [=](EQXFloat x) -> EQXBool { return x >= -1.f && x <= 1.f; };
-		auto IsVec4InCanonic = [=](const Vec3 v) -> EQXBool { return IsCanonic(v.x) && IsCanonic(v.y) && IsCanonic(v.z); };
+		auto IsCanonic = [=](XFloat x) -> XBool { return x >= -1.f && x <= 1.f; };
+		auto IsVec4InCanonic = [=](const Vec3 v) -> XBool { return IsCanonic(v.x) && IsCanonic(v.y) && IsCanonic(v.z); };
 
 		/*  Special Judgement for triangle within cube  */
 		if (IsVec4InCanonic(inFace.L().pos) && IsVec4InCanonic(inFace.M().pos) && IsVec4InCanonic(inFace.R().pos))
@@ -50,7 +50,7 @@ namespace EQX {
 						Vec3 interpPos = Lerp(start, end, 1.0f, axis);
 						if (IsVec4InCanonic(interpPos))
 						{
-							EQXBool repFound = false;
+							XBool repFound = false;
 							for (const auto& i : UnitBoxIntersection)
 								if (Distance(i.pos, interpPos) <= 1e-5)
 									repFound = true;
@@ -63,7 +63,7 @@ namespace EQX {
 						Vec3 interpPos = Lerp(start, end, -1.0f, axis);
 						if (IsVec4InCanonic(interpPos))
 						{
-							EQXBool repFound = false;
+							XBool repFound = false;
 							for (const auto& i : UnitBoxIntersection)
 								if (Distance(i.pos, interpPos) <= 1e-5)
 									repFound = true;
@@ -131,9 +131,9 @@ namespace EQX {
 		}
 	}
 
-	EQXBool CornerEdge(const std::vector<Vertex>& intersections, EQX_OUT std::vector<Line>& lines)
+	XBool CornerEdge(const std::vector<Vertex>& intersections, EQX_OUT std::vector<Line>& lines)
 	{
-		EQXBool up = false, down = false, left = false, right = false, front = false, behind = false;
+		XBool up = false, down = false, left = false, right = false, front = false, behind = false;
 		for (const auto& i : intersections)
 		{
 			if (i.pos.x == -1)
@@ -150,7 +150,7 @@ namespace EQX {
 				front = true;
 		}
 
-		EQXBool exists = true;
+		XBool exists = true;
 		if (left && up)
 			lines.emplace_back(Line(Vec3(-1, 1, 1), Vec3(0, 0, 1)));
 		if (right && up)
@@ -188,7 +188,7 @@ namespace EQX {
 		Plane trigPlane = Plane(vertices[0].pos, vertices[1].pos, vertices[2].pos);
 		Vec3 tanVec = trigPlane.TanVec();
 		auto LessAlongTan = [&](const Vertex& v1, const Vertex& v2)
-			-> EQXBool { return Dot((v1.pos - trigPlane.GetPoint()), tanVec) < Dot((v2.pos - trigPlane.GetPoint()), tanVec); };
+			-> XBool { return Dot((v1.pos - trigPlane.GetPoint()), tanVec) < Dot((v2.pos - trigPlane.GetPoint()), tanVec); };
 		std::sort(vertices.begin(), vertices.end(), LessAlongTan);
 
 		/*  Change {tanVec} into measure along the extrema and evaluate binormal  */
@@ -199,7 +199,7 @@ namespace EQX {
 		Vec3 binormalVec = Cross(tanVec, trigPlane.GetNormal());
 		// Binormal measure is required to be compared with the ends with extreme tangential measure
 		auto BinormalMeasure = [&](const Vertex& v)
-			-> EQXFloat { return Dot((v.pos - upperEnd.pos), binormalVec); }; 
+			-> XFloat { return Dot((v.pos - upperEnd.pos), binormalVec); }; 
 
 		/*  Divide into ABOVE and BELOW vertices on a plane  */
 		std::vector<Vertex> aboveVerts, belowVerts;

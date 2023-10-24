@@ -2,11 +2,15 @@
 
 #include "Renderer.h"
 
+// unnecessary to explicitly write out conversion
+#pragma warning(push)
+#pragma warning(disable:4244)
+
 namespace EQX
 {
 	Renderer::Renderer() : Renderer(400, 400) {  }
 
-	Renderer::Renderer(EQXUInt width, EQXUInt height) :
+	Renderer::Renderer(XUInt width, XUInt height) :
 		curScene(nullptr),
 		cameraEnabled(true),
 		hardShadow(true),
@@ -32,7 +36,7 @@ namespace EQX
 		/*  Buffers and Outputs  */
 		outputImage(width, height),
 		ZBuffer(width, height),
-		MSAAMask(width, height, (char)(MSAAMult* MSAAMult)),
+		MSAAMask(width, height, (XChar)(MSAAMult* MSAAMult)),
 		lightZMaps({})
 	{  }
 
@@ -45,7 +49,7 @@ namespace EQX
 		return _renderer;
 	}
 
-	Renderer& Renderer::Init(EQXUInt width, EQXUInt height)
+	Renderer& Renderer::Init(XUInt width, XUInt height)
 	{
 #ifdef EQX_PRINT_STATUS
 		EQX::Print("Welcome to Equivnox!");
@@ -67,7 +71,7 @@ namespace EQX
 		this->curScene = nullptr;
 	}
 
-	void Renderer::SetMSAAMult(EQXUInt scale)
+	void Renderer::SetMSAAMult(XUInt scale)
 	{
 		if (scale == 0 || scale == 1)
 			MSAAMult = 2;
@@ -85,22 +89,22 @@ namespace EQX
 		this->lights.push_back(l);
 	}
 
-	SceneInfo Renderer::CreateEmptyScene(std::string sceneName)
+	SceneInfo Renderer::CreateEmptyScene(XString sceneName)
 	{
 		return assetManager._createEmptyScene(sceneName);
 	}
 
-	EntityInfo Renderer::CreateEmptyEntityUnderScene(SceneInfo scene, std::string entityName)
+	EntityInfo Renderer::CreateEmptyEntityUnderScene(SceneInfo scene, XString entityName)
 	{
 		return assetManager._createEmptyEntityUnderScene(scene, entityName);
 	}
 
-	EntityInfo Renderer::DuplicateEntity(SceneInfo curScene, std::string from, std::string to)
+	EntityInfo Renderer::DuplicateEntity(SceneInfo curScene, XString from, XString to)
 	{
 		return assetManager._duplicateEntity(curScene, from, to);
 	}
 
-	EntityInfo Renderer::DuplicateEntityWithTransform(SceneInfo curScene, std::string from, std::string to, const MeshTransform& trans)
+	EntityInfo Renderer::DuplicateEntityWithTransform(SceneInfo curScene, XString from, XString to, const MeshTransform& trans)
 	{
 		return assetManager._duplicateEntityWithTransform(curScene, from, to, trans);
 	}
@@ -135,8 +139,8 @@ namespace EQX
 #endif
 
 		/*  Initializing the background color to be black  */
-		for (EQXUInt x = 0; x < this->width; ++x)
-			for (EQXUInt y = 0; y < this->height; ++y)
+		for (XUInt x = 0; x < this->width; ++x)
+			for (XUInt y = 0; y < this->height; ++y)
 				outputImage.Set(x, y, Color::Black);
 
 		/*  Setup Transformation Matrix  */
@@ -240,7 +244,7 @@ namespace EQX
 
 	void Renderer::RenderFaces()
 	{
-		constexpr EQXFloat reserveScale = 1.5;	// reserve scale for clipping meshes
+		constexpr XFloat reserveScale = 1.5;	// reserve scale for clipping meshes
 		Scene& sceneToRender = this->assetManager._scene(Scene::s_rendererSceneName);
 		SceneInfo sceneToRenderInfo = SceneInfo(sceneToRender.GetName(), sceneToRender.GetSceneID());
 
@@ -249,8 +253,8 @@ namespace EQX
 		/*  Frustum Clipping & Generating ZBuf for Shadow and Result */
 
 		// Background of ZBuf should be white
-		for (EQXUInt x = 0; x < this->width; ++x)
-			for (EQXUInt y = 0; y < this->height; ++y)
+		for (XUInt x = 0; x < this->width; ++x)
+			for (XUInt y = 0; y < this->height; ++y)
 				ZBuffer.Set(x, y, 255.0f);
 
 		for (auto entConfig = curScene->Renderables().begin();
@@ -265,7 +269,7 @@ namespace EQX
 			std::vector<Vertex> vertices = {};
 			for (auto iter = curMesh.vertices.begin(); iter != curMesh.vertices.cend(); ++iter)
 				vertices.push_back(*iter);
-			targetMesh.faceIndices.reserve(reserveScale * curMesh.faceIndices.size() * 3 * sizeof(std::array<EQXUInt, 3>));
+			targetMesh.faceIndices.reserve(reserveScale * curMesh.faceIndices.size() * 3 * sizeof(std::array<XUInt, 3>));
 			targetMesh.vertices.reserve(reserveScale * curMesh.vertices.size() * 3 * sizeof(Vertex));
 			for (auto& vert : vertices)
 				vert.MeshTransform(entConfig->GetTransform());
@@ -349,12 +353,12 @@ namespace EQX
 	{
 		LineSeg perspL(l.start, l.end);
 
-		EQXUInt sx = static_cast<EQXUInt>(perspL.start.pos.x);
-		EQXUInt sy = static_cast<EQXUInt>(perspL.start.pos.y);
-		EQXUInt ex = static_cast<EQXUInt>(perspL.end.pos.x);
-		EQXUInt ey = static_cast<EQXUInt>(perspL.end.pos.y);
+		XUInt sx = static_cast<XUInt>(perspL.start.pos.x);
+		XUInt sy = static_cast<XUInt>(perspL.start.pos.y);
+		XUInt ex = static_cast<XUInt>(perspL.end.pos.x);
+		XUInt ey = static_cast<XUInt>(perspL.end.pos.y);
 
-		bool transpose = false;
+		XBool transpose = false;
 		if (abs(perspL.k) > 1)
 		{
 			std::swap(sx, sy);
@@ -367,16 +371,16 @@ namespace EQX
 			transpose = true;
 		}
 
-		for (EQXUInt x = sx; x != ex + 1; x += 1)
+		for (XUInt x = sx; x != ex + 1; x += 1)
 		{
 			if (transpose)
 			{
-				EQXUInt y = static_cast<EQXUInt>(std::roundf(1 / perspL.k * (x - sx)) + sy);
+				XUInt y = static_cast<XUInt>(std::roundf(1 / perspL.k * (x - sx)) + sy);
 				outputImage.Set(y, x, Color::White);
 			}
 			else
 			{
-				EQXUInt y = static_cast<EQXUInt>(std::roundf(perspL.k * (x - sx)) + sy);
+				XUInt y = static_cast<XUInt>(std::roundf(perspL.k * (x - sx)) + sy);
 				outputImage.Set(x, y, Color::White);
 			}
 		}
@@ -386,35 +390,35 @@ namespace EQX
 	{
 		LineSeg perspL(l.start, l.end);
 
-		EQXUInt sx = static_cast<EQXUInt>(perspL.start.pos.x);
-		EQXUInt sy = static_cast<EQXUInt>(perspL.start.pos.y);
-		EQXUInt ex = static_cast<EQXUInt>(perspL.end.pos.x);
-		EQXUInt ey = static_cast<EQXUInt>(perspL.end.pos.y);
+		XUInt sx = static_cast<XUInt>(perspL.start.pos.x);
+		XUInt sy = static_cast<XUInt>(perspL.start.pos.y);
+		XUInt ex = static_cast<XUInt>(perspL.end.pos.x);
+		XUInt ey = static_cast<XUInt>(perspL.end.pos.y);
 
-		EQXUInt xPace = 1;
-		EQXUInt yPace = 1;
+		XUInt xPace = 1;
+		XUInt yPace = 1;
 		if (ey < sy)
 			yPace = -1;
 
 		if (sy == ey)
-			for (EQXUInt x = sx; x != ex + xPace; x += xPace)
+			for (XUInt x = sx; x != ex + xPace; x += xPace)
 				outputImage.Set(x, sy, blendColor(Color::White, outputImage.Get(x, sy), 1.0));
 		else if (abs(perspL.k) > SLOPE_MAX)
-			for (EQXUInt y = sy; y != ey + yPace; y += yPace)
+			for (XUInt y = sy; y != ey + yPace; y += yPace)
 				outputImage.Set(sx, y, blendColor(Color::White, outputImage.Get(sx, y), 1.0));
 		else
 		{
-			for (EQXUInt x = sx; x != ex; x += xPace)
+			for (XUInt x = sx; x != ex; x += xPace)
 			{
-				for (EQXUInt y = static_cast<EQXUInt>(sy + perspL.k * (x - sx - 1)) - 2 * yPace;
-					y != static_cast<EQXUInt>(sy + perspL.k * (x - sx + 2) + 2 * yPace);
+				for (XUInt y = static_cast<XUInt>(sy + perspL.k * (x - sx - 1)) - 2 * yPace;
+					y != static_cast<XUInt>(sy + perspL.k * (x - sx + 2) + 2 * yPace);
 					y += yPace)
 					// only traverse pixels that will possibly be rendered
 				{
 					if (x >= this->width || y >= this->height)
 						continue;
 					Vector2 center(x + xPace / 2.0f, y + yPace / 2.0f);
-					EQXFloat coeff = PixelAmp(perspL, center);
+					XFloat coeff = PixelAmp(perspL, center);
 					outputImage.Set(x, y, blendColor(Color::White, outputImage.Get(x, y), coeff));
 				}
 			}
@@ -440,7 +444,7 @@ namespace EQX
 	
 	void Renderer::RenderFaceSingle(const Face& fOriginal, const Face& fTrans)
 	{
-		EQXFloat xpos, ypos;
+		XFloat xpos, ypos;
 		if (std::abs(fTrans.SlopeLM()) > SLOPE_MAX)
 		{
 			for (xpos = std::floor(fTrans.L().pos.x); xpos <= fTrans.R().pos.x; ++xpos)
@@ -488,7 +492,7 @@ namespace EQX
 
 	void Renderer::RenderFaceZBuf(const Face& fTrans)
 	{
-		EQXFloat xpos, ypos;
+		XFloat xpos, ypos;
 		if (std::abs(fTrans.SlopeLM()) > SLOPE_MAX)
 		{
 			for (xpos = std::floor(fTrans.L().pos.x); xpos <= fTrans.R().pos.x; ++xpos)
@@ -526,7 +530,7 @@ namespace EQX
 		}
 	}
 
-	bool Renderer::Validify()
+	XBool Renderer::Validify()
 	{
 		if (this->curScene == nullptr)
 		{
@@ -540,7 +544,7 @@ namespace EQX
 		}
 		else
 		{
-			bool existNonEmpty = false;
+			XBool existNonEmpty = false;
 			for (auto iter = this->curScene->Renderables().begin();
 				iter != this->curScene->Renderables().cend(); ++iter)
 			{
@@ -577,12 +581,12 @@ namespace EQX
 		return perspMat;
 	}
 
-	void Renderer::UpdateZBufColor(EQXFloat x, EQXFloat y, const Face& f)
+	void Renderer::UpdateZBufColor(XFloat x, XFloat y, const Face& f)
 	{
-		EQXFloat curGreyScale = ZBuffer.Get(x, y);
+		XFloat curGreyScale = ZBuffer.Get(x, y);
 
-		EQXFloat zpos = f.ZAtXYFace(Vec2(x, y));
-		EQXFloat newGreyScale = (zpos == 1) ? 0 : 128 - 127.f * zpos;
+		XFloat zpos = f.ZAtXYFace(Vec2(x, y));
+		XFloat newGreyScale = (zpos == 1) ? 0 : 128 - 127.f * zpos;
 
 		if (newGreyScale > 255 || newGreyScale < 0)
 			return;
@@ -592,7 +596,7 @@ namespace EQX
 	}
 
 	
-	void Renderer::UpdateFragColor(EQXFloat xpos, EQXFloat ypos, const Face& f, const Face& fOriginal)
+	void Renderer::UpdateFragColor(XFloat xpos, XFloat ypos, const Face& f, const Face& fOriginal)
 	{
 		// If camera disabled, only render white pixels
 		if (!this->cameraEnabled)
@@ -602,7 +606,7 @@ namespace EQX
 		}
 
 		/*  Full Pixel Processing  */
-		EQXFloat curGreyScale = ZBuffer.Get(xpos, ypos);
+		XFloat curGreyScale = ZBuffer.Get(xpos, ypos);
 		Color pixelColor = Color(0);
 		Color texColor = Color(200); 
 
@@ -612,14 +616,14 @@ namespace EQX
 				return;
 
 			// Set z to -Z_MAX if point is outside the triangle
-			EQXFloat zpos = f.ZAtXYFace(Vec2(xpos, ypos));
+			XFloat zpos = f.ZAtXYFace(Vec2(xpos, ypos));
 			Vec3 curPos = Vec3(xpos, ypos, zpos);
 			Vec3 originalPos = inverseTransform * (curPos.ToVec4());
 			Vec3 baryCoord = fOriginal.baryCoord(originalPos.x, originalPos.y);
 			Vec3 fragNormal = baryCoord[0] * fOriginal.L().normal +
 				baryCoord[1] * fOriginal.M().normal + baryCoord[2] * fOriginal.R().normal;
 
-			EQXFloat newGreyScale = (zpos == 1) ? 0 : 128 - 127.f * zpos;
+			XFloat newGreyScale = (zpos == 1) ? 0 : 128 - 127.f * zpos;
 			if (newGreyScale > 255 || newGreyScale < 0)
 				return;
 
@@ -639,7 +643,7 @@ namespace EQX
 		else if (this->renderAAConfig == RenderAAConfig::MSAA)
 		{
 			// Obtains z value presuming that the point is in the triangle
-			EQXFloat zpos = f.ZAtXYPlane(Vec2(xpos, ypos));
+			XFloat zpos = f.ZAtXYPlane(Vec2(xpos, ypos));
 			Vec3 curPos = Vec3(xpos, ypos, zpos);
 			Vec3 originalPos = inverseTransform * (curPos.ToVec4());
 			Vec3 baryCoord = fOriginal.baryCoord(originalPos.x, originalPos.y);
@@ -657,19 +661,19 @@ namespace EQX
 						resultColor += PhongLighting(originalPos, fragNormal, texColor, l);
 
 			/*  MSAA  */
-			EQXUInt samplerCnt = MSAAMult * MSAAMult;
-			EQXUInt validSamplerCnt = 0;
-			EQXFloat step = 1.f / (MSAAMult + 1);
+			XUInt samplerCnt = MSAAMult * MSAAMult;
+			XUInt validSamplerCnt = 0;
+			XFloat step = 1.f / (MSAAMult + 1);
 
-			for (EQXUInt i = 1; i <= MSAAMult; ++i)
+			for (XUInt i = 1; i <= MSAAMult; ++i)
 			{
-				for (EQXUInt j = 1; j <= MSAAMult; ++j)
+				for (XUInt j = 1; j <= MSAAMult; ++j)
 				{
 					Vec2 curPos = Vec2(xpos - 0.5f + i * step, ypos - 0.5f + j * step);
 
 					/*  Occlusion Test  */
-					EQXFloat z = face.ZAtXYFace(curPos.x, curPos.y);
-					EQXFloat newGreyScale = (z == 1) ? 0 : 128 - 127.f * z;
+					XFloat z = face.ZAtXYFace(curPos.x, curPos.y);
+					XFloat newGreyScale = (z == 1) ? 0 : 128 - 127.f * z;
 					if (newGreyScale >= curGreyScale + 0.04)
 						continue;
 
@@ -679,7 +683,7 @@ namespace EQX
 				}
 			}
 
-			EQXUInt vacantSamplerCnt = EQXUInt(MSAAMask.Get(xpos, ypos));
+			XUInt vacantSamplerCnt = XUInt(MSAAMask.Get(xpos, ypos));
 			if (vacantSamplerCnt <= validSamplerCnt)
 				validSamplerCnt = vacantSamplerCnt;
 			MSAAMask.Set(xpos, ypos, vacantSamplerCnt - validSamplerCnt);
@@ -693,7 +697,7 @@ namespace EQX
 
 	Color Renderer::PhongLighting(Vec3 originalPos, Vec3 fragNormal, Color texColor, const Light& l)
 	{
-		EQXFloat distance = (l.pos - originalPos).Norm();
+		XFloat distance = (l.pos - originalPos).Norm();
 		Vec3 lightDir = (l.pos - originalPos) / distance;
 		Vec3 viewDir = (this->camera.pos.ToVec3() - originalPos).Normalize();
 		Vector3 halfDir = (lightDir + viewDir).Normalize();
@@ -706,7 +710,7 @@ namespace EQX
 		return resultColor;
 	}
 
-	Scene& Renderer::_scene(std::string sceneName)
+	Scene& Renderer::_scene(XString sceneName)
 	{
 		return assetManager._scene(sceneName);
 	}
@@ -716,7 +720,7 @@ namespace EQX
 		return assetManager._scene(sceneInfo);
 	}
 
-	EntityConfig& Renderer::_configUnderScene(SceneInfo scene, std::string entName)
+	EntityConfig& Renderer::_configUnderScene(SceneInfo scene, XString entName)
 	{
 		return assetManager._configUnderScene(scene, entName);
 	}
@@ -727,3 +731,4 @@ namespace EQX
 	}
 
 }
+#pragma warning(pop)

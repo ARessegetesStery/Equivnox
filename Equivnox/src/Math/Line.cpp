@@ -24,18 +24,18 @@ namespace EQX {
         direction = l.direction;
     }
 
-    EQXBool Line::operator==(const Line& l) const
+    XBool Line::operator==(const Line& l) const
     {
         return (l.GetDirection() == direction) && 
             IsPointOnLine(this->point, l);
     }
 
-    EQXBool IsPointOnLine(const Vec3& point, const Line& l)
+    XBool IsPointOnLine(const Vec3& point, const Line& l)
     {
         Vec3 diff = point - l.GetPoint();
-        EQXFloat diffLengthSquared = diff.NormSquare();
-        EQXFloat innerprod = Dot(diff, l.GetDirection());
-        EQXFloat innerprodSquared = innerprod * innerprod;
+        XFloat diffLengthSquared = diff.NormSquare();
+        XFloat innerprod = Dot(diff, l.GetDirection());
+        XFloat innerprodSquared = innerprod * innerprod;
         if (abs(diffLengthSquared) == abs(innerprodSquared))
             return true;
         else

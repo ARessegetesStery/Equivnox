@@ -1,5 +1,6 @@
 // EQX SPECIFIC DISABLING WARNING
-#pragma warning(disable:26451)
+#pragma warning(push)
+#pragma warning(disable:6385 6386 26819 4996)
 
 /* stb_image_write - v1.16 - public domain - http://nothings.org/stb
    writes out PNG/BMP/TGA/JPEG/HDR images to C stdio - Sean Barrett 2010-2015
@@ -1630,6 +1631,7 @@ STBIWDEF int stbi_write_jpg(char const *filename, int x, int y, int comp, const 
 
 #endif // STB_IMAGE_WRITE_IMPLEMENTATION
 
+#pragma warning(pop)
 /* Revision history
       1.16  (2021-07-11)
              make Deflate code emit uncompressed blocks when it would otherwise expand

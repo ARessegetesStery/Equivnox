@@ -13,7 +13,7 @@ namespace EQX {
 	{
 	private:
 		Vertex l, m, r;
-		EQXFloat kLM, kLR, kMR;
+		XFloat kLM, kLR, kMR;
 
 	public:
 		Face();
@@ -28,9 +28,9 @@ namespace EQX {
 		inline const Vertex& L() const { return this->l; }
 		inline const Vertex& M() const { return this->m; }
 		inline const Vertex& R() const { return this->r; }
-		inline const EQXFloat SlopeLM() const { return this->kLM; }
-		inline const EQXFloat SlopeLR() const { return this->kLR; }
-		inline const EQXFloat SlopeMR() const { return this->kMR; }
+		inline const XFloat SlopeLM() const { return this->kLM; }
+		inline const XFloat SlopeLR() const { return this->kLR; }
+		inline const XFloat SlopeMR() const { return this->kMR; }
 
 		Face& operator= (const Face& f);
 		const Vertex& operator[] (size_t index) const;
@@ -40,15 +40,15 @@ namespace EQX {
 		 * Only considers xy
 		 */
 		Vector3 baryCoord(Vector2) const;
-		Vector3 baryCoord(EQXFloat, EQXFloat) const;
+		Vector3 baryCoord(XFloat, XFloat) const;
 
 		// Returns -Z_MAX if the point falls outside the triangle
-		EQXFloat ZAtXYFace(Vector2) const;
-		EQXFloat ZAtXYFace(EQXFloat, EQXFloat) const;
+		XFloat ZAtXYFace(Vector2) const;
+		XFloat ZAtXYFace(XFloat, XFloat) const;
 
 		// Returns z value on the spanned surface of the face
-		EQXFloat ZAtXYPlane(Vector2) const;
-		EQXFloat ZAtXYPlane(EQXFloat, EQXFloat) const;
+		XFloat ZAtXYPlane(Vector2) const;
+		XFloat ZAtXYPlane(XFloat, XFloat) const;
 
 		void MatTransform(const Mat4& projection);
 		void MeshTransform(const MeshTransform& trans);
@@ -59,7 +59,7 @@ namespace EQX {
 	 * If a point is on the edge or at the vertex, return true.
 	 * Only works for 2D case: the z info of vertex and face is discarded
 	 */
-	bool IsPointInTriangle(Vertex, Face);
+	XBool IsPointInTriangle(Vertex, Face);
 
 	void CompleteAttribInFace(EQX_OUT Vertex& v, const Face& f);
 
@@ -69,7 +69,7 @@ namespace EQX {
 	 * @param pos - [OUT]the point of intersection; does not change value if no intersection detected
 	 * @return true if has intersection; false if parallel, i.e. no intersection
 	 */
-	bool FaceIntersectWithLine(const Face& f, const Line& l, EQX_OUT Vec3& pos);
+	XBool FaceIntersectWithLine(const Face& f, const Line& l, EQX_OUT Vec3& pos);
 
 	/**
 	 * @param p - the plane
@@ -77,5 +77,5 @@ namespace EQX {
 	 * @param pos - [OUT]the point of intersection; does not change value if no intersection detected
 	 * @return true if has intersection; false if parallel, i.e. no intersection
 	 */
-	bool PlaneIntersectWithLine(const Plane& p, const Line& l, EQX_OUT Vector3& pos);
+	XBool PlaneIntersectWithLine(const Plane& p, const Line& l, EQX_OUT Vector3& pos);
 }

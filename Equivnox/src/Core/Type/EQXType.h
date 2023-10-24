@@ -5,12 +5,12 @@
 
 namespace EQX {
 
-	using EQXFloat = float;
-	using EQXUInt = uint32_t;
-	using EQXInt = int32_t;
-	using EQXChar = char;
-	using EQXUChar = unsigned char;
-	using EQXBool = bool;
-	using EQXString = std::string;
+	using XFloat = float;
+	using XUInt = uint32_t;
+	using XInt = int32_t;
+	using XChar = char;
+	using XUChar = unsigned char;
+	using XBool = bool;
+	using XString = std::string;
 
 }

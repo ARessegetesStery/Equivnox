@@ -10,10 +10,10 @@ namespace EQX {
 
         struct IndexVector3
         {
-            EQXInt x;
-            EQXInt y;
-            EQXInt z;
-            IndexVector3(EQXInt x, EQXInt y, EQXInt z) : x(x), y(y), z(z) {}
+            XInt x;
+            XInt y;
+            XInt z;
+            IndexVector3(XInt x, XInt y, XInt z) : x(x), y(y), z(z) {}
             IndexVector3() : x(0), y(0), z(0) {}
 
             IndexVector3 operator = (const IndexVector3& v)

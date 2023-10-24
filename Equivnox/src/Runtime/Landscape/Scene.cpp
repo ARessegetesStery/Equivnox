@@ -4,20 +4,10 @@
 
 namespace EQX {
 
-    const std::string Scene::s_defaultSceneName = "__nil__";
-    const std::string Scene::s_rendererSceneName = "__renderer__";
+    const XString Scene::s_defaultSceneName = "__nil__";
+    const XString Scene::s_rendererSceneName = "__renderer__";
 
-    // TODO Maintain searching structure
-    const Entity& Scene::FindEntityWithUID(int UID) const
-    {
-        for (auto iter = entityPool.begin(); iter != entityPool.cend(); ++iter)
-        {
-            if (iter->GetUID() == UID)
-                return *iter;
-        }
-    }
-
-    Scene::Scene(std::string str)
+    Scene::Scene(XString str)
     {
         this->name = str;
         this->renderables = {};
@@ -25,7 +15,8 @@ namespace EQX {
         this->AddDefaultEntity(Entity(), EntityConfig::s_defaultEntityName); // serve as a placeholder
     }
 
-    Entity& Scene::FindEntityWithUID(int UID)
+    // TODO Maintain searching structure
+    const Entity& Scene::FindEntityWithUID(XInt UID) const
     {
         for (auto iter = entityPool.begin(); iter != entityPool.cend(); ++iter)
             if (iter->GetUID() == UID)
@@ -33,10 +24,18 @@ namespace EQX {
         return *entityPool.begin();
     }
 
-    EntityConfig& Scene::AddDefaultEntity(const Entity& ent, std::string name)
+    Entity& Scene::FindEntityWithUID(XInt UID)
     {
-        int UID = ent.GetUID();
-        bool existDuplicate = false;
+        for (auto iter = entityPool.begin(); iter != entityPool.cend(); ++iter)
+            if (iter->GetUID() == UID)
+                return *iter;
+        return *entityPool.begin();
+    }
+
+    EntityConfig& Scene::AddDefaultEntity(const Entity& ent, XString name)
+    {
+        XInt UID = ent.GetUID();
+        XBool existDuplicate = false;
         for (auto iter = entityPool.begin(); iter != entityPool.cend(); ++iter)
             if (iter->GetUID() == UID)
                 existDuplicate = true;
@@ -46,10 +45,10 @@ namespace EQX {
         return *(this->renderables.end() - 1);
     }
 
-    EntityConfig& Scene::AddEntityWithTransform(const Entity& ent, std::string name, const MeshTransform& transform)
+    EntityConfig& Scene::AddEntityWithTransform(const Entity& ent, XString name, const MeshTransform& transform)
     {
-        int UID = ent.GetUID();
-        bool existDuplicate = false;
+        XInt UID = ent.GetUID();
+        XBool existDuplicate = false;
         for (auto iter = entityPool.begin(); iter != entityPool.cend(); ++iter)
             if (iter->GetUID() == UID)
                 existDuplicate = true;
@@ -59,6 +58,6 @@ namespace EQX {
         return *(this->renderables.end() - 1);
     }
 
-    SceneInfo::SceneInfo(std::string name, SceneID ID) : name(name), sceneID(ID)  {  }
+    SceneInfo::SceneInfo(XString name, SceneID ID) : name(name), sceneID(ID)  {  }
 
 }

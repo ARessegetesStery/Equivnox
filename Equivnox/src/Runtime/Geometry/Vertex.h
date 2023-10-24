@@ -38,8 +38,8 @@ namespace EQX
 		void MeshTransform(const MeshTransform& trans);
 	};
 
-	bool operator== (Vertex&, Vertex&);
-	bool operator== (Vertex&, const Vertex&);
+	XBool operator== (Vertex&, Vertex&);
+	XBool operator== (Vertex&, const Vertex&);
 
 	/**
 	 * return true if l.x is smaller than or equal to r.x
@@ -47,15 +47,15 @@ namespace EQX
 	 * @param l vertex supposedly with smaller x
 	 * @param r vertex supposedly with larger x
 	 */
-	bool LefterVertex(const Vertex& l, const Vertex& r);
+	XBool LefterVertex(const Vertex& l, const Vertex& r);
 	/**
 	 * return true if l.y is smaller than or equal to u.y
 	 *
 	 * @param l vertex supposedly with smaller y
 	 * @param u vertex supposedly with larger y
 	 */
-	bool LowerVertex(const Vertex& l, const Vertex& u);
+	XBool LowerVertex(const Vertex& l, const Vertex& u);
 
 	// General operator<(s) defined for Vertex
-	bool LefterLowerBehindVertex(const Vertex& l, const Vertex& r);
+	XBool LefterLowerBehindVertex(const Vertex& l, const Vertex& r);
 }
