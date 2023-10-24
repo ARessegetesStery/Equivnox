@@ -30,6 +30,7 @@ project "Equivnox"
     includedirs
     {
         "%{prj.name}/src",
+        "%{prj.name}/src/Core",
     }
 
     filter "system:Windows"

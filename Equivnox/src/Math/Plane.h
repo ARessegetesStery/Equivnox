@@ -2,6 +2,7 @@
 
 #include "eqxpch.h"
 
+#include "Math.h"
 #include "Line.h"
 
 namespace EQX {

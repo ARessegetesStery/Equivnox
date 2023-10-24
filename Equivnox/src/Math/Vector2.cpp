@@ -1,6 +1,6 @@
-#include "Vector2.h"
-
 #include "eqxpch.h"
+
+#include "Vector2.h"
 
 namespace EQX
 {

@@ -1,11 +1,11 @@
 #include "eqxpch.h"
 
 #include "Util/Log/Log.h"
-#include "Renderer/Core/Core.h"
-#include "Renderer/Geometry/Geometry.h"
+#include "Runtime/Renderer/Core.h"
+#include "Runtime/Geometry/Geometry.h"
 #include "Loader/Loader.h"
-#include "Renderer/Landscape/Landscape.h"
-#include "Renderer/ExternalTools/Image.h"
+#include "Runtime/Landscape/Landscape.h"
+#include "Runtime/ExternalTools/Image.h"
 #include "Math/MathHeader.h"
 
 namespace EQX {
@@ -35,9 +35,9 @@ int main(int argc, char** argv) {
 
 	coreRenderer.SetPass(EQX::RenderPass::FULL);
 	coreRenderer.SetFill(EQX::RenderFill::FILL);
-	coreRenderer.SetAA(EQX::RenderAAConfig::MSAA);
+	coreRenderer.SetAA(EQX::RenderAAConfig::ANTIALIAS_OFF);
 	coreRenderer.SetMSAAMult(4);
-	coreRenderer.SetOutputType(EQX::ImageType::TGA);
+	coreRenderer.SetOutputType(EQX::ImageType::PNG);
 	coreRenderer.SetLight(EQX::ShadingMode::RASTERIZE);
 
 	coreRenderer.EnableCamera();

@@ -2,12 +2,16 @@
 
 #include <iostream>
 #include <string>
-#include "Math/MathHeader.h"
 
-#include "Renderer/Geometry/Geometry.h"
-#include "Renderer/Landscape/Landscape.h"
+#include "Math/MathHeader.h"
+#include "Runtime/Geometry/Geometry.h"
+#include "Runtime/Landscape/LandscapeInfo.h"
 
 namespace EQX {
+
+	// TODO split into basic types and custom types
+	//		include the basic logging in CoreMinimal.h
+	//		For custom types include in CoreDebugs.h
 
 #ifdef EQX_DEBUG
 #define EQX_LOG(x) {cout << "| Variable: " << #x << " " << "| Type: " << typeid(x).name() << endl;\

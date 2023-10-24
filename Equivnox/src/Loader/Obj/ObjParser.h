@@ -1,10 +1,10 @@
 #pragma 
 
-#include "eqxpch.h"
+#include "CoreMinimal.h"
 
 #include "Loader/Parsing.h"
-#include "Renderer/Core/Renderer.h"
-#include "Renderer/Landscape/Landscape.h"
+#include "Runtime/Renderer/Renderer.h"
+#include "Runtime/Landscape/Landscape.h"
 
 namespace EQX {
 
@@ -12,7 +12,7 @@ namespace EQX {
     class ObjParser
     {
     public:
-        ObjParser(Renderer& renderer, EntityInfo ent, std::string filename)
+        ObjParser(Renderer& renderer, EntityInfo ent, EQXString filename)
         {
             if (ent.name == EntityConfig::s_defaultEntityName)
             {
@@ -32,7 +32,7 @@ namespace EQX {
 
     private:
         Entity* p_ent;
-        std::string filename;
+        EQXString filename;
     };
 
 }

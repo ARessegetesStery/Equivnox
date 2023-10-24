@@ -1,6 +1,8 @@
 #pragma once
 
-#include "eqxpch.h"
+#include <CoreMinimal.h>
+
+#include "Math.h"
 
 namespace EQX {
 

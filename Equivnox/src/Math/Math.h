@@ -4,11 +4,15 @@
 
 namespace EQX
 {
+	// Forward declaration of math classes
 	class Vector2;
 	class Vector3;
 	class Vector4;
 	class Matrix4x4;
 	class Quaternion;
+
+	class Line;
+	class Plane;
 
 	const float EQX_PI = 3.1415892653589793f;
 

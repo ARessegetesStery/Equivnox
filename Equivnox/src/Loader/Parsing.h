@@ -1,8 +1,8 @@
 #pragma once
 
-#include "eqxpch.h"
+#include <CoreMinimal.h>
 
-#include "Renderer/Geometry/Geometry.h"
+#include "Runtime/Geometry/Geometry.h"
 
 namespace EQX {
 
@@ -10,10 +10,10 @@ namespace EQX {
 
         struct IndexVector3
         {
-            int x;
-            int y;
-            int z;
-            IndexVector3(int x, int y, int z) : x(x), y(y), z(z) {}
+            EQXInt x;
+            EQXInt y;
+            EQXInt z;
+            IndexVector3(EQXInt x, EQXInt y, EQXInt z) : x(x), y(y), z(z) {}
             IndexVector3() : x(0), y(0), z(0) {}
 
             IndexVector3 operator = (const IndexVector3& v)

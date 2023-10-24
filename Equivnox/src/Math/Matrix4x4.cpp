@@ -296,9 +296,9 @@ namespace EQX {
 		float NearClip, float FarClip)
 	{
 		Matrix4x4 scale = Matrix4x4(
-			Vector4(2.0 / NearWidth, 0               , 0                         , 0),
-			Vector4(0              , 2.0 / NearHeight, 0                         , 0),
-			Vector4(0              , 0               , 2.0 / (NearClip - FarClip), 0),
+			Vector4(2.0f / NearWidth, 0               , 0                         , 0),
+			Vector4(0              , 2.0f / NearHeight, 0                         , 0),
+			Vector4(0              , 0               , 2.0f / (NearClip - FarClip), 0),
 			Vector4(0              , 0               , 0                         , 1));
 		Matrix4x4 trans = Matrix4x4(
 			Vector4(1, 0, 0, 0),
