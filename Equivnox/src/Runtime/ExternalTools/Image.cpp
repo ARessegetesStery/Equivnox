@@ -75,7 +75,7 @@ namespace EQX {
 	}
 
 #ifdef EQX_DEBUG
-	void PrEQXInt(const Color& c)
+	void Print(const Color& c)
 	{
 		cout << "Color: " << static_cast<XInt>(c.r) << " " << static_cast<XInt>(c.g) << 
 			" " << static_cast<XInt>(c.b) << " " << static_cast<XInt>(c.a) << endl;

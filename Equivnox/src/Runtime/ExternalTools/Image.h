@@ -157,6 +157,9 @@ namespace EQX {
 		inline XUInt GetHeight() const { return height; }
 	};
 
+	// TODO Upgrade to c++20 to integrae T and ZT
+	//     In c++17 or lower it is invalid to pass argument of non-integer type
+
 	/**
 	 * @tparam T - the type of data that the canvas is to be filled with
 	 * @tparam ZT - the type of data for zero element
